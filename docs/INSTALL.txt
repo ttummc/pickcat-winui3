@@ -1,0 +1,147 @@
+﻿PickCat WinUI 3 版 · 安装说明
+================================
+
+
+【1】系统要求
+
+  · 浏览器：Chrome 111 或更高 / Edge 111 或更高
+  · 系统：Windows 10 / 11、macOS 11+、Linux
+  · 磁盘：约 6 MB
+  · 账号：浏览不需要；发帖、通知、个人图盘需要登录
+  · 查版本：地址栏输入 chrome://version ，看第一行
+
+
+【2】安装包放哪里（最重要）
+
+  必须放在你自己的用户文件夹里。位置要固定、要有读权限。
+  扩展每次打开页面都会从这个位置读文件，文件被删或移动就失效。
+
+  推荐位置：
+    C:\Users\你的用户名\PickCatWinUI3
+
+  快速进入：在文件资源管理器地址栏输入
+    %USERPROFILE%
+  然后在里面新建一个文件夹，取名 PickCatWinUI3
+
+  也可以放：
+    D:\Apps\PickCatWinUI3
+    macOS：~/Applications/PickCatWinUI3
+    Linux：~/PickCatWinUI3
+
+  不要放在这些地方：
+    C:\Program Files\...
+      受保护目录。Chrome 读取规则文件会失败，并报一句误导性的
+      "rules.json: Internal error while parsing rules"
+    「下载」文件夹
+      清理软件会清空它，文件一消失扩展就静默失效
+    桌面
+      容易误删，而且经常被同步
+    OneDrive / 坚果云 / iCloud 等同步目录
+      同步会锁文件、生成副本，Chrome 会拒绝加载
+    %TEMP% / C:\Windows\...
+      会被自动清理，或者根本没有读取权限
+
+  如果已经解压到 Program Files：
+    剪切整个文件夹，粘贴到 C:\Users\你的用户名\ 下面，再从新路径加载。
+    要剪切，不要复制 —— 否则旧的还在那里，很容易又选错。
+
+
+【3】解压
+
+  右键压缩包 → 全部解压缩（macOS 双击即可）。
+
+  会得到一个文件夹，里面应该是这样：
+
+    PickCat-WinUI3-extension\
+      manifest.json      ← 必须在这一层
+      content.js
+      content.css
+      bridge.js
+      rules.json
+      icons\pickcat.png
+
+  把这个文件夹移到第 2 步选好的位置，改名成 PickCatWinUI3 也可以。
+  名字无所谓，manifest.json 在它里面直接可见才是关键。
+
+  加载前自检：
+    打开这个文件夹，应该直接看见 manifest.json，旁边就是 content.js。
+    如果打开后只看到一个文件夹（要点进去才有 manifest.json），
+    说明解压多套了一层 —— 点进去，用里面那一层。
+
+
+【4】加载到 Chrome
+
+  1) 地址栏输入 chrome://extensions（Edge 用 edge://extensions）
+  2) 打开「开发者模式」（Chrome 在右上角，Edge 在左侧栏）
+  3) 点「加载已解压的扩展程序」（Chrome 在左上角）
+  4) 选中含 manifest.json 的那一层文件夹，确定
+
+  列表里出现 PickCat WinUI 3（非官方重制），开关是打开的，就成功了。
+
+  macOS 上按钮同样叫 Load unpacked，选文件夹本身，不要选里面的文件。
+
+
+【5】常见报错对照
+
+  rules.json: Internal error while parsing rules
+    原因：文件夹在受保护目录（C:\Program Files 等），或 Chrome 读不到
+    解决：按第 2 步把文件夹移到用户目录，重新加载
+
+  Manifest file is missing or unreadable
+    原因：选中的是压缩包，或者选错了一层目录
+    解决：选中直接包含 manifest.json 的文件夹
+
+  Could not load background script / 文件读取失败
+    原因：文件被删除、改名，或者正在同步中
+    解决：重新解压，放到稳定目录再加载
+
+  能加载，但卡片上显示「错误」
+    原因：通常是旧构建
+    解决：重新下载最新版本，然后在卡片上点刷新按钮
+
+
+【6】验证是否生效
+
+  打开 https://pickcat.dao3.fun/
+  应该看到带标题栏、左侧导航、信息流的 Windows 11 风格界面。
+
+  如果还是原站，按 Ctrl+R 刷新一次。
+  仍然是原站：确认扩展是「已启用」，并确认当前地址确实是 pickcat.dao3.fun。
+
+  扩展只在这个域名生效，其他任何网站都不会有影响。
+
+
+【7】更新
+
+  1) 解压新版本
+  2) 删除旧的 PickCatWinUI3 文件夹，把新的放到同一位置（或覆盖里面的文件）
+  3) 打开 chrome://extensions，在扩展卡片上点刷新按钮
+  4) 刷新页面
+
+  只替换文件而不点刷新按钮，Chrome 仍然在跑旧版本 ——
+  这就是「明明更新了却还是老样子」的原因。
+
+
+【8】关闭 / 卸载 / 恢复原站
+
+  临时关闭：在扩展卡片上关闭开关
+  彻底卸载：chrome://extensions → PickCat WinUI 3 → 移除
+  恢复原站：关闭或移除扩展后刷新页面，原站界面立刻回来
+  完全清理：先卸载扩展，再删除文件夹
+
+
+【9】首次使用说明
+
+  · 需要账号的页面（发帖、通知、个人图盘）会先要求登录，
+    登录时会弹出阿里云滑块验证
+  · 尚未重建的页面（注册、找回密码、圈子、创建、入学考试、审核）
+    会给出提示，并提供「在原站打开」按钮
+  · 扩展只在本地保存两项界面偏好，不读取 Cookie，不上传任何数据
+
+
+【10】还是装不上
+
+  提 issue 时请附上这三样：
+  1. 你的 Chrome 版本（chrome://version 第一行）
+  2. chrome://extensions 上的完整报错原文
+  3. 你加载文件夹的完整路径
