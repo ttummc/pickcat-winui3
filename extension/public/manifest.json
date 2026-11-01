@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "PickCat WinUI 3（非官方重制）",
+  "version": "1.0.0",
+  "description": "用 WinUI 3 控件从零重绘 pickcat.dao3.fun 的界面：窗口、导航、右键菜单、Markdown 编辑器全部重写。非官方实现。",
+  "minimum_chrome_version": "111",
+  "icons": {
+    "16": "icons/pickcat.png",
+    "48": "icons/pickcat.png",
+    "128": "icons/pickcat.png"
+  },
+  "permissions": [
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://pickcat.dao3.fun/*"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "block_original_shell",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://pickcat.dao3.fun/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://pickcat.dao3.fun/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/*",
+        "assets/*"
+      ],
+      "matches": [
+        "https://pickcat.dao3.fun/*"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,924 @@
+/* App-level layout for the WinUI shell. Component visuals come from winuionweb. */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--app-bg, #202020);
+  overflow: hidden;
+}
+
+body > *:not(#pickcat-root) {
+  display: none !important;
+}
+
+#pickcat-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-bg);
+  color: var(--text-primary);
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  overflow: hidden;
+}
+
+/* Our root is position:fixed, so it becomes a stacking context. The library
+   portals flyouts to <body>; pin them far above everything of ours.
+   (The app renders inside this document, so scoping the token to :root is fine.) */
+:root {
+  --win-menu-flyout-z-index: 2147483000;
+  --win-tip-z-index: 2147483001;
+}
+
+/* Windows focus rect, drawn on the control's *visible fill* rather than its
+   outer box. The library's Button keeps a transparent 16px padding around the
+   content presenter, so the default outline sits far away from the surface and
+   reads as a second nested rectangle. */
+#pickcat-root .win-btn:focus-visible,
+#pickcat-root .win-btn.system-focus:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+#pickcat-root .win-btn:focus-visible > .win-button-content-presenter,
+#pickcat-root .win-btn.system-focus:focus-visible > .win-button-content-presenter {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+#pickcat-root *,
+#pickcat-root *::before,
+#pickcat-root *::after {
+  box-sizing: border-box;
+}
+
+.pc-titlebar-host {
+  flex: 0 0 auto;
+}
+
+.pc-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.pc-content {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- motion ---------- */
+
+:root {
+  --pc-ease: var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+  --pc-enter: 0.3s;
+  --pc-leave: 0.12s;
+}
+
+/* page transitions: drill in from the right, back from the left, siblings fade */
+.pc-page-drill-enter-active,
+.pc-page-back-enter-active {
+  transition: opacity var(--pc-enter) var(--pc-ease), transform var(--pc-enter) var(--pc-ease);
+}
+
+.pc-page-drill-leave-active,
+.pc-page-back-leave-active {
+  transition: opacity var(--pc-leave) linear, transform var(--pc-leave) linear;
+}
+
+.pc-page-drill-enter-from {
+  opacity: 0;
+  transform: translateX(56px);
+}
+.pc-page-drill-leave-to {
+  opacity: 0;
+  transform: translateX(-14px);
+}
+
+.pc-page-back-enter-from {
+  opacity: 0;
+  transform: translateX(-56px);
+}
+.pc-page-back-leave-to {
+  opacity: 0;
+  transform: translateX(14px);
+}
+
+.pc-page-fade-enter-active {
+  transition: opacity 0.26s var(--pc-ease), transform 0.26s var(--pc-ease);
+}
+.pc-page-fade-leave-active {
+  transition: opacity 0.1s linear;
+}
+.pc-page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.pc-page-fade-leave-to {
+  opacity: 0;
+}
+
+/* list entrance — same shape as the library's list-item-fade-in */
+@keyframes pc-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pc-feed > .pc-feed-item,
+.pc-work-grid > .pc-work-card,
+.pc-people-grid > *,
+.pc-featured-thumb {
+  animation: pc-rise-in 0.32s var(--pc-ease) both;
+}
+
+.pc-feed > .pc-feed-item:nth-child(1),
+.pc-work-grid > .pc-work-card:nth-child(1),
+.pc-people-grid > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.pc-feed > .pc-feed-item:nth-child(2),
+.pc-work-grid > .pc-work-card:nth-child(2),
+.pc-people-grid > *:nth-child(2) {
+  animation-delay: 30ms;
+}
+.pc-feed > .pc-feed-item:nth-child(3),
+.pc-work-grid > .pc-work-card:nth-child(3),
+.pc-people-grid > *:nth-child(3) {
+  animation-delay: 60ms;
+}
+.pc-feed > .pc-feed-item:nth-child(4),
+.pc-work-grid > .pc-work-card:nth-child(4),
+.pc-people-grid > *:nth-child(4) {
+  animation-delay: 90ms;
+}
+.pc-feed > .pc-feed-item:nth-child(5),
+.pc-work-grid > .pc-work-card:nth-child(5),
+.pc-people-grid > *:nth-child(5) {
+  animation-delay: 120ms;
+}
+.pc-feed > .pc-feed-item:nth-child(6),
+.pc-work-grid > .pc-work-card:nth-child(6),
+.pc-people-grid > *:nth-child(6) {
+  animation-delay: 150ms;
+}
+.pc-feed > .pc-feed-item:nth-child(n + 7),
+.pc-work-grid > .pc-work-card:nth-child(n + 7),
+.pc-people-grid > *:nth-child(n + 7) {
+  animation-delay: 180ms;
+}
+
+/* press feedback */
+.pc-card--interactive,
+.pc-work-card,
+.pc-tag,
+.pc-tool,
+.pc-cat,
+.pc-tab {
+  transition: background var(--fast-duration, 0.167s) ease,
+    border-color var(--fast-duration, 0.167s) ease,
+    color var(--fast-duration, 0.167s) ease,
+    transform var(--faster-duration, 0.083s) ease;
+}
+
+.pc-card--interactive:active,
+.pc-work-card:active {
+  transform: scale(0.995);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-feed > .pc-feed-item,
+  .pc-work-grid > .pc-work-card,
+  .pc-people-grid > *,
+  .pc-featured-thumb {
+    animation: none;
+  }
+  .pc-page-drill-enter-active,
+  .pc-page-drill-leave-active,
+  .pc-page-back-enter-active,
+  .pc-page-back-leave-active,
+  .pc-page-fade-enter-active,
+  .pc-page-fade-leave-active {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---------- page scaffolding ---------- */
+
+.pc-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pc-page-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 32px 48px;
+  scrollbar-gutter: stable;
+}
+
+.pc-page-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+.pc-page-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 6px;
+}
+.pc-page-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+  background-clip: content-box;
+}
+.pc-page-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pc-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.pc-page-title {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.pc-page-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.pc-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+/* ---------- cards ---------- */
+
+.pc-card {
+  background: var(--card-bg);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 8px;
+  padding: 16px 20px;
+  transition: background var(--fast-duration, 0.167s) ease,
+    border-color var(--fast-duration, 0.167s) ease;
+}
+
+.pc-card--interactive {
+  cursor: pointer;
+}
+.pc-card--interactive:hover {
+  background: color-mix(in srgb, var(--text-primary) 5%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+.pc-card--interactive:active {
+  background: color-mix(in srgb, var(--text-primary) 3%, var(--card-bg));
+}
+
+.pc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 56px 24px;
+  color: var(--text-tertiary);
+  text-align: center;
+  border: 1px dashed color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 8px;
+}
+
+.pc-empty-glyph {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 26px;
+  line-height: 1;
+  opacity: 0.75;
+}
+
+/* ---------- feed ---------- */
+
+.pc-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pc-feed-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pc-feed-title {
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pc-feed-excerpt {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  line-height: 21px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pc-feed-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.pc-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pc-meta-glyph {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.pc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pc-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: background var(--fast-duration, 0.167s) ease;
+}
+.pc-tag:hover {
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+  color: var(--text-primary);
+}
+.pc-tag--accent {
+  color: var(--pc-accent, #ff6b60);
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 14%, transparent);
+}
+
+/* ---------- author line ---------- */
+
+.pc-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pc-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  flex: 0 0 auto;
+}
+
+.pc-avatar--lg {
+  width: 40px;
+  height: 40px;
+}
+.pc-avatar--xl {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--app-bg);
+}
+
+.pc-username {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pc-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 16%, transparent);
+  color: var(--pc-accent, #ff6b60);
+  border: 1px solid color-mix(in srgb, var(--pc-accent, #ff6b60) 30%, transparent);
+}
+
+/* ---------- two column layout ---------- */
+
+.pc-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .pc-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pc-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+}
+
+.pc-rail-card {
+  background: var(--card-bg);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.pc-rail-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
+}
+
+/* ---------- rich text (cookedHtml) ---------- */
+
+.pc-rich {
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 26px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.pc-rich p {
+  margin: 0 0 14px;
+}
+.pc-rich p:last-child {
+  margin-bottom: 0;
+}
+.pc-rich h1,
+.pc-rich h2,
+.pc-rich h3 {
+  margin: 24px 0 12px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.pc-rich h1 {
+  font-size: 22px;
+}
+.pc-rich h2 {
+  font-size: 19px;
+}
+.pc-rich h3 {
+  font-size: 16px;
+}
+.pc-rich a {
+  color: var(--pc-accent, #ff6b60);
+  text-decoration: none;
+}
+.pc-rich a:hover {
+  text-decoration: underline;
+}
+.pc-rich img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 6px 0;
+}
+.pc-rich img.markdown-emoji {
+  height: 22px;
+  width: auto;
+  vertical-align: -4px;
+  margin: 0 2px;
+  border-radius: 0;
+  display: inline-block;
+}
+.pc-rich pre {
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  border-radius: 6px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 20px;
+}
+.pc-rich code {
+  font-family: 'Cascadia Code', Consolas, 'Courier New', monospace;
+  font-size: 0.92em;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.pc-rich pre code {
+  background: none;
+  padding: 0;
+}
+.pc-rich blockquote {
+  margin: 0 0 14px;
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
+  color: var(--text-secondary);
+}
+.pc-rich ul,
+.pc-rich ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
+.pc-rich li {
+  margin: 4px 0;
+}
+.pc-rich hr {
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  margin: 20px 0;
+}
+.pc-rich table {
+  border-collapse: collapse;
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+.pc-rich th,
+.pc-rich td {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  padding: 6px 10px;
+}
+
+/* ---------- misc ---------- */
+
+.pc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pc-row--between {
+  justify-content: space-between;
+}
+.pc-col {
+  display: flex;
+  flex-direction: column;
+}
+.pc-grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pc-muted {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+.pc-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  margin: 12px 0;
+}
+.pc-clickable {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+.pc-link {
+  color: var(--pc-accent, #ff6b60);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+}
+.pc-link:hover {
+  text-decoration: underline;
+}
+
+.pc-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.pc-infobar-stack {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  /* never let a pile of toasts run off the top of the window */
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pc-infobar-stack > * {
+  pointer-events: auto;
+  /* Informational uses a 3%-white severity brush, i.e. it reads as transparent
+     over page content. Give toasts a real WinUI surface. */
+  --SystemFillColorAttentionBackgroundBrush: #2b2b2bf2;
+}
+
+.pc-infobar-stack .win-infobar {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 45%), 0 2px 6px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(20px) saturate(1.1);
+  animation: pc-toast-in 0.2s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)) both;
+}
+
+@keyframes pc-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Login window */
+.pc-login {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(
+      120% 100% at 20% 0%,
+      color-mix(in srgb, var(--pc-accent, #ff6b60) 16%, transparent),
+      transparent 60%
+    ),
+    var(--app-bg);
+  overflow: auto;
+}
+
+.pc-login-card {
+  width: 420px;
+  max-width: 100%;
+  background: var(--dialog-background, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 45%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pc-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.pc-login-title {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.pc-work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.pc-work-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--card-bg);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  transition: transform var(--fast-duration, 0.167s) ease,
+    border-color var(--fast-duration, 0.167s) ease;
+}
+.pc-work-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--text-primary) 18%, transparent);
+}
+
+.pc-work-cover {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.pc-work-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pc-work-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pc-work-desc {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* profile */
+.pc-profile-hero {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  background: var(--card-bg);
+}
+
+.pc-profile-banner {
+  height: 140px;
+  width: 100%;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--pc-accent, #ff6b60) 55%, #000),
+    color-mix(in srgb, var(--pc-accent, #ff6b60) 10%, #000)
+  );
+}
+
+.pc-profile-banner-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pc-profile-body {
+  padding: 0 20px 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: -44px;
+  /* The banner is position:relative, so the overlapping avatar needs to be
+     lifted above it or the banner paints over the top half of the picture. */
+  position: relative;
+  z-index: 1;
+}
+
+.pc-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.pc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+
+.pc-stat-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pc-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.pc-heatmap {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.pc-heat-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  flex: 0 0 auto;
+}
+
+.pc-heat-cell[data-level='1'] {
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 30%, transparent);
+}
+.pc-heat-cell[data-level='2'] {
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 55%, transparent);
+}
+.pc-heat-cell[data-level='3'] {
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 78%, transparent);
+}
+.pc-heat-cell[data-level='4'] {
+  background: var(--pc-accent, #ff6b60);
+}
+
+.pc-heat-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* scrollbar polish for nested scrollers */
+.pc-scroll {
+  overflow-y: auto;
+  min-height: 0;
+}
+.pc-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.pc-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 5px;
+}
+.pc-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

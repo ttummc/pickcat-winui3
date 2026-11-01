@@ -1,0 +1,15 @@
+{
+  "id": "01a19513-89f1-7d46-b685-2d145cc14fb9",
+  "viewCount": 2,
+  "coinCount": 0,
+  "likeCount": 1,
+  "favoriteCount": 0,
+  "commentCount": 0,
+  "viewer": {
+    "liked": false,
+    "favorited": false,
+    "coined": false,
+    "coinedAmount": null,
+    "tokenBalance": 3
+  }
+}

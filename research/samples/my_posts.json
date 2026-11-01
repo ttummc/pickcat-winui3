@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": "01a115a0-f543-7a89-929a-dc91b33d6580",
+      "postNumber": 36,
+      "cookedHtml": "<p>头像怎么换</p>\n",
+      "replyCount": 0,
+      "viewCount": 1,
+      "likeCount": 0,
+      "bookmarkCount": 0,
+      "topic": {
+        "id": "01a0eb91-5d11-7fb0-b998-179add93620f",
+        "title": "【共琢一轮月】PickCat 中秋创作分享活动第一阶段获奖名单公示"
+      },
+      "createdAt": "2026-10-07T09:10:32.503Z"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": false,
+    "nextCursor": null
+  }
+}

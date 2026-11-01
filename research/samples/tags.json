@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "id": "01a0ab26-84a8-718b-996a-36be3dda4fa4",
+      "slug": "creative-works",
+      "name": "创作与作品",
+      "description": "作品发布、试玩反馈、开发日志与作品复盘"
+    },
+    {
+      "id": "01a0ab26-84a8-718b-996a-3960a4789d05",
+      "slug": "learning-technology",
+      "name": "学习与技术",
+      "description": "教程、知识分享与技术讨论"
+    },
+    {
+      "id": "01a0ab26-84a8-718b-996a-3cce5e3bb015",
+      "slug": "q-and-a",
+      "name": "你问我答",
+      "description": "技术求助、作品调试与问题交流"
+    },
+    {
+      "id": "01a0ab26-84a8-718b-996a-42a29388f3fa",
+      "slug": "events-competitions",
+      "name": "活动与赛事",
+      "description": "官方活动、社区赛事与赛后复盘"
+    },
+    {
+      "id": "01a0ab26-84a8-718b-996a-4536506db3ba",
+      "slug": "interest-plaza",
+      "name": "兴趣广场",
+      "description": "绘画、音乐、动画、生活交流与普通闲聊"
+    },
+    {
+      "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+      "slug": "box",
+      "name": "神奇代码岛",
+      "description": "神奇代码岛岛民专属交流区，打造属于你的3D创作游戏乐园。"
+    },
+    {
+      "id": "01a0e835-c652-7aa2-aea8-6bebe7ba21c9",
+      "slug": "neko",
+      "name": "KittenN创作",
+      "description": "KittenN 专属交流阵地，共享优质源码，解决技术难题，成长更快一步。"
+    },
+    {
+      "id": "01a0e838-e72c-7140-8921-ca17bf6e8d22",
+      "slug": "coconut",
+      "name": "CoCo应用创作",
+      "description": "CoCo专属交流区，欢迎大家在这里尽情交流，打造自己的应用。"
+    },
+    {
+      "id": "01a0e83b-c108-7026-b80b-e3b033e02a5f",
+      "slug": "python",
+      "name": "Python乐园",
+      "description": "Python内容聚集地，解决Python难题，分享Python作品，学习Python so easy！"
+    },
+    {
+      "id": "01a14932-879f-7474-a366-904d45afc7f5",
+      "slug": "ghost-is-coming",
+      "name": "2026 万圣奇想夜",
+      "description": "2026 万圣奇想夜！不给糖，就捣蛋！嗷嗷呜呜喵喵喵"
+    },
+    {
+      "id": "01a18c60-3f24-7524-8474-fc9e69182cfa",
+      "slug": "box-play",
+      "name": "BoxPlay",
+      "description": "记录 AI 游戏从灵感、迭代、试玩到发布的完整过程，分享版本更新、创作复盘。"
+    }
+  ]
+}

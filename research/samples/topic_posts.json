@@ -1,0 +1,248 @@
+{
+  "items": [
+    {
+      "id": "01a18c1e-e9f3-7d16-99c7-7e83c550b2ed",
+      "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "postNumber": 2,
+      "replyToPostNumber": 1,
+      "deleted": false,
+      "children": [],
+      "currentRevision": 1,
+      "likeCount": 0,
+      "pinned": false,
+      "cookedHtml": "<p>沙发</p>\n",
+      "author": {
+        "id": "41f9300d-4490-4ae2-9042-dbd89b652d45",
+        "username": "shidang",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a12ac1-8021-7047-ad22-8aa26600fcf5",
+          "url": "/api/v1/avatars/01a12ac1-8021-7047-ad22-8aa26600fcf5"
+        },
+        "displayedBadge": {
+          "id": "badge_judgment",
+          "name": "PICKCAT 风纪",
+          "description": "PICKCAT 风纪委员",
+          "image": {
+            "fileId": "01a11b5b-17bc-73ae-aca6-bcdf10739dc4",
+            "url": "/api/v1/files/01a11b5b-17bc-73ae-aca6-bcdf10739dc4",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "createdAt": "2026-10-30T09:23:18.618Z",
+      "editedAt": null,
+      "viewerCapabilities": {
+        "canPin": false,
+        "canEdit": false,
+        "canDelete": false,
+        "canLike": true,
+        "canBookmark": true,
+        "canReport": true,
+        "canSelectAnswer": false
+      },
+      "viewerState": {
+        "liked": false,
+        "bookmarkId": null,
+        "selectedAnswer": false
+      }
+    },
+    {
+      "id": "01a18c33-b9c8-7bce-b78d-e1b027ad9f52",
+      "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "postNumber": 3,
+      "replyToPostNumber": 1,
+      "deleted": false,
+      "children": [],
+      "currentRevision": 1,
+      "likeCount": 0,
+      "pinned": false,
+      "cookedHtml": "<p>沙发（22分钟）</p>\n",
+      "author": {
+        "id": "01a129b7-1c39-781b-9e06-237afc1b0a2f",
+        "username": "原664766020",
+        "avatar": {
+          "type": "PRESET",
+          "id": 7,
+          "url": "/api/v1/avatars/7?v=2e57f182434cc17fb8d8802c1dc2c8dfc268433947d8e70045614dd9469e6ffa"
+        },
+        "displayedBadge": {
+          "id": "badge_pioneer",
+          "name": "开拓者",
+          "description": "参与 PICKCAT 社区第一次内测",
+          "image": {
+            "fileId": "01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "url": "/api/v1/files/01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "createdAt": "2026-10-30T09:46:02.545Z",
+      "editedAt": null,
+      "viewerCapabilities": {
+        "canPin": false,
+        "canEdit": false,
+        "canDelete": false,
+        "canLike": true,
+        "canBookmark": true,
+        "canReport": true,
+        "canSelectAnswer": false
+      },
+      "viewerState": {
+        "liked": false,
+        "bookmarkId": null,
+        "selectedAnswer": false
+      }
+    },
+    {
+      "id": "01a18c3a-75ed-787f-859a-8747152aa8ed",
+      "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "postNumber": 4,
+      "replyToPostNumber": 1,
+      "deleted": false,
+      "children": [],
+      "currentRevision": 1,
+      "likeCount": 0,
+      "pinned": false,
+      "cookedHtml": "<p>sofa</p>\n",
+      "author": {
+        "id": "b13f3af1-f9ef-4cb8-9135-e81d9cacf189",
+        "username": "石榴",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a114de-b11f-7323-a0b5-88f938a9a4fe",
+          "url": "/api/v1/avatars/01a114de-b11f-7323-a0b5-88f938a9a4fe"
+        },
+        "displayedBadge": {
+          "id": "badge_judgment",
+          "name": "PICKCAT 风纪",
+          "description": "PICKCAT 风纪委员",
+          "image": {
+            "fileId": "01a11b5b-17bc-73ae-aca6-bcdf10739dc4",
+            "url": "/api/v1/files/01a11b5b-17bc-73ae-aca6-bcdf10739dc4",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "createdAt": "2026-10-30T09:53:23.926Z",
+      "editedAt": null,
+      "viewerCapabilities": {
+        "canPin": false,
+        "canEdit": false,
+        "canDelete": false,
+        "canLike": true,
+        "canBookmark": true,
+        "canReport": true,
+        "canSelectAnswer": false
+      },
+      "viewerState": {
+        "liked": false,
+        "bookmarkId": null,
+        "selectedAnswer": false
+      }
+    },
+    {
+      "id": "01a18c40-85a1-7d5f-a477-940bdcf4c981",
+      "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "postNumber": 5,
+      "replyToPostNumber": 1,
+      "deleted": false,
+      "children": [],
+      "currentRevision": 1,
+      "likeCount": 1,
+      "pinned": false,
+      "cookedHtml": "<p>沙发🛋️</p>\n",
+      "author": {
+        "id": "01a0d323-6b5b-7ff6-887b-45b0c3de93a4",
+        "username": "小小方a",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14dbe-2d7e-7748-a04e-8915965be4ab",
+          "url": "/api/v1/avatars/01a14dbe-2d7e-7748-a04e-8915965be4ab"
+        },
+        "displayedBadge": {
+          "id": "badge_pioneer",
+          "name": "开拓者",
+          "description": "参与 PICKCAT 社区第一次内测",
+          "image": {
+            "fileId": "01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "url": "/api/v1/files/01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "createdAt": "2026-10-30T10:00:01.164Z",
+      "editedAt": null,
+      "viewerCapabilities": {
+        "canPin": false,
+        "canEdit": false,
+        "canDelete": false,
+        "canLike": true,
+        "canBookmark": true,
+        "canReport": true,
+        "canSelectAnswer": false
+      },
+      "viewerState": {
+        "liked": false,
+        "bookmarkId": null,
+        "selectedAnswer": false
+      }
+    },
+    {
+      "id": "01a18c65-e807-7b42-b5da-cf3c8ddd3808",
+      "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "postNumber": 6,
+      "replyToPostNumber": 1,
+      "deleted": false,
+      "children": [],
+      "currentRevision": 1,
+      "likeCount": 0,
+      "pinned": false,
+      "cookedHtml": "<p><img src=\"/api/v1/emojis/gif_expression_aduan_wa/image\" alt=\"[emoji:gif_expression_aduan_wa]\" class=\"markdown-emoji\" decoding=\"async\" /></p>\n",
+      "author": {
+        "id": "01a0d35a-3165-7fda-9322-57933e90d5a6",
+        "username": "Jeek_ethan",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14f04-f1c9-7306-b466-02bb01d08c86",
+          "url": "/api/v1/avatars/01a14f04-f1c9-7306-b466-02bb01d08c86"
+        },
+        "displayedBadge": {
+          "id": "badge_pioneer",
+          "name": "开拓者",
+          "description": "参与 PICKCAT 社区第一次内测",
+          "image": {
+            "fileId": "01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "url": "/api/v1/files/01a0b34f-c685-7777-b60d-fe2a6adb6f52",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "createdAt": "2026-10-30T10:40:51.184Z",
+      "editedAt": null,
+      "viewerCapabilities": {
+        "canPin": false,
+        "canEdit": false,
+        "canDelete": false,
+        "canLike": true,
+        "canBookmark": true,
+        "canReport": true,
+        "canSelectAnswer": false
+      },
+      "viewerState": {
+        "liked": false,
+        "bookmarkId": null,
+        "selectedAnswer": false
+      }
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "eyJwb3N0TnVtYmVyIjo2fQ"
+  }
+}

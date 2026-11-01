@@ -1,0 +1,139 @@
+{
+  "currentLevel": 1,
+  "promotionCeiling": null,
+  "scores": {
+    "ability": 0,
+    "responsibility": 0,
+    "care": 0
+  },
+  "familiarity": {
+    "tracking": true,
+    "familiarityStartedAt": "2026-10-07T09:10:10.708Z",
+    "daysSinceEntranceExam": 24,
+    "validVisitDays": 0,
+    "topicsEntered": 1,
+    "postsRead": 6,
+    "effectiveReadingSeconds": 6
+  },
+  "nextLevel": {
+    "level": 2,
+    "admission": "LEVEL_REQUIREMENTS",
+    "scores": {
+      "ability": {
+        "current": 0,
+        "required": 100,
+        "met": false
+      },
+      "responsibility": {
+        "current": 0,
+        "required": 60,
+        "met": false
+      },
+      "care": {
+        "current": 0,
+        "required": 100,
+        "met": false
+      }
+    },
+    "familiarity": {
+      "daysSinceEntranceExam": {
+        "current": 24,
+        "required": 30,
+        "met": false
+      },
+      "validVisitDays": {
+        "current": 0,
+        "required": 20,
+        "met": false
+      },
+      "topicsEntered": {
+        "current": 1,
+        "required": 100,
+        "met": false
+      },
+      "postsRead": {
+        "current": 6,
+        "required": 800,
+        "met": false
+      },
+      "effectiveReadingSeconds": {
+        "current": 6,
+        "required": 43200,
+        "met": false
+      }
+    },
+    "hardRequirements": [
+      {
+        "key": "NO_ACTIVE_PENALTY",
+        "met": true
+      },
+      {
+        "key": "NO_CONFIRMED_VIOLATION_90_DAYS",
+        "met": true
+      }
+    ],
+    "blockedByPromotionCeiling": false,
+    "eligible": false
+  },
+  "lv4Candidate": false,
+  "quotas": [
+    {
+      "action": "TOPIC_CREATE",
+      "windowSeconds": 86400,
+      "limit": 10,
+      "used": 0,
+      "remaining": 10
+    },
+    {
+      "action": "QUESTION_CREATE",
+      "windowSeconds": 86400,
+      "limit": 5,
+      "used": 0,
+      "remaining": 5
+    },
+    {
+      "action": "REPLY_CREATE",
+      "windowSeconds": 86400,
+      "limit": 50,
+      "used": 0,
+      "remaining": 50
+    },
+    {
+      "action": "LIKE_CREATE",
+      "windowSeconds": 86400,
+      "limit": 50,
+      "used": 0,
+      "remaining": 50
+    },
+    {
+      "action": "BOOKMARK_CREATE",
+      "windowSeconds": 86400,
+      "limit": 40,
+      "used": 0,
+      "remaining": 40
+    },
+    {
+      "action": "REPORT_CREATE",
+      "windowSeconds": 86400,
+      "limit": 20,
+      "used": 0,
+      "remaining": 20
+    },
+    {
+      "action": "DUPLICATE_REQUEST_CREATE",
+      "windowSeconds": 86400,
+      "limit": 10,
+      "used": 0,
+      "remaining": 10
+    },
+    {
+      "action": "BOT_REQUEST",
+      "windowSeconds": 86400,
+      "limit": 5,
+      "used": 0,
+      "remaining": 5
+    }
+  ],
+  "updating": false,
+  "calculatedAt": "2026-11-01T03:26:15.886Z"
+}

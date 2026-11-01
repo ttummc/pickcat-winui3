@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": "01a115a0-f543-7a89-929a-dc91b33d6580",
+      "kind": "REPLIED",
+      "occurredAt": "2026-10-07T09:10:32.503Z",
+      "title": "【共琢一轮月】PickCat 中秋创作分享活动第一阶段获奖名单公示",
+      "level": null
+    },
+    {
+      "id": "01a115a0-a025-7d60-936e-d270854aae2f",
+      "kind": "LEVEL_UP",
+      "occurredAt": "2026-10-07T09:10:10.708Z",
+      "title": null,
+      "level": 1
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": false,
+    "nextCursor": null
+  }
+}

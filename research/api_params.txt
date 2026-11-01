@@ -1,0 +1,310 @@
+DELETE /approved-link-domains/{domainId}
+DELETE /badges/{badgeId}
+      query: limit:20,cursor:t
+DELETE /bookmarks/{bookmarkId}
+      query: cursor:n,limit:20
+DELETE /emoji-collections/{collectionId}
+DELETE /entrance-exam/question-groups/{groupId}
+DELETE /groups/{groupId}
+DELETE /groups/{groupId}/grants/{grantId}
+      query: limit:30,...n
+DELETE /groups/{groupId}/members/{userId}
+DELETE /oidc-clients/{clientId}
+DELETE /oidc-clients/{clientId}/logo
+DELETE /posts/{postId}
+DELETE /posts/{postId}/like
+DELETE /posts/{postId}/pin
+DELETE /questions/{topicId}/duplicate
+DELETE /questions/{topicId}/selected-answer
+DELETE /session
+DELETE /topic-collections/{collectionId}
+DELETE /topics/{topicId}/closure
+DELETE /topics/{topicId}/pin
+DELETE /users/{userId}/badges/{badgeId}
+DELETE /users/{userId}/follow
+      query: cursor:n,limit:i.limit??50
+DELETE /users/{userId}/oidc-grants/{clientId}
+DELETE /works/{workId}/comments/{commentNumber}
+DELETE /works/{workId}/comments/{commentNumber}/like
+DELETE /works/{workId}/comments/{commentNumber}/pin
+DELETE /works/{workId}/favorite
+DELETE /works/{workId}/like
+GET /account-verification-policy
+GET /approved-link-domains
+GET /avatar-presets
+GET /badge-grant-batches
+      query: limit:20,cursor:t
+GET /badge-grant-batches/{batchId}
+GET /badge-grant-batches/{batchId}/items
+GET /badges
+GET /badges/{badgeId}
+GET /badges/{badgeId}/image
+      query: limit:20,cursor:t
+GET /bookmarks
+      query: cursor:n,limit:20
+GET /content-length-limit
+GET /content-length-quotas
+GET /emoji-collections
+      query: page:t,pageSize:n
+GET /emoji-collections/{collectionId}
+      query: collectionId:t,page:n,...r?{includeUnavailable:`true`
+GET /emojis
+      query: collectionId:t,page:n,...r?{includeUnavailable:`true`
+GET /emojis/{emojiId}
+GET /entrance-exam
+GET /entrance-exam/attempts/{attemptId}/current-question
+GET /entrance-exam/plan
+GET /entrance-exam/question-groups
+GET /entrance-exam/questions
+GET /external-works/codemao/{workId}
+GET /featured-works
+GET /file-storage
+GET /file-storage-quotas
+GET /file-upload-policy
+GET /files
+GET /groups
+GET /groups/{groupId}
+GET /groups/{groupId}/grants
+GET /groups/{groupId}/members
+GET /groups/{groupId}/quota-rules
+      query: limit:30,...n
+GET /level-certifications
+GET /level-certifications/{certificationId}
+GET /level-contributions/{year}
+GET /level-progress
+GET /like-notification-groups
+      query: before:t?.before,beforeKey:t?.beforeId,limit:20
+GET /like-notification-groups/{groupKey}
+      query: before:n?.before,beforeUserId:n?.beforeId,limit:20
+GET /like-notification-groups/{groupKey}/likers
+      query: before:n?.before,beforeUserId:n?.beforeId,limit:20
+GET /management-actions
+      query: limit:30,...n
+GET /management-actions/{managementActionId}
+GET /moderation/post-submissions
+GET /moderation/posts
+GET /moderation/posts/{postId}
+GET /moderation/profile-report-cases
+GET /moderation/profile-report-cases/{caseId}
+GET /moderation/report-cases
+GET /moderation/report-cases/{caseId}
+GET /moderation/topic-quality-reassessments
+GET /moderation/topic-quality-statistics
+GET /moderation/topics
+GET /moderation/topics/{topicId}
+GET /moderation/users/{userId}/profile
+GET /moderation/users/{userId}/silence
+GET /moderation/users/{userId}/suspension
+GET /moderation/work-report-cases
+GET /moderation/work-report-cases/{caseId}
+GET /notification-summary
+      query: type:t?.length?[...t]:void 0
+GET /notifications
+      query: type:t.types?.length?[...t.types]:void 0,cursor:t.cursor,limit:20
+GET /official-account
+      query: offset:t,limit:5
+GET /official-account/works
+      query: offset:t,limit:5
+GET /oidc-clients
+GET /oidc-clients/{clientId}
+GET /oidc-clients/{clientId}/logo
+GET /permissions
+GET /post-submissions
+      query: cursor:r,limit:50,sort:i
+GET /post-submissions/{submissionId}
+GET /posts/{postId}
+GET /posts/{postId}/revisions
+      query: cursor:n,limit:20
+GET /product-analytics
+GET /profile-activities
+      query: year:t,cursor:n,limit:r
+GET /registration-email-domains
+GET /search/users
+      query: q:t.trim(),cursor:n,limit:i.limit??20
+GET /search/works
+GET /session
+GET /tags
+      query: assignable:`true` | include:`referenceCount`
+GET /tags/{tagSlug}/sidebar-links
+GET /topic-collection-quotas
+GET /topic-collection-usage
+GET /topic-collections/{collectionId}
+GET /topic-collections/{collectionId}/topics
+      query: cursor:r,limit:20
+GET /topic-recommendations
+GET /topics
+GET /topics/{topicId}
+GET /topics/{topicId}/duplicate-candidates
+GET /topics/{topicId}/posts
+      query: cursor:r,limit:50,sort:i
+GET /user-badge-displays
+      query: userIds:t.join(`,`)
+GET /users/{userId}
+      query: year:n,cursor:i,limit:a
+GET /users/{userId}/avatar
+GET /users/{userId}/badge-display
+      query: userIds:t.join(`,`)
+GET /users/{userId}/badges
+GET /users/{userId}/badges/{badgeId}
+GET /users/{userId}/email
+GET /users/{userId}/featured-topics
+      query: role:`reply`,cursor:n,limit:20
+GET /users/{userId}/featured-works
+      query: cursor:n,limit:20
+GET /users/{userId}/followers
+      query: cursor:n,limit:50
+GET /users/{userId}/following
+      query: cursor:n,limit:i.limit??50
+GET /users/{userId}/level-contributions/{year}
+      query: year:n,cursor:i,limit:a
+GET /users/{userId}/oidc-grants
+GET /users/{userId}/phone
+GET /users/{userId}/posts
+      query: role:`reply`,cursor:n,limit:20
+GET /users/{userId}/profile-activities
+      query: year:n,cursor:i,limit:a
+GET /users/{userId}/topic-collections
+      query: cursor:r,limit:20
+GET /users/{userId}/topics
+      query: cursor:n,limit:20
+GET /users/{userId}/username-changes/{usernameChangeId}
+GET /users/{userId}/work-comments
+      query: cursor:r,limit:20
+GET /users/{userId}/works
+      query: cursor:r,limit:i,publication:a
+GET /work-favorites
+      query: cursor:n,limit:20
+GET /work-recommendations
+      query: sort:`random`,scope:`all`,limit:6 | sort:n===`latest`?`latest`:`recommended`,scope:n===`following`?`following`:`all`,cursor:t??void 0,limit:8
+GET /works/{workId}
+GET /works/{workId}/comments
+      query: ...r,limit:30
+GET /works/{workId}/comments/{commentNumber}
+      query: cursor:i,limit:20
+GET /works/{workId}/comments/{commentNumber}/revisions
+      query: cursor:i,limit:20
+GET /works/{workId}/stats
+      query: sort:`random`,scope:`all`,limit:6
+PATCH /badges/{badgeId}
+      query: limit:20,cursor:t
+PATCH /emoji-collections/{collectionId}
+PATCH /emojis/{emojiId}
+PATCH /entrance-exam/attempts/{attemptId}
+PATCH /entrance-exam/attempts/{attemptId}/current-question
+PATCH /entrance-exam/question-groups/{groupId}
+PATCH /entrance-exam/questions/{questionId}
+PATCH /files/{fileId}/deletion
+PATCH /groups/{groupId}
+PATCH /groups/{groupId}/grants/{grantId}
+      query: limit:30,...n
+PATCH /level-certifications/{certificationId}
+PATCH /moderation/profile-report-cases/{caseId}
+PATCH /moderation/report-cases/{caseId}
+PATCH /moderation/topic-quality-reassessments/{runId}
+PATCH /moderation/users/{userId}/profile
+PATCH /moderation/users/{userId}/silence
+PATCH /moderation/users/{userId}/suspension
+PATCH /moderation/work-report-cases/{caseId}
+PATCH /notifications
+      query: type:t?.length?[...t]:void 0
+PATCH /oidc-clients/{clientId}
+PATCH /posts/{postId}
+PATCH /registrations/{registrationId}
+PATCH /tags/{tagSlug}
+PATCH /topic-collections/{collectionId}
+PATCH /topics/{topicId}
+PATCH /users/{userId}
+      query: q:t.trim(),cursor:n,limit:i.limit??20
+PATCH /users/{userId}/email-changes/{emailChangeId}
+PATCH /users/{userId}/phone-changes/{phoneChangeId}
+PATCH /users/{userId}/username-changes/{usernameChangeId}
+PATCH /works/{workId}
+PATCH /works/{workId}/comments/{commentNumber}
+POST /approved-link-domains
+POST /badge-grant-batches
+      query: limit:20,cursor:t
+POST /badge-grant-batches/{batchId}/actions
+POST /badge-grant-batches/{batchId}/reports
+POST /badges
+POST /bookmarks
+      query: cursor:n,limit:20
+POST /emoji-collections
+POST /emojis
+POST /entrance-exam/attempts
+POST /entrance-exam/question-groups
+POST /entrance-exam/questions
+POST /files
+POST /groups
+POST /groups/{groupId}/grants
+      query: limit:30,...n
+POST /groups/{groupId}/members
+POST /level-certifications
+POST /moderation/content-removals
+POST /moderation/post-submissions/{submissionId}/decision
+POST /moderation/topic-quality-reassessments/{runId}/actions
+POST /official-account/works/sync
+      query: offset:t,limit:5
+POST /oidc-clients
+POST /oidc-clients/{clientId}/secret
+POST /password-resets
+POST /password-resets/completions
+POST /posts
+POST /posts/{postId}/reports
+POST /recommendation-events
+POST /registrations
+POST /session
+POST /tags
+POST /users/{userId}/badges
+POST /users/{userId}/email-changes
+POST /users/{userId}/phone-changes
+POST /users/{userId}/profile-reports
+POST /users/{userId}/topic-collections
+POST /users/{userId}/username-changes
+POST /works/{workId}/comments
+      query: cursor:i,limit:20
+POST /works/{workId}/sync
+PUT /account-verification-policy
+PUT /content-length-quotas
+PUT /entrance-exam/plan
+PUT /entrance-exam/questions/{questionId}
+PUT /featured-works
+      query: cursor:r,limit:i,publication:a
+PUT /file-storage-quotas
+PUT /file-upload-policy
+PUT /files/{fileId}/deletion
+PUT /groups/{groupId}/quota-rules
+      query: limit:30,...n
+PUT /official-account
+      query: offset:t,limit:5
+PUT /oidc-clients/{clientId}/logo
+PUT /posts/{postId}/like
+PUT /posts/{postId}/pin
+PUT /questions/{topicId}/duplicate
+PUT /questions/{topicId}/selected-answer
+PUT /reading-sessions/{readingSessionId}/batches/{sequence}
+PUT /registration-email-domains
+PUT /tags/{tagSlug}/sidebar-links
+PUT /topic-collection-quotas
+PUT /topics/{topicId}/closure
+PUT /topics/{topicId}/collection
+PUT /topics/{topicId}/pin
+PUT /users/{userId}/avatar
+      query: year:n,cursor:i,limit:a
+PUT /users/{userId}/background
+      query: year:n,cursor:i,limit:a
+PUT /users/{userId}/badge-display
+      query: userIds:t.join(`,`)
+PUT /users/{userId}/featured-topics
+      query: role:`reply`,cursor:n,limit:20
+PUT /users/{userId}/featured-works
+      query: cursor:n,limit:20
+PUT /users/{userId}/follow
+      query: cursor:n,limit:i.limit??50
+PUT /users/{userId}/real-name-verification
+PUT /works/{workId}/coins
+      query: sort:`random`,scope:`all`,limit:6
+PUT /works/{workId}/comment-reads
+PUT /works/{workId}/comments/{commentNumber}/like
+PUT /works/{workId}/comments/{commentNumber}/pin
+PUT /works/{workId}/favorite
+PUT /works/{workId}/like

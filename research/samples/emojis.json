@@ -1,0 +1,10 @@
+{
+  "statusCode": 400,
+  "code": "VALIDATION_FAILED",
+  "message": "请求参数不合法",
+  "details": {
+    "collectionId": [
+      "Invalid input: expected string, received undefined"
+    ]
+  }
+}

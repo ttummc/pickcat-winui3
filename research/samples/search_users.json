@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+      "username": "吉吉喵",
+      "avatar": {
+        "type": "CUSTOM",
+        "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+        "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+      },
+      "bio": "祝所有岛民越来越好！",
+      "region": "广东省"
+    },
+    {
+      "id": "01a0e15e-61c4-7b50-830b-64b1173b3266",
+      "username": "吉吉工作室Official",
+      "avatar": {
+        "type": "PRESET",
+        "id": 8,
+        "url": "/api/v1/avatars/8?v=0f84adb346a06c3ba42881af95448716dae45bf984166d6040c203ed2254df16"
+      },
+      "bio": "重生之我在pickcat继续当工作室运营",
+      "region": "四川省"
+    },
+    {
+      "id": "01a10a63-abc8-776b-87af-8df20d9c0602",
+      "username": "布吉岛取啥名",
+      "avatar": {
+        "type": "CUSTOM",
+        "id": "01a10abb-c16e-7028-b2f0-3944a275e820",
+        "url": "/api/v1/avatars/01a10abb-c16e-7028-b2f0-3944a275e820"
+      },
+      "bio": "专注致力于研究Kitten4和C++的鲨鲨（bushi）",
+      "region": null
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "towA605ryge8SvuSOuD9Sxf0n5no5mBB_KUwTK3r8QXDmaSuye8irRH91706fYWKQA-YdpeGfDtZMCnvFYA5TQeFOI5mz6Kcm0pLgUvfDQL2fiPjPa4ilzL9of44gla98TNlFRi7yWL18ULa1TJ5AnfmEoEk9mw2lS36mLa-y2tOh3lv8FcGN23OStbjLqG3qdZHLsJ7Yw1lqHr5P4FuwYc4KTQ"
+  },
+  "resultCount": {
+    "value": 3,
+    "relation": "gte"
+  }
+}

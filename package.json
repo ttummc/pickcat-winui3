@@ -1,0 +1,24 @@
+{
+  "name": "pickcat-winui3-on-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "PickCat rebuilt from scratch as a WinUI 3 app on the web (Chrome extension)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "ext:build": "cd extension && vite build",
+    "ext:dev": "cd extension && vite build --watch"
+  },
+  "dependencies": {
+    "vue": "^3.5.32",
+    "winuionweb": "file:./vendor/winuionweb-0.2.0.tgz"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "typescript": "~5.9.0",
+    "vite": "^7.1.0",
+    "vue-tsc": "^3.2.6"
+  }
+}

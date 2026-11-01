@@ -1,0 +1,146 @@
+{
+  "items": [
+    {
+      "id": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "title": "BoxPlay（PikAgent） 来了：许个愿，AI 搬砖，顺便过个万圣",
+      "kind": "DISCUSSION",
+      "excerpt": "地有山川原隰，各具条理，此古人之地理也。今有 BoxPlay，亦各具条理：你负责许愿，AI 负责搬砖。搬成是作品，搬不成是经验，总之不亏。 上次写“快来啦”，有人问：到底多快？今可答：已来，能试。[emoji:beat_call] 在开始之前，吉吉先丢几张图。 链接：https://boxplay.dao3.fun/play/009bfcbc 链接：https://boxplay.dao3.fun",
+      "author": {
+        "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+        "username": "吉吉喵",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+          "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0ab26-84a8-718b-996a-36be3dda4fa4",
+          "slug": "creative-works",
+          "name": "创作与作品"
+        },
+        {
+          "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+          "slug": "box",
+          "name": "神奇代码岛"
+        },
+        {
+          "id": "01a18c60-3f24-7524-8474-fc9e69182cfa",
+          "slug": "box-play",
+          "name": "BoxPlay"
+        }
+      ],
+      "replyCount": 40,
+      "viewCount": 131,
+      "likeCount": 18,
+      "bookmarkCount": 7,
+      "closedAt": null,
+      "pinned": true,
+      "pinnedGlobally": true,
+      "pinnedTagId": null,
+      "pinnedAt": "2026-10-30T09:18:41.593Z",
+      "pinnedUntil": null,
+      "createdAt": "2026-10-30T09:17:33.270Z",
+      "editedAt": "2026-10-30T10:35:47.217Z",
+      "lastActivityAt": "2026-11-01T01:43:34.983Z"
+    },
+    {
+      "id": "01a14946-577e-7c7c-b203-13357c504273",
+      "title": "万圣奇想夜 | PICKCAT 万圣节创作活动，启动！",
+      "kind": "DISCUSSION",
+      "excerpt": "南瓜灯已经亮起来了，编程猫发现，今年来讨糖的家伙好像有点特别—— 幽灵开起了糖果店，南瓜偷偷改了游戏规则，平平无奇的房间里，还藏着一条谁也没发现的通道…… Hello hello，各位训练师下午好呀！这段时间，看到大家在PICKCAT上踊跃发言，喵感到非常的开心！[emoji:gif_expression_aduan_jizhang] 你对即将到来的万圣有什么期盼呢？你将如何度过呢？你有什么关于万",
+      "author": {
+        "id": "2e9331bc-8dfb-4818-bb5c-5f7be033b90a",
+        "username": "pigeonxian",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a124ef-0212-745e-9c17-f5c02552fcad",
+          "url": "/api/v1/avatars/01a124ef-0212-745e-9c17-f5c02552fcad"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+          "slug": "box",
+          "name": "神奇代码岛"
+        },
+        {
+          "id": "01a14932-879f-7474-a366-904d45afc7f5",
+          "slug": "ghost-is-coming",
+          "name": "2026 万圣奇想夜"
+        },
+        {
+          "id": "01a0ab26-84a8-718b-996a-42a29388f3fa",
+          "slug": "events-competitions",
+          "name": "活动与赛事"
+        }
+      ],
+      "replyCount": 60,
+      "viewCount": 253,
+      "likeCount": 26,
+      "bookmarkCount": 6,
+      "closedAt": null,
+      "pinned": true,
+      "pinnedGlobally": true,
+      "pinnedTagId": null,
+      "pinnedAt": "2026-10-17T09:54:13.675Z",
+      "pinnedUntil": null,
+      "createdAt": "2026-10-17T09:51:49.099Z",
+      "editedAt": "2026-10-20T07:49:09.393Z",
+      "lastActivityAt": "2026-10-31T06:22:37.956Z"
+    },
+    {
+      "id": "01a12921-22c2-7390-9b4e-4ec5d4683f75",
+      "title": "用豆包？拼？积木???!!!   啥叫大AI时代？！",
+      "kind": "QUESTION",
+      "excerpt": "什么叫我在用豆包写图形化？现在内卷那么厉害的吗？！ 来龙去脉 我之前发了一个用豆包写图形化的帖子（点我），多亏了熬夜的我和@{01a0d323-6b5b-7ff6-887b-45b0c3de93a4} 的大力支持，终于搓出了KN和K4的AI生成表格，只需要把这个表格扔给AI，它就能给你拼积木了！！！（如果你想要看表格的话，可以去我的另一篇帖子还是要点我） 求助 没错，我还要再求助一下，如果你有一些",
+      "author": {
+        "id": "01a11126-ecda-7e6a-a069-0e077f82f8f5",
+        "username": "Helen.S",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a11199-80b8-7759-a108-3ad82ed9b058",
+          "url": "/api/v1/avatars/01a11199-80b8-7759-a108-3ad82ed9b058"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0ab26-84a8-718b-996a-36be3dda4fa4",
+          "slug": "creative-works",
+          "name": "创作与作品"
+        },
+        {
+          "id": "01a0ab26-84a8-718b-996a-3960a4789d05",
+          "slug": "learning-technology",
+          "name": "学习与技术"
+        },
+        {
+          "id": "01a0ab26-84a8-718b-996a-3cce5e3bb015",
+          "slug": "q-and-a",
+          "name": "你问我答"
+        }
+      ],
+      "replyCount": 24,
+      "viewCount": 88,
+      "likeCount": 7,
+      "bookmarkCount": 2,
+      "closedAt": null,
+      "pinned": false,
+      "pinnedGlobally": false,
+      "pinnedTagId": null,
+      "pinnedAt": null,
+      "pinnedUntil": null,
+      "questionState": {
+        "resolution": null
+      },
+      "createdAt": "2026-10-11T04:03:19.860Z",
+      "editedAt": null,
+      "lastActivityAt": "2026-11-01T03:18:37.070Z"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "eyJ2IjoxLCJtb2RlIjoiYnJvd3NlIiwiYmluZGluZyI6eyJxIjpudWxsLCJzb3J0IjoibGF0ZXN0Iiwia2luZCI6bnVsbCwidGFncyI6W10sInRhZ01vZGUiOiJhbGwifSwicG9zaXRpb24iOnsicGlubmVkUmFuayI6MSwib3JkZXJlZEF0IjoiMjAyNi0xMS0wMVQwMzoxODozNy4wNzBaIiwiaWQiOiIwMWExMjkyMS0yMmMyLTczOTAtOWI0ZS00ZWM1ZDQ2ODNmNzUifX0"
+  }
+}

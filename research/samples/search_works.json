@@ -1,0 +1,177 @@
+{
+  "items": [
+    {
+      "id": "01a17ddb-aad0-73b9-8e9d-19b331cf2f42",
+      "sourceWorkId": "312372129",
+      "sourceUserId": "1805353429",
+      "author": {
+        "id": "01a17dd7-7751-72b3-84e4-4d430d4cf69b",
+        "username": "蛋仔派对落别",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a19017-673a-773b-a61f-5ced456ecd7d",
+          "url": "/api/v1/avatars/01a19017-673a-773b-a61f-5ced456ecd7d"
+        }
+      },
+      "workName": "为什么不火",
+      "type": "KITTEN4",
+      "forkEnable": true,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "请问呢官方",
+      "description": "啊啊啊！！！",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfMTgwNTM1MzQyOV8zMTIzNzIxMjlfMTc3NjU2ODA1NzE5NV84MmJkNzhjMw==.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfMTgwNTM1MzQyOV8xXzE3NzY1NjgwMjg1MjhfZWU1ZjQ3YTU=",
+      "viewCount": 0,
+      "coinCount": 0,
+      "likeCount": 0,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-10-27T14:55:10.541Z",
+      "createdAt": "2026-10-27T14:55:10.541Z",
+      "updatedAt": "2026-10-27T14:55:10.541Z",
+      "excerpt": "啊啊啊!!!"
+    },
+    {
+      "id": "01a1681e-a04a-71b1-9983-295e31907d66",
+      "sourceWorkId": "232211478",
+      "sourceUserId": "1351437069",
+      "author": {
+        "id": "01a0b871-fceb-75f5-8c06-fb23352cc554",
+        "username": "imaginary_number是小虚数啦~",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a0faf1-2b2f-76f2-be69-28cefeb70613",
+          "url": "/api/v1/avatars/01a0faf1-2b2f-76f2-be69-28cefeb70613"
+        }
+      },
+      "workName": "3D_Object_Engine",
+      "type": "KITTEN4",
+      "forkEnable": true,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "作者很懒，没有留下任何操作说明！",
+      "description": "完成了！\n哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈红红火火恍恍惚惚",
+      "preview": "https://creation.codemao.cn/445/kitten/d2ViXzIwMDFfMTM1MTQzNzA2OV8yMzIyMTE0NzhfMTcyMzg3NjY1MTkxNl85ODIwMTQwZg==.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfMTM1MTQzNzA2OV8yMzIyMTE0NzhfMTc3MjkzMzM5MzUzM19lOGU1YzNjOA==",
+      "viewCount": 3,
+      "coinCount": 0,
+      "likeCount": 0,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-10-25T07:51:36.874Z",
+      "createdAt": "2026-10-23T09:36:40.005Z",
+      "updatedAt": "2026-10-29T09:52:39.681Z",
+      "excerpt": "完成了! 哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈红红火火恍恍惚惚"
+    },
+    {
+      "id": "01a16811-88e4-7a20-9517-bfc5d4066030",
+      "sourceWorkId": "102901309",
+      "sourceUserId": "843818",
+      "author": {
+        "id": "3991c158-d32a-4299-865f-08a1081a7abe",
+        "username": "冷鱼闲风",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14392-f67c-744c-a034-44f1a3e2e2b1",
+          "url": "/api/v1/avatars/01a14392-f67c-744c-a034-44f1a3e2e2b1"
+        }
+      },
+      "workName": "[大雪山]红军长征史",
+      "type": "KITTEN3",
+      "forkEnable": false,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "聆听即可",
+      "description": "向红军致敬。 风雨，一百年，金戈铁马，艰苦创业，你的睿智，你的坚定，你的信念，让喵扎根中国，让人民生活红红火火，七一节，祝福永远。",
+      "preview": "https://cdn-community.codemao.cn/47/community/d2ViXzIwMDFfODQzODE4XzEwMjkwMTMwOV8xNjM5OTk1NDk2MzU2XzhmZjU3ZTAx.png",
+      "screenshotCoverUrl": "https://cdn-community.codemao.cn/47/community/d2ViXzIwMDFfODQzODE4XzEwMjkwMTMwOV8xNjM5OTk1NDk2MzU2XzhmZjU3ZTAx.png",
+      "viewCount": 4,
+      "coinCount": 0,
+      "likeCount": 1,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-10-23T13:52:44.931Z",
+      "createdAt": "2026-10-23T09:22:22.050Z",
+      "updatedAt": "2026-10-23T13:52:44.931Z",
+      "excerpt": ",你的睿智,你的坚定,你的信念,让喵扎根中国,让人民生活红红火火,七一节,祝福永远。"
+    },
+    {
+      "id": "01a19445-5079-7932-ada8-5a4d343d8341",
+      "sourceWorkId": "328591401",
+      "sourceUserId": "1331497869",
+      "author": {
+        "id": "01a191ac-5a20-7d97-92aa-e31603e1ca12",
+        "username": "WindowsVista",
+        "avatar": {
+          "type": "PRESET",
+          "id": 1,
+          "url": "/api/v1/avatars/1?v=f5589496f49b96239b2b980047402bac70a09f4d268c65053da3385c43049c75"
+        }
+      },
+      "workName": "新的作品-9",
+      "type": "KITTEN4",
+      "forkEnable": true,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "鼠标",
+      "description": "本来是随便想做那个枪战游戏的，但是还没有做完，就先交给大家评价了，有没有人能喵火的素材？我会特别感谢。",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfMTMzMTQ5Nzg2OV8zMjg1OTE0MDFfMTc4OTI2NzU5NTMwM18zMWVlOTA4Yg==.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfMTMzMTQ5Nzg2OV8zMjg1OTE0MDFfMTc4ODkzODI1MDYzMF85NmVmOTlkZQ==",
+      "viewCount": 1,
+      "coinCount": 0,
+      "likeCount": 0,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-11-01T00:59:41.920Z",
+      "createdAt": "2026-10-31T23:22:12.981Z",
+      "updatedAt": "2026-11-01T00:59:41.920Z",
+      "excerpt": "枪战游戏的,但是还没有做完,就先交给大家评价了,有没有人能喵火的素材?我会特别感谢。"
+    },
+    {
+      "id": "01a191f4-72e3-778a-993d-12b8dcc06025",
+      "sourceWorkId": "285328279",
+      "sourceUserId": "719760795",
+      "author": {
+        "id": "01a191f0-9886-7bb5-9e75-76ac28c83ec4",
+        "username": "雷霆小锐",
+        "avatar": {
+          "type": "PRESET",
+          "id": 1,
+          "url": "/api/v1/avatars/1?v=f5589496f49b96239b2b980047402bac70a09f4d268c65053da3385c43049c75"
+        }
+      },
+      "workName": "小锐聊天室",
+      "type": "KITTEN4",
+      "forkEnable": false,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "没人不会吧，不会请自由探索。\n",
+      "description": "最近看到社区做聊天室挺火的，自己也搞了一个",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNzE5NzYwNzk1XzI4NTMyODI3OV8xNzU5NTgxNzYxMzk1X2U0NmExZWMw.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNzE5NzYwNzk1XzI4NTMyODI3OV8xNzU5NTgxNjQ0MzE5X2UwYjVmZjA5",
+      "viewCount": 0,
+      "coinCount": 0,
+      "likeCount": 0,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-10-31T12:34:38.944Z",
+      "createdAt": "2026-10-31T12:34:38.944Z",
+      "updatedAt": "2026-10-31T12:34:38.944Z",
+      "excerpt": "最近看到社区做聊天室挺火的,自己也搞了一个"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "eyJ2IjoxLCJtb2RlIjoid29yay1zZWFyY2giLCJiaW5kaW5nIjp7InEiOiLngasiLCJzb3J0IjoicmVsZXZhbmNlIn0sInBvc2l0aW9uIjp7InNjb3JlIjoxLjE2NjY2NjY3MTYzMzcyMDQsImNyZWF0ZWRBdCI6IjIwMjYtMTAtMzFUMTI6MzQ6MzguOTQ0WiIsImlkIjoiMDFhMTkxZjQtNzJlMy03NzhhLTk5M2QtMTJiOGRjYzA2MDI1In19"
+  },
+  "resultCount": {
+    "value": 25,
+    "relation": "eq"
+  }
+}

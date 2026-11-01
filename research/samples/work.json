@@ -1,0 +1,32 @@
+{
+  "id": "01a19513-89f1-7d46-b685-2d145cc14fb9",
+  "sourceWorkId": "334942232",
+  "sourceUserId": "418470355",
+  "author": {
+    "id": "01a0de39-bed3-7de7-bfac-b9ef3384aed7",
+    "username": "是红石块呀",
+    "avatar": {
+      "type": "CUSTOM",
+      "id": "01a14789-1aa8-746f-a038-3f2937650970",
+      "url": "/api/v1/avatars/01a14789-1aa8-746f-a038-3f2937650970"
+    }
+  },
+  "workName": "红石的加载动画",
+  "type": "KITTEN4",
+  "forkEnable": false,
+  "isForked": false,
+  "parentUuid": null,
+  "operation": "作者很懒，没有留下任何操作说明！",
+  "description": "加载动画（20赞开源）",
+  "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDE4NDcwMzU1XzMzNDk0MjIzMl8xNzkzNTAyNDIxNTk1XzMwYzYwNjIw.png",
+  "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDE4NDcwMzU1XzMzNDk0MjIzMl8xNzkzNTAyMjY1NDI1XzI2NjU1ZTMw",
+  "viewCount": 1,
+  "coinCount": 0,
+  "likeCount": 1,
+  "favoriteCount": 0,
+  "commentCount": 0,
+  "published": true,
+  "lastSyncedAt": "2026-11-01T03:07:28.110Z",
+  "createdAt": "2026-11-01T03:07:28.110Z",
+  "updatedAt": "2026-11-01T03:07:28.110Z"
+}

@@ -1,0 +1,44 @@
+name: build-extension
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the extension
+        run: npm run ext:build
+
+      - name: Package
+        run: |
+          cd extension/dist
+          zip -qr ../../PickCat-WinUI3-extension.zip .
+          cd ../..
+          ls -lh PickCat-WinUI3-extension.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PickCat-WinUI3-extension
+          path: PickCat-WinUI3-extension.zip
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PickCat-WinUI3-extension.zip
+          body_path: RELEASE_NOTES.md

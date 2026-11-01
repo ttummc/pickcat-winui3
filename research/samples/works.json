@@ -1,0 +1,104 @@
+{
+  "items": [
+    {
+      "id": "01a19513-89f1-7d46-b685-2d145cc14fb9",
+      "sourceWorkId": "334942232",
+      "sourceUserId": "418470355",
+      "author": {
+        "id": "01a0de39-bed3-7de7-bfac-b9ef3384aed7",
+        "username": "是红石块呀",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14789-1aa8-746f-a038-3f2937650970",
+          "url": "/api/v1/avatars/01a14789-1aa8-746f-a038-3f2937650970"
+        }
+      },
+      "workName": "红石的加载动画",
+      "type": "KITTEN4",
+      "forkEnable": false,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "作者很懒，没有留下任何操作说明！",
+      "description": "加载动画（20赞开源）",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDE4NDcwMzU1XzMzNDk0MjIzMl8xNzkzNTAyNDIxNTk1XzMwYzYwNjIw.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDE4NDcwMzU1XzMzNDk0MjIzMl8xNzkzNTAyMjY1NDI1XzI2NjU1ZTMw",
+      "viewCount": 1,
+      "coinCount": 0,
+      "likeCount": 1,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-11-01T03:07:28.110Z",
+      "createdAt": "2026-11-01T03:07:28.110Z",
+      "updatedAt": "2026-11-01T03:07:28.110Z"
+    },
+    {
+      "id": "01a19511-ddc6-7f3e-a855-0283212c4dd4",
+      "sourceWorkId": "252780167",
+      "sourceUserId": "1626542307",
+      "author": {
+        "id": "01a0ce08-08e1-79dd-b312-ef6fa2a8bda5",
+        "username": "lloyd",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14a27-2f44-7481-a5ad-5ff5abfd227a",
+          "url": "/api/v1/avatars/01a14a27-2f44-7481-a5ad-5ff5abfd227a"
+        }
+      },
+      "workName": "Code OS",
+      "type": "NEMO",
+      "forkEnable": false,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "",
+      "description": "Code OS全面焕新回归",
+      "preview": "https://creation.bcmcdn.com/490/YW5kXzIwMDFfMTYyNjU0MjMwN18yNTI3ODAxNjdfMTczNzU0NjQ2NjE4OV9JWXZjOGxkTw==.cover",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/490/YW5kXzIwMDFfMTYyNjU0MjMwN18yNTI3ODAxNjdfMTczNzYzNTU5OTY5OV9XeElHaEZhcA==.cover",
+      "viewCount": 1,
+      "coinCount": 0,
+      "likeCount": 1,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-11-01T03:05:38.499Z",
+      "createdAt": "2026-11-01T03:05:38.499Z",
+      "updatedAt": "2026-11-01T03:05:38.499Z"
+    },
+    {
+      "id": "01a19511-dc5a-7c3e-a396-499811893ac0",
+      "sourceWorkId": "267189657",
+      "sourceUserId": "1626542307",
+      "author": {
+        "id": "01a0ce08-08e1-79dd-b312-ef6fa2a8bda5",
+        "username": "lloyd",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a14a27-2f44-7481-a5ad-5ff5abfd227a",
+          "url": "/api/v1/avatars/01a14a27-2f44-7481-a5ad-5ff5abfd227a"
+        }
+      },
+      "workName": "DeepSeek V3-双语言版",
+      "type": "NEKO",
+      "forkEnable": true,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "识物、识脸、自定义背景新功能上线；优化代码设计，使运行更流畅。",
+      "description": "DeepSeek V3-双语言版",
+      "preview": "https://creation.bcmcdn.com/490/YW5kXzIwMDFfMTYyNjU0MjMwN18yNjcxODk2NTdfMTc0NjE5NTg1NDUwOF80eVV1ZWpkVw==.cover",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/490/YW5kXzIwMDFfMTYyNjU0MjMwN18yNjcxODk2NTdfMTc0NjE5NTg1NDUwOF80eVV1ZWpkVw==.cover",
+      "viewCount": 1,
+      "coinCount": 0,
+      "likeCount": 1,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-11-01T03:05:38.135Z",
+      "createdAt": "2026-11-01T03:05:38.135Z",
+      "updatedAt": "2026-11-01T03:05:38.135Z"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "eyJjcmVhdGVkQXQiOiIyMDI2LTExLTAxVDAzOjA1OjM4LjEzNVoiLCJpZCI6IjAxYTE5NTExLWRjNWEtN2MzZS1hMzk2LTQ5OTgxMTg5M2FjMCJ9"
+  }
+}

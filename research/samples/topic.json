@@ -1,0 +1,125 @@
+{
+  "collection": null,
+  "id": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+  "title": "BoxPlay（PikAgent） 来了：许个愿，AI 搬砖，顺便过个万圣",
+  "headerFileId": null,
+  "kind": "DISCUSSION",
+  "author": {
+    "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+    "username": "吉吉喵",
+    "avatar": {
+      "type": "CUSTOM",
+      "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+      "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+    },
+    "displayedBadge": {
+      "id": "badge_official",
+      "name": "PICKCAT 官方",
+      "description": "PICKCAT 官方人员",
+      "image": {
+        "fileId": "01a11f0e-a08c-7386-a3a2-ac6f0855b973",
+        "url": "/api/v1/files/01a11f0e-a08c-7386-a3a2-ac6f0855b973",
+        "width": 512,
+        "height": 512
+      }
+    }
+  },
+  "tags": [
+    {
+      "id": "01a0ab26-84a8-718b-996a-36be3dda4fa4",
+      "slug": "creative-works",
+      "name": "创作与作品"
+    },
+    {
+      "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+      "slug": "box",
+      "name": "神奇代码岛"
+    },
+    {
+      "id": "01a18c60-3f24-7524-8474-fc9e69182cfa",
+      "slug": "box-play",
+      "name": "BoxPlay"
+    }
+  ],
+  "replyCount": 40,
+  "viewCount": 131,
+  "closedAt": null,
+  "closedBy": null,
+  "pinned": true,
+  "pinnedGlobally": true,
+  "pinnedTagId": null,
+  "pinnedAt": "2026-10-30T09:18:41.593Z",
+  "pinnedUntil": null,
+  "lastActivityAt": "2026-11-01T01:43:34.983Z",
+  "createdAt": "2026-10-30T09:17:33.270Z",
+  "editedAt": "2026-10-30T10:35:47.217Z",
+  "updatedAt": "2026-11-01T02:22:12.272Z",
+  "firstPost": {
+    "id": "01a18c19-a4f2-763a-850b-b4e9503630e4",
+    "topicId": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+    "postNumber": 1,
+    "replyToPostNumber": null,
+    "deleted": false,
+    "children": [],
+    "currentRevision": 2,
+    "likeCount": 18,
+    "pinned": false,
+    "cookedHtml": "<p>地有山川原隰，各具条理，此古人之地理也。今有 BoxPlay，亦各具条理：你负责许愿，AI 负责搬砖。搬成是作品，搬不成是经验，总之不亏。</p>\n<p>上次写“快来啦”，有人问：到底多快？今可答：已来，能试。<img src=\"/api/v1/emojis/beat_call/image\" alt=\"[emoji:beat_call]\" class=\"markdown-emoji\" decoding=\"async\" /></p>\n<p>在开始之前，吉吉先丢几张图。</p>\n<p><img src=\"/api/v1/files/01a18bbc-df1e-75cf-81fd-4c6c4156dc8d\" alt=\"\" decoding=\"async\" /><br />\n链接：<a href=\"https://boxplay.dao3.fun/play/009bfcbc\">https://boxplay.dao3.fun/play/009bfcbc</a></p>\n<p><img src=\"/api/v1/files/01a18bbd-cee4-753c-8ba0-1087fbc8921a\" alt=\"\" decoding=\"async\" /><br />\n链接：<a href=\"https://boxplay.dao3.fun/play/e62f8326\">https://boxplay.dao3.fun/play/e62f8326</a></p>\n<p><img src=\"/api/v1/files/01a18bbf-1e84-73e5-b7a5-bd315e74368a\" alt=\"\" decoding=\"async\" /><br />\n链接：<a href=\"https://boxplay.dao3.fun/play/d28ca85b\">https://boxplay.dao3.fun/play/d28ca85b</a></p>\n<p><img src=\"/api/v1/files/01a18bc0-498d-71db-9afc-3eb963a2e517\" alt=\"\" decoding=\"async\" /><br />\n链接：<a href=\"https://boxplay.dao3.fun/play/c6ad4e62\">https://boxplay.dao3.fun/play/c6ad4e62</a></p>\n<p><img src=\"/api/v1/files/01a18bc1-0106-763c-9bb2-9c052d55035b\" alt=\"\" decoding=\"async\" /><br />\n链接：<a href=\"https://boxplay.dao3.fun/play/23a82cd2\">https://boxplay.dao3.fun/play/23a82cd2</a></p>\n<p>是不是很厉害～<img src=\"/api/v1/emojis/love/image\" alt=\"[emoji:love]\" class=\"markdown-emoji\" decoding=\"async\" />这就是 BoxPlay。来来来：<a href=\"https://boxplay.dao3.fun\">https://boxplay.dao3.fun</a></p>\n<hr />\n<h2>一、开始许愿</h2>\n<p>在 BoxPlay 里，你直接说话即可，不必编程。</p>\n<p>告诉它：想做什么、什么风格、玩家怎么玩。它帮你把想法做成能操作的 2D、3D 作品。</p>\n<p>比如：</p>\n<pre><code class=\"language-text\">做一个 2D 像素闯关作品，主角是只猫，任务是把散落的罐罐都捡回来，躲避扫地机器人，三关，节奏轻快，失败可以立刻重开。\n</code></pre>\n<p>你说你没灵感？你甚至可以直接复刻抖音、快手、微信上的小游戏，再在 BoxPlay 里魔改成自己想要的样子！<s>因为你也过不了第二关。</s><img src=\"/api/v1/emojis/look_you/image\" alt=\"[emoji:look_you]\" class=\"markdown-emoji\" decoding=\"async\" /></p>\n<hr />\n<h2>二、作品晒一晒，社区给展示位</h2>\n<p>做完别藏着。发帖晒出来，带话题 <strong>#BoxPlay</strong>。参加万圣创作的，也可带 <strong>#2026万圣奇想夜</strong>。</p>\n<p>晒作品别只丢链接。写一句“最想让大家试哪里”，你会收到更有用的反馈。真的。</p>\n<pre><code class=\"language-text\">作品名：\n类型：2D / 3D\n一句话玩法：\n我改了几次：\n最得意的地方：\n最想让大家帮我试的地方：\n作品链接/截图：\n</code></pre>\n<hr />\n<h2>三、（敲黑板）万圣二创活动——不给玩，就捣蛋</h2>\n<p>没错，吉吉打算带大家一起创作。锁定我们的 B 站直播间，不见不散。你们也可以自己创作，我们会直播试玩。<img src=\"/api/v1/emojis/near_door/image\" alt=\"[emoji:near_door]\" class=\"markdown-emoji\" decoding=\"async\" /></p>\n<p>B 站直播间：<a href=\"https://live.bilibili.com/31294630\">https://live.bilibili.com/31294630</a></p>\n<table>\n<thead>\n<tr>\n<th>节点</th>\n<th>时间</th>\n<th>你要做什么</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>二创创作期</td>\n<td>10 月 30 日 17:30 ～ 10 月 31 日 18:00</td>\n<td>在平台内发布二创作品，合格作品可参与限定徽章解锁</td>\n</tr>\n<tr>\n<td>示范共创直播</td>\n<td>10 月 30 日 19:45</td>\n<td>看官方/嘉宾现场做示范，弹幕递脑洞</td>\n</tr>\n<tr>\n<td>试玩评选直播</td>\n<td>10 月 31 日 19:00</td>\n<td>直播间现场玩岛民投递的作品，参与互动评选</td>\n</tr>\n</tbody>\n</table>\n<p>参与方式很简单：活动时间内，在平台内直接发布你的二创作品。合格作品可解锁限定“神岛”万圣徽章。<img src=\"/api/v1/emojis/good/image\" alt=\"[emoji:good]\" class=\"markdown-emoji\" decoding=\"async\" /></p>\n",
+    "author": {
+      "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+      "username": "吉吉喵",
+      "avatar": {
+        "type": "CUSTOM",
+        "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+        "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+      },
+      "displayedBadge": {
+        "id": "badge_official",
+        "name": "PICKCAT 官方",
+        "description": "PICKCAT 官方人员",
+        "image": {
+          "fileId": "01a11f0e-a08c-7386-a3a2-ac6f0855b973",
+          "url": "/api/v1/files/01a11f0e-a08c-7386-a3a2-ac6f0855b973",
+          "width": 512,
+          "height": 512
+        }
+      }
+    },
+    "createdAt": "2026-10-30T09:17:33.270Z",
+    "editedAt": "2026-10-30T10:35:47.217Z",
+    "viewerCapabilities": {
+      "canPin": false,
+      "canEdit": false,
+      "canDelete": false,
+      "canLike": false,
+      "canBookmark": false,
+      "canReport": false,
+      "canSelectAnswer": false
+    },
+    "viewerState": {
+      "liked": false,
+      "bookmarkId": null,
+      "selectedAnswer": false
+    }
+  },
+  "repliesTruncated": true,
+  "events": [],
+  "eventsTruncated": false,
+  "viewerCapabilities": {
+    "canEdit": false,
+    "canReply": false,
+    "canDelete": false,
+    "canBookmark": false,
+    "canClose": false,
+    "canReopen": false,
+    "canUnselectAnswer": false,
+    "canClearDuplicate": false,
+    "canMarkDuplicate": false,
+    "pinnableTagIds": [],
+    "canPinGlobally": false,
+    "canUnpin": false
+  },
+  "viewerState": {
+    "bookmarkId": null
+  }
+}

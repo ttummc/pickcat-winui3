@@ -1,0 +1,5 @@
+{
+  "statusCode": 404,
+  "code": "POST_NOT_FOUND",
+  "message": "帖子不存在"
+}

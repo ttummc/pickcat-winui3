@@ -1,0 +1,17 @@
+{
+  "unreadCount": 0,
+  "unreadCountByType": {
+    "REPLY_CREATED": 0,
+    "WORK_COMMENT_REPLY_CREATED": 0,
+    "USER_MENTIONED": 0,
+    "WORK_COMMENT_MENTIONED": 0,
+    "MANAGEMENT_ACTION": 0,
+    "POST_LIKED": 0,
+    "TOPIC_EVENT": 0,
+    "USER_FOLLOWED": 0,
+    "LEVEL_CERTIFICATION": 0,
+    "WORK_COMMENT_CREATED": 0,
+    "WORK_LIKED": 0,
+    "WORK_COMMENT_LIKED": 0
+  }
+}

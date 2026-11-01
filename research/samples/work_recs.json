@@ -1,0 +1,117 @@
+{
+  "strategy": "TRENDING",
+  "items": [
+    {
+      "id": "01a19496-a925-70bc-b4a9-d08b04416851",
+      "sourceWorkId": "334636350",
+      "sourceUserId": "982357356",
+      "author": {
+        "id": "01a12a9d-fe17-7f35-aa50-f4fe12bd82fb",
+        "username": "电脑报废工MUJIU",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a12aa1-f6c3-74c4-890b-a5c5cd27cd52",
+          "url": "/api/v1/avatars/01a12aa1-f6c3-74c4-890b-a5c5cd27cd52"
+        }
+      },
+      "workName": "用303引擎改的三角形渲染（可能是吧）",
+      "type": "KITTEN4",
+      "forkEnable": false,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "作者很懒，没有留下任何操作说明！",
+      "description": "不知道算不算，还请大佬多多指教",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfOTgyMzU3MzU2XzMzNDYzNjM1MF8xNzkzNDk0Nzg2Mzg1XzRiODk3ZTJh.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfOTgyMzU3MzU2XzMzNDYzNjM1MF8xNzkzNDk0NzYxMTMxX2M0NzYyZmNm",
+      "viewCount": 2,
+      "coinCount": 0,
+      "likeCount": 1,
+      "favoriteCount": 0,
+      "commentCount": 0,
+      "published": true,
+      "lastSyncedAt": "2026-11-01T01:01:49.248Z",
+      "createdAt": "2026-11-01T00:51:04.097Z",
+      "updatedAt": "2026-11-01T01:01:49.248Z",
+      "reason": "FRESH",
+      "recommendation": {
+        "impressionId": "01a1951e-66df-779b-96d0-d3d1839ebaab"
+      }
+    },
+    {
+      "id": "01a18f55-6c48-74bb-9ea7-ed95e50cba3c",
+      "sourceWorkId": "288389831",
+      "sourceUserId": "955246435",
+      "author": {
+        "id": "01a18f4e-9aaa-7390-b15e-2b096a9bed9f",
+        "username": "浩新EhVa",
+        "avatar": {
+          "type": "PRESET",
+          "id": 1,
+          "url": "/api/v1/avatars/1?v=f5589496f49b96239b2b980047402bac70a09f4d268c65053da3385c43049c75"
+        }
+      },
+      "workName": "圆形跑酷-1",
+      "type": "KITTEN4",
+      "forkEnable": true,
+      "isForked": false,
+      "parentUuid": null,
+      "operation": "关卡里有\n建议在评论区说",
+      "description": "该作品参考了部分大佬的作品，包括《方寸之地》、《水桶球》，采用了纯画笔的制作方法\n社区维修期间更新：3月9日：关卡数：17关\n更新内容：更新灵魂出窍\n3月15日：关卡数：19关\n更新内容：将教程板块换为设置，更新失败后显示喵亡位置（到设置里调）\n花絮：《关于我在社区维修期间发布作品试图被更多人看到》《2-8理论可过》",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfOTU1MjQ2NDM1XzI4ODM4OTgzMV8xNzczNTU2MTMyMTY1XzllOTZjOGJi.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfOTU1MjQ2NDM1XzI4ODM4OTgzMV8xNzc2NTgzOTg5NTU2XzVmMmQ3OTI3",
+      "viewCount": 42,
+      "coinCount": 1,
+      "likeCount": 5,
+      "favoriteCount": 2,
+      "commentCount": 5,
+      "published": true,
+      "lastSyncedAt": "2026-10-31T00:21:42.597Z",
+      "createdAt": "2026-10-31T00:21:42.597Z",
+      "updatedAt": "2026-10-31T00:21:42.597Z",
+      "reason": "TRENDING",
+      "recommendation": {
+        "impressionId": "01a1951e-66df-779b-96d0-d7ec7322f592"
+      }
+    },
+    {
+      "id": "01a18ce1-3742-7d80-8da3-01ad08b3e069",
+      "sourceWorkId": "289256245",
+      "sourceUserId": "446054638",
+      "author": {
+        "id": "01a144fb-7c36-7482-8ac7-519697e11d65",
+        "username": "玩耍编程者",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a147ee-68e2-77f2-a97d-2ae384d2bb14",
+          "url": "/api/v1/avatars/01a147ee-68e2-77f2-a97d-2ae384d2bb14"
+        }
+      },
+      "workName": "弹痕（互赞）",
+      "type": "KITTEN4",
+      "forkEnable": false,
+      "isForked": true,
+      "parentUuid": null,
+      "operation": "作者很懒，没有留下任何操作说明！",
+      "description": "喜欢我的作品吗？点个赞再走吧！",
+      "preview": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDQ2MDU0NjM4XzI4OTI1NjI0NV8xNzkzMzY0OTEzODMyXzZiYmM4Mjll.png",
+      "screenshotCoverUrl": "https://creation.bcmcdn.com/445/kitten/d2ViXzIwMDFfNDQ2MDU0NjM4XzI4OTI1NjI0NV8xNzkyMTU5MDM2MjAzX2E1NTZlZGNi",
+      "viewCount": 7,
+      "coinCount": 3,
+      "likeCount": 4,
+      "favoriteCount": 0,
+      "commentCount": 1,
+      "published": true,
+      "lastSyncedAt": "2026-10-30T12:55:32.417Z",
+      "createdAt": "2026-10-30T12:55:32.417Z",
+      "updatedAt": "2026-10-30T12:55:32.417Z",
+      "reason": "TRENDING",
+      "recommendation": {
+        "impressionId": "01a1951e-66df-779b-96d0-d870d869b7bf"
+      }
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "01a1951e-66a6-723a-b396-ebd68bab2686.2.r93pnlpfYjPFtjUEhk7o2MS5HidtCkcFFFN_sSWJbc4"
+  }
+}

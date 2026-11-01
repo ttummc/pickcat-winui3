@@ -1,0 +1,31 @@
+{
+  "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+  "username": "吉吉喵",
+  "avatar": {
+    "type": "CUSTOM",
+    "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+    "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+  },
+  "bio": "祝所有岛民越来越好！",
+  "region": "广东省",
+  "showFollowingList": true,
+  "showFollowersList": true,
+  "backgroundFileId": null,
+  "profileVersion": "97a48f2c-bfb7-46ca-b8ec-e284743b44d3",
+  "createdAt": "2026-09-29T03:57:03.142Z",
+  "level": {
+    "current": 4
+  },
+  "stats": {
+    "followers": 95,
+    "following": 2,
+    "topics": 4,
+    "replies": 16
+  },
+  "viewerState": {
+    "following": false,
+    "followedBy": false,
+    "canFollow": false,
+    "canReport": false
+  }
+}

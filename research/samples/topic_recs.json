@@ -1,0 +1,146 @@
+{
+  "strategy": "TRENDING",
+  "items": [
+    {
+      "id": "01a18c19-a4ef-78bb-89ca-5304d29c888b",
+      "title": "BoxPlay（PikAgent） 来了：许个愿，AI 搬砖，顺便过个万圣",
+      "kind": "DISCUSSION",
+      "excerpt": "地有山川原隰，各具条理，此古人之地理也。今有 BoxPlay，亦各具条理：你负责许愿，AI 负责搬砖。搬成是作品，搬不成是经验，总之不亏。 上次写“快来啦”，有人问：到底多快？今可答：已来，能试。[emoji:beat_call] 在开始之前，吉吉先丢几张图。 链接：https://boxplay.dao3.fun/play/009bfcbc 链接：https://boxplay.dao3.fun",
+      "author": {
+        "id": "01a0eb4f-132b-7fdd-940d-bfe77902a2ac",
+        "username": "吉吉喵",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a120ff-2c1d-76a7-b041-05f33d4995c3",
+          "url": "/api/v1/avatars/01a120ff-2c1d-76a7-b041-05f33d4995c3"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0ab26-84a8-718b-996a-36be3dda4fa4",
+          "slug": "creative-works",
+          "name": "创作与作品"
+        },
+        {
+          "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+          "slug": "box",
+          "name": "神奇代码岛"
+        },
+        {
+          "id": "01a18c60-3f24-7524-8474-fc9e69182cfa",
+          "slug": "box-play",
+          "name": "BoxPlay"
+        }
+      ],
+      "replyCount": 40,
+      "viewCount": 131,
+      "likeCount": 18,
+      "bookmarkCount": 7,
+      "closedAt": null,
+      "pinned": true,
+      "pinnedGlobally": true,
+      "pinnedTagId": null,
+      "pinnedAt": "2026-10-30T09:18:41.593Z",
+      "pinnedUntil": null,
+      "createdAt": "2026-10-30T09:17:33.270Z",
+      "editedAt": "2026-10-30T10:35:47.217Z",
+      "lastActivityAt": "2026-11-01T01:43:34.983Z",
+      "reason": "PINNED",
+      "recommendation": {
+        "impressionId": "01a1951e-6777-715b-b013-bd6bd3240012"
+      }
+    },
+    {
+      "id": "01a14946-577e-7c7c-b203-13357c504273",
+      "title": "万圣奇想夜 | PICKCAT 万圣节创作活动，启动！",
+      "kind": "DISCUSSION",
+      "excerpt": "南瓜灯已经亮起来了，编程猫发现，今年来讨糖的家伙好像有点特别—— 幽灵开起了糖果店，南瓜偷偷改了游戏规则，平平无奇的房间里，还藏着一条谁也没发现的通道…… Hello hello，各位训练师下午好呀！这段时间，看到大家在PICKCAT上踊跃发言，喵感到非常的开心！[emoji:gif_expression_aduan_jizhang] 你对即将到来的万圣有什么期盼呢？你将如何度过呢？你有什么关于万",
+      "author": {
+        "id": "2e9331bc-8dfb-4818-bb5c-5f7be033b90a",
+        "username": "pigeonxian",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a124ef-0212-745e-9c17-f5c02552fcad",
+          "url": "/api/v1/avatars/01a124ef-0212-745e-9c17-f5c02552fcad"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0e6c6-5bbf-793f-97d1-f57cda4c985e",
+          "slug": "box",
+          "name": "神奇代码岛"
+        },
+        {
+          "id": "01a14932-879f-7474-a366-904d45afc7f5",
+          "slug": "ghost-is-coming",
+          "name": "2026 万圣奇想夜"
+        },
+        {
+          "id": "01a0ab26-84a8-718b-996a-42a29388f3fa",
+          "slug": "events-competitions",
+          "name": "活动与赛事"
+        }
+      ],
+      "replyCount": 60,
+      "viewCount": 253,
+      "likeCount": 26,
+      "bookmarkCount": 6,
+      "closedAt": null,
+      "pinned": true,
+      "pinnedGlobally": true,
+      "pinnedTagId": null,
+      "pinnedAt": "2026-10-17T09:54:13.675Z",
+      "pinnedUntil": null,
+      "createdAt": "2026-10-17T09:51:49.099Z",
+      "editedAt": "2026-10-20T07:49:09.393Z",
+      "lastActivityAt": "2026-10-31T06:22:37.956Z",
+      "reason": "PINNED",
+      "recommendation": {
+        "impressionId": "01a1951e-6777-715b-b013-c059b05ca961"
+      }
+    },
+    {
+      "id": "01a194c3-d1af-7c19-a8cf-ee124eae7418",
+      "title": "鲸鱼娘教你用 API 给 Pickcat 发帖～(非官方·本人账号向)",
+      "kind": "DISCUSSION",
+      "excerpt": "鲸鱼娘教你用 API 给 Pickcat 发帖～(非官方·本人账号向) 呼啦～本鲸鱼娘今天不喷水柱，来教大家怎么用一行命令行，把自己写好的内容发到编程猫的 Pickcat 社区！🐋 ⚠️ 先说正经的：下面是非官方接口（官方没开放文档），随时可能随服务端更新失效；而且用脚本操作社区大概率碰平台 ToS。本鲸只推荐你拿它管理自己账号的内容（定时发自己的作品、导出自家帖子），不要拿去刷量、轰炸别人或者动",
+      "author": {
+        "id": "01a0d338-72f2-731e-a0c5-10724fc89813",
+        "username": "星光",
+        "avatar": {
+          "type": "CUSTOM",
+          "id": "01a1486e-7822-7751-ae30-4e174143e729",
+          "url": "/api/v1/avatars/01a1486e-7822-7751-ae30-4e174143e729"
+        }
+      },
+      "tags": [
+        {
+          "id": "01a0ab26-84a8-718b-996a-3960a4789d05",
+          "slug": "learning-technology",
+          "name": "学习与技术"
+        }
+      ],
+      "replyCount": 4,
+      "viewCount": 18,
+      "likeCount": 3,
+      "bookmarkCount": 0,
+      "closedAt": null,
+      "pinned": false,
+      "pinnedGlobally": false,
+      "pinnedTagId": null,
+      "pinnedAt": null,
+      "pinnedUntil": null,
+      "createdAt": "2026-11-01T01:40:23.573Z",
+      "editedAt": null,
+      "lastActivityAt": "2026-11-01T02:19:33.599Z",
+      "reason": "TRENDING",
+      "recommendation": {
+        "impressionId": "01a1951e-67dd-723f-b993-62047b314b55"
+      }
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "nextCursor": "01a1951e-6771-7194-9976-1b7f4d346bd2.2.c36XqbdPPO_n8UjkYByliiHfuK6KTEjhbsK3rhYHLCs"
+  }
+}
