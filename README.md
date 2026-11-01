@@ -1,7 +1,6 @@
 # PickCat · WinUI 3 Edition
 
 [![Download](https://img.shields.io/badge/⬇_Download_for_Chrome-Latest_release-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
-[![Windows installer](https://img.shields.io/badge/Windows-One--click_installer-0078d4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat)
 
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
@@ -14,17 +13,13 @@
 
 ## Install
 
-**Windows — one click.** Download and double-click
-[`install-windows.bat`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat).
-It downloads the latest build, extracts it to `%LOCALAPPDATA%\PickCatWinUI3`, opens
-`chrome://extensions`, and puts the folder path on your clipboard — then you only turn on
-**Developer mode**, click **Load unpacked**, and press <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+1. Download **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)**
+   and extract it somewhere permanent — **not** a temp folder, Chrome keeps reading those files
+2. Open `chrome://extensions` in Chrome
+3. Turn on **Developer mode** (top right)
+4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
 
-**Any other way — four steps.** Grab
-[`PickCat-WinUI3-extension.zip`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip),
-extract it somewhere permanent, then in Chrome open `chrome://extensions` → enable **Developer mode**
-→ **Load unpacked** → pick the extracted folder (the one with `manifest.json`). Visit
-<https://pickcat.dao3.fun/> and the new UI is already there.
+Visit <https://pickcat.dao3.fun/> and the new UI is already there.
 
 > Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
 
