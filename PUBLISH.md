@@ -14,7 +14,7 @@
 
 ---
 
-## 2. 把 `OWNER/REPO` 替换成你的真实地址
+## 2. 把 `ttummc/pickcat-winui3` 替换成你的真实地址
 
 README 里的徽章和 Releases 链接目前是占位符。在仓库根目录执行（把两个变量改成你的）：
 
@@ -23,7 +23,7 @@ $owner = "你的GitHub用户名"
 $repo  = "pickcat-winui3"
 
 foreach ($f in @("README.md", "STORE.md", "RELEASE_NOTES.md")) {
-  (Get-Content $f -Raw).Replace("OWNER/REPO", "$owner/$repo") |
+  (Get-Content $f -Raw).Replace("ttummc/pickcat-winui3", "$owner/$repo") |
     Set-Content $f -Encoding utf8
 }
 git add -A

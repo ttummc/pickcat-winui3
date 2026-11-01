@@ -1,6 +1,6 @@
 # PickCat · WinUI 3 Edition
 
-[![build](https://github.com/OWNER/REPO/actions/workflows/build.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/build.yml)
+[![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
 > **非官方项目。** 这是粉丝实现，与 PickCat 官方无关，未获其认可或授权。
@@ -13,7 +13,7 @@
 - 形态：Chrome 扩展（MV3），在原站域名下接管窗口
 - 数据：原站真实的 245 个接口（见 [docs/API.md](docs/API.md)）
 
-**安装**：见下方「安装（开发版）」，或直接下载 [Releases](https://github.com/OWNER/REPO/releases) 里的 `PickCat-WinUI3-extension.zip`。
+**安装**：见下方「安装（开发版）」，或直接下载 [Releases](https://github.com/ttummc/pickcat-winui3/releases) 里的 `PickCat-WinUI3-extension.zip`。
 
 ---
 
