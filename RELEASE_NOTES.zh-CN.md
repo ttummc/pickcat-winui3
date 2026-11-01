@@ -6,7 +6,13 @@
 
 ## 安装
 
-1. 下载下方 `PickCat-WinUI3-extension.zip` 并解压到任意目录（**不要**放在会被清理的临时目录）
+**Windows —— 一键。** 下载 [`install-windows.bat`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat) 并双击：
+它会自动下载、解压到 `%LOCALAPPDATA%\PickCatWinUI3`、打开扩展页，并把路径放进剪贴板。
+之后开启「开发者模式」→「加载已解压的扩展程序」→ <kbd>Ctrl</kbd>+<kbd>V</kbd> 即可。
+
+**手动 —— 四步。**
+
+1. 下载 [PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip) 并解压到固定目录（**不要**放在会被清理的临时目录）
 2. Chrome 打开 `chrome://extensions`
 3. 右上角开启「开发者模式」
 4. 点「加载已解压的扩展程序」，选择解压出来的目录（含 `manifest.json` 那一层）

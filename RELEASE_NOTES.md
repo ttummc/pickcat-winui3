@@ -5,12 +5,26 @@ application that looks and feels like Windows 11.
 
 ## Install
 
-1. Download `PickCat-WinUI3-extension.zip` below and extract it somewhere permanent
+### Windows — one click
+
+Download **[install-windows.bat](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat)** and double-click it.
+
+It downloads the latest build, extracts it to `%LOCALAPPDATA%\PickCatWinUI3`, opens
+`chrome://extensions`, and copies the folder path to your clipboard. Then:
+
+1. Turn on **Developer mode** (top right)
+2. Click **Load unpacked**
+3. Press <kbd>Ctrl</kbd>+<kbd>V</kbd> and confirm
+
+### Any platform — four steps
+
+1. Download **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)** and extract it somewhere permanent
    (do **not** leave it in a temp folder — Chrome needs the files to stay put)
 2. Open `chrome://extensions`
 3. Enable **Developer mode** (top right)
 4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
-5. Open <https://pickcat.dao3.fun/> — the new UI is already there
+
+Then open <https://pickcat.dao3.fun/> — the new UI is already there.
 
 > Only active on `pickcat.dao3.fun`. Disable the extension and the original site returns.
 

@@ -1,5 +1,8 @@
 # PickCat · WinUI 3 Edition
 
+[![Download](https://img.shields.io/badge/⬇_Download_for_Chrome-Latest_release-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
+[![Windows installer](https://img.shields.io/badge/Windows-One--click_installer-0078d4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat)
+
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
@@ -8,6 +11,22 @@
 > **Unofficial project.** This is a fan-made client. It is not affiliated with, endorsed by, or
 > authorised by PickCat. It only activates on `pickcat.dao3.fun` and collects no user data
 > (see [PRIVACY.md](PRIVACY.md)).
+
+## Install
+
+**Windows — one click.** Download and double-click
+[`install-windows.bat`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat).
+It downloads the latest build, extracts it to `%LOCALAPPDATA%\PickCatWinUI3`, opens
+`chrome://extensions`, and puts the folder path on your clipboard — then you only turn on
+**Developer mode**, click **Load unpacked**, and press <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+
+**Any other way — four steps.** Grab
+[`PickCat-WinUI3-extension.zip`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip),
+extract it somewhere permanent, then in Chrome open `chrome://extensions` → enable **Developer mode**
+→ **Load unpacked** → pick the extracted folder (the one with `manifest.json`). Visit
+<https://pickcat.dao3.fun/> and the new UI is already there.
+
+> Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
 
 PickCat's community site, **rebuilt from scratch as a Windows 11 style application**. This is not a
 reskin: the original UI is dropped entirely and replaced with a new interface written against the

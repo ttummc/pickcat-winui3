@@ -45,5 +45,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: PickCat-WinUI3-extension.zip
+          files: |
+            PickCat-WinUI3-extension.zip
+            install-windows.bat
           body_path: RELEASE_NOTES.md

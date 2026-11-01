@@ -2,11 +2,27 @@
 
 [English](README.md) · **简体中文**
 
+[![下载](https://img.shields.io/badge/⬇_下载_for_Chrome-最新版本-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
+[![Windows 安装器](https://img.shields.io/badge/Windows-一键安装-0078d4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat)
+
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
 > **非官方项目。** 这是粉丝实现，与 PickCat 官方无关，未获其认可或授权。
 > 只在 `pickcat.dao3.fun` 上生效，不收集任何用户数据（见 [PRIVACY.md](PRIVACY.md)）。
+
+## 安装
+
+**Windows —— 一键。** 下载 [`install-windows.bat`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/install-windows.bat) 并双击。
+
+它会自动下载最新构建、解压到 `%LOCALAPPDATA%\PickCatWinUI3`、打开 `chrome://extensions`，
+并把目录路径放进剪贴板 —— 你只需要开启**开发者模式**、点**加载已解压的扩展程序**，然后 <kbd>Ctrl</kbd>+<kbd>V</kbd>。
+
+**其他方式 —— 四步。** 下载 [`PickCat-WinUI3-extension.zip`](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
+并解压到一个固定目录，打开 `chrome://extensions` → 开启**开发者模式** → **加载已解压的扩展程序**
+→ 选择含 `manifest.json` 的那一层。然后访问 <https://pickcat.dao3.fun/> 就是新界面。
+
+> 只在 `pickcat.dao3.fun` 生效；关掉扩展就回到原站。
 
 把 [PickCat](https://pickcat.dao3.fun/) 社区**从零重做成一个 WinUI 3 风格的应用**——
 不是给原站套一层皮，而是把原站的 UI 整个丢掉，用扒下来的 API 重新写一套界面。
