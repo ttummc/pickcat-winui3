@@ -35,6 +35,11 @@ jobs:
           cd ../..
           ls -lh PickCat-WinUI3-extension.zip
 
+      - name: Checksum
+        run: |
+          sha256sum PickCat-WinUI3-extension.zip | tee SHA256SUMS.txt
+          wc -c PickCat-WinUI3-extension.zip >> SHA256SUMS.txt
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -53,4 +58,5 @@ jobs:
         with:
           files: |
             PickCat-WinUI3-extension.zip
+            SHA256SUMS.txt
           body_path: RELEASE_NOTES.md
