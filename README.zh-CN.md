@@ -3,6 +3,7 @@
 [English](README.md) · **简体中文**
 
 [![下载](https://img.shields.io/badge/⬇_下载_for_Chrome-最新版本-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
+[![安装教程](https://img.shields.io/badge/%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B-%E5%9B%BE%E6%96%87%E6%AD%A5%E9%AA%A4-2ea043?style=for-the-badge)](https://kitter.cn/pickcat-winui3/)
 
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
@@ -19,6 +20,8 @@
 4. 点「加载已解压的扩展程序」，选择解压出来的目录（含 `manifest.json` 那一层）
 
 访问 <https://pickcat.dao3.fun/> 就是新界面。
+
+> 想要带截图的分步教程？**<https://kitter.cn/pickcat-winui3/>** 有五步图文说明。
 
 > 只在 `pickcat.dao3.fun` 生效；关掉扩展就回到原站。
 

@@ -15,6 +15,8 @@ application that looks and feels like Windows 11.
 
 Then open <https://pickcat.dao3.fun/> — the new UI is already there.
 
+> Step-by-step guide with screenshots: <https://kitter.cn/pickcat-winui3/>
+
 > Only active on `pickcat.dao3.fun`. Disable the extension and the original site returns.
 
 ## What's in it

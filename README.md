@@ -1,6 +1,7 @@
 # PickCat · WinUI 3 Edition
 
 [![Download](https://img.shields.io/badge/⬇_Download_for_Chrome-Latest_release-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
+[![Install guide](https://img.shields.io/badge/Install_guide-Step--by--step_with_screenshots-2ea043?style=for-the-badge)](https://kitter.cn/pickcat-winui3/)
 
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
@@ -20,6 +21,9 @@
 4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
 
 Visit <https://pickcat.dao3.fun/> and the new UI is already there.
+
+> Prefer a page with screenshots and step-by-step instructions?
+> **<https://kitter.cn/pickcat-winui3/>** walks through it in five steps.
 
 > Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
 
