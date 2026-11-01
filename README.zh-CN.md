@@ -13,17 +13,21 @@
 
 ## 安装
 
-1. 下载 **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)**，
-   解压到一个**固定目录**（不要放在会被清理的临时目录，Chrome 之后还要持续读这些文件）
-2. Chrome 打开 `chrome://extensions`
-3. 右上角开启「开发者模式」
-4. 点「加载已解压的扩展程序」，选择解压出来的目录（含 `manifest.json` 那一层）
+1. 下载 **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)**
+2. 解压到**用户文件夹**里的固定位置，例如 `C:\Users\<你的用户名>\PickCatWinUI3`。
+   **不要**放 `C:\Program Files` —— 那是受保护目录，Chrome 会报
+   `rules.json: Internal error while parsing rules`；也不要放「下载」或同步目录
+3. Chrome 打开 `chrome://extensions`
+4. 右上角开启「开发者模式」
+5. 点「加载已解压的扩展程序」，选中**直接包含 `manifest.json`** 的那一层文件夹
 
 访问 <https://pickcat.dao3.fun/> 就是新界面。
 
-> 想要带截图的分步教程？**<https://kitter.cn/pickcat-winui3/>** 有五步图文说明。
-
 > 只在 `pickcat.dao3.fun` 生效；关掉扩展就回到原站。
+
+📖 **[完整安装说明](docs/INSTALL.zh-CN.md)** —— 目录结构、每一种报错的原因与解决、更新、卸载。
+
+> 想要带截图的分步教程？**<https://kitter.cn/pickcat-winui3/>** 有五步图文说明。
 
 把 [PickCat](https://pickcat.dao3.fun/) 社区**从零重做成一个 WinUI 3 风格的应用**——
 不是给原站套一层皮，而是把原站的 UI 整个丢掉，用扒下来的 API 重新写一套界面。

@@ -15,17 +15,22 @@
 ## Install
 
 1. Download **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)**
-   and extract it somewhere permanent — **not** a temp folder, Chrome keeps reading those files
-2. Open `chrome://extensions` in Chrome
-3. Turn on **Developer mode** (top right)
-4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
+2. Extract it into a folder **inside your user profile**, e.g. `C:\Users\<your-name>\PickCatWinUI3`.
+   **Not** `C:\Program Files` — it is protected, and Chrome fails there with
+   `rules.json: Internal error while parsing rules`. Not `Downloads` either, and not a synced folder
+3. Open `chrome://extensions` in Chrome
+4. Turn on **Developer mode** (top right)
+5. Click **Load unpacked** and select the folder that **directly contains `manifest.json`**
 
 Visit <https://pickcat.dao3.fun/> and the new UI is already there.
 
+> Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
+
+📖 **[Full installation guide](docs/INSTALL.md)** — folder layout, every error message and its fix,
+updating, uninstalling.
+
 > Prefer a page with screenshots and step-by-step instructions?
 > **<https://kitter.cn/pickcat-winui3/>** walks through it in five steps.
-
-> Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
 
 PickCat's community site, **rebuilt from scratch as a Windows 11 style application**. This is not a
 reskin: the original UI is dropped entirely and replaced with a new interface written against the
