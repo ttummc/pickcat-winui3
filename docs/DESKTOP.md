@@ -100,6 +100,112 @@ CORS 问题在代理层解决掉。
 
 ---
 
+## 2.5 窗口形态：全自绘（frameless）
+
+目标形态：**里面只有一个浏览器内核，连标题栏和三颗按钮都由我们自己画。**
+
+```
+┌──────────────────────────────────────────────┐
+│  ▣ PickCat  社区首页        ─    □    ✕      │  ← 我们的 TitleBar 组件（网页画的）
+├──────────┬───────────────────────────────────┤
+│ 首页     │                                   │
+│ 论坛     │        WebView2 渲染区            │  ← 浏览器内核
+│ 作品     │   （同一个 Vue 应用，同一份代码）  │
+│ 搜索     │                                   │
+└──────────┴───────────────────────────────────┘
+```
+
+### 为什么要这么做
+
+| | 系统标题栏 | **全自绘** |
+| --- | --- | --- |
+| 外观一致性 | 系统画，和网页部分风格可能割裂 | 和界面完全一致（同一个设计系统） |
+| 主题联动 | 需要单独调 `AppWindow.TitleBar` 颜色 | 跟随网页主题，深/浅色自动同步 |
+| 品牌感 | 弱 | 强 |
+| 代价 | 无 | 要自己实现拖动、双击最大化、Snap Layouts |
+
+### 关键点：全自绘不等于放弃系统行为
+
+这是最容易踩坑的地方。**按钮画在我们这边，但行为必须交给系统**，否则会丢失：
+
+- 拖动窗口
+- 双击最大化 / 还原
+- 贴边分屏、Snap Layouts 悬停弹出
+- 边缘缩放
+- 最大化时的 8px 留白与圆角
+
+Windows App SDK 1.4+ 提供了 **`InputNonClientPointerSource`**，可以告诉系统「这块区域属于标题栏」，
+系统就会按原生行为处理，**即使按钮是我们画的**：
+
+```csharp
+var source = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+
+source.SetRegionRects(NonClientRegionKind.Caption, new[] {
+    new RectInt32(0, 0, width, titleBarHeight)   // 整条标题栏 = 可拖动
+});
+
+source.SetRegionRects(NonClientRegionKind.Minimize,  minimizeRect);
+source.SetRegionRects(NonClientRegionKind.Maximize,  maximizeRect);  // ← Snap Layouts 靠它
+source.SetRegionRects(NonClientRegionKind.Close,     closeRect);
+```
+
+关键在 `Maximize`：把矩形登记成系统认的「最大化块」后，鼠标悬停时 Windows 会**自己弹出
+Snap Layouts 面板**，点击也由系统执行 —— 我们只需要把按钮画在那儿。
+
+> 纯 `SetTitleBar(element)` 的方案在这里不适用：WebView2 是整块控件，拿不到边缘区域的命中测试，
+> 必须用 `InputNonClientPointerSource` 划分区域。
+
+### 三颗按钮怎么接
+
+网页里的按钮不能直接操作窗口，通过 WebView2 的消息桥：
+
+```
+网页 TitleBar 按钮
+   │  window.chrome.webview.postMessage({ type: 'pc:capp', action: 'minimize' })
+   ↓
+MainWindow.WebMessageReceived
+   │
+   ├─ minimize → AppWindow.  (系统 caption 行为，或直接 SetPresenterState)
+   ├─ maximize → 切换 Max/Default 状态
+   └─ close    → Close()
+```
+
+前端只需要在 `TitleBar` 组件里判断宿主：
+
+```ts
+const host = (window as any).chrome?.webview
+function onMinimize() {
+  if (host) host.postMessage({ type: 'pc:capp', action: 'minimize' })
+  else notify('最小化', '请使用浏览器窗口控件')   // 扩展里保留原提示
+}
+```
+
+这样**同一份前端代码**，在扩展里点按钮弹提示，在桌面版里真的最小化窗口。
+
+### 要补的细节（都是老坑）
+
+| 项目 | 说明 |
+| --- | --- |
+| 最大化留白 | 最大化时窗口会有 8px 不可见边框，标题栏内容要 `padding-top` 补偿，否则会被裁掉 |
+| 拖拽区域 | 标题栏里**可交互元素**（头像、按钮、搜索框）必须从 Caption 区域里挖掉，否则点不动 |
+| 双击最大化 | 登记了 Caption 区域后系统自动处理，不用自己写 |
+| 边缘缩放 | `AppWindow` 保持可缩放即可；全屏 WebView2 不会吃掉边缘，因为系统在处理非客户区 |
+| 圆角 | Win11 自动给；自定义背景色时注意 `CornerRadius` 不被 WebView2 盖住 |
+| Mica | WebView2 必须设 `DefaultBackgroundColor = Transparent` 才能透出 Mica；但网页本身有不透明背景，所以**实际看不到 Mica** —— 想要 Mica 只能做「标题栏 Mica + 内容区不透明」 |
+| 高 DPI | 区域矩形是物理像素，要用 `XamlRoot.RasterizationScale` 换算 |
+
+### 与模式 A/B 的关系
+
+不冲突。窗口形态（全自绘）和内容托管方式（注入 / 本地代理）是两个正交的选择：
+
+```
+              注入模式 A        本地模式 B
+全自绘窗口  ◀── 推荐首版 ──▶      以后可选
+系统标题栏     也能用            也能用
+```
+
+---
+
 ## 3. 扩展 API → WebView2 API 对照
 
 | 现在（扩展） | 桌面版（WebView2） |
@@ -196,9 +302,11 @@ if (isNativeHost) document.documentElement.classList.add('pc-native-host')
 
 | 问题 | 答案 |
 | --- | --- |
-| 前端要重写吗 | **不用**，只加一个「原生宿主」样式开关 |
+| 前端要重写吗 | **不用**，只加「原生宿主」判断（隐藏假标题栏 → 改用宿主标题栏 / 按钮接桥） |
 | 推荐技术栈 | **WinUI 3（C#）+ WebView2** |
-| 第一版形态 | 模式 A（注入），复用现有 `content.js` |
+| 窗口形态 | **全自绘**：`ExtendsContentIntoTitleBar` + `InputNonClientPointerSource` |
+| 标题栏谁画 | 我们画（复用现有 `TitleBar` 组件），行为交给系统 |
+| 第一版内容托管 | 模式 A（注入），复用现有 `content.js` |
 | 多久能出一个能跑的窗口 | **半天**（P0） |
 | 多久能发给别人用 | **4–6 天**（含打包签名） |
 
