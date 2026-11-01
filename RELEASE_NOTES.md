@@ -1,34 +1,41 @@
 # v1.0.0
 
-第一个可用版本：把 [PickCat](https://pickcat.dao3.fun/) 的网页界面整个换掉，重写成 Windows 11 风格的应用。
+First usable release: [PickCat](https://pickcat.dao3.fun/)'s web UI is replaced entirely with an
+application that looks and feels like Windows 11.
 
-## 安装
+## Install
 
-1. 下载下方 `PickCat-WinUI3-extension.zip` 并解压到任意目录（**不要**放在会被清理的临时目录）
-2. Chrome 打开 `chrome://extensions`
-3. 右上角开启「开发者模式」
-4. 点「加载已解压的扩展程序」，选择解压出来的目录（含 `manifest.json` 那一层）
-5. 打开 <https://pickcat.dao3.fun/> —— 已经是新界面
+1. Download `PickCat-WinUI3-extension.zip` below and extract it somewhere permanent
+   (do **not** leave it in a temp folder — Chrome needs the files to stay put)
+2. Open `chrome://extensions`
+3. Enable **Developer mode** (top right)
+4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
+5. Open <https://pickcat.dao3.fun/> — the new UI is already there
 
-> 只在 `pickcat.dao3.fun` 生效。关掉扩展即恢复原站。
+> Only active on `pickcat.dao3.fun`. Disable the extension and the original site returns.
 
-## 这个版本有什么
+## What's in it
 
-- **原生 WinUI 控件**：`TitleBar`、`NavigationView`、`SelectorBar`、`SettingsCard`、`ContentDialog`、`MenuFlyout`、`PipsPager`、`Expander`、`PersonPicture`、`InfoBar`、`ProgressRing`…
-- **页面过渡**：进入下一层从右滑入、返回反向退出、同级淡入；列表逐条上浮
-- **右键菜单全接管**：卡片操作 / 复制选中文字 / 页面操作（含空白处）
-- **Markdown 编辑器**：工具栏 + 快捷键（Ctrl+B/I/E/K）+ 实时预览 + 字数统计
-- **主题**：浅色 / 深色 / 跟随系统，四套强调色
-- **13 个页面**：首页、论坛、分类、帖子详情、发帖、作品、作品详情、个人主页、通知、搜索、个人图盘、个人作品库、设置
+- **Real WinUI controls**: `TitleBar`, `NavigationView`, `SelectorBar`, `SettingsCard`,
+  `ContentDialog`, `MenuFlyout`, `PipsPager`, `Expander`, `PersonPicture`, `InfoBar`, `ProgressRing`
+- **Page transitions**: drill-in slides from the right, back slides from the left, siblings fade;
+  list items rise in staggered
+- **Context menu everywhere**: card actions, "copy selected text", page actions — including on empty space
+- **Markdown editor**: toolbar, shortcuts (Ctrl+B/I/E/K), live preview, character/word count
+- **Themes**: light / dark / follow system, four accent colours
+- **14 pages**: home, forum, category, topic, compose, works, work detail, profile, notifications,
+  search, personal file board, personal library, settings, sign-in
 
-## 已知限制
+## Known limitations
 
-- 需要登录的页面（发帖、通知、图盘）必须先登录；登录会弹出阿里云滑块
-- 未重做的页面（注册、找回密码、圈子、创作、入站考试、管理后台）会显示「这个页面还没重做」，并提供「在原站打开」
-- 登录态、数据全部来自官方接口，本扩展不存储任何用户数据
+- Pages that need an account (compose, notifications, file board) require signing in first; sign-in
+  shows an Aliyun slider CAPTCHA
+- Pages that have not been rebuilt (register, password reset, circles, create, entrance exam,
+  moderation) show "this page has not been rebuilt yet" with an **Open on the original site** button
+- All data and sessions come from the official API; the extension stores no user data
 
-## 许可
+## Licence
 
-GPL-3.0。界面控件来自 [WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb)（GPL-3.0）。
+GPL-3.0. The UI controls come from [WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb) (GPL-3.0).
 
-本项目是非官方粉丝实现，与 PickCat 官方无关。
+Unofficial fan project. Not affiliated with PickCat.
