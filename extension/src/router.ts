@@ -31,6 +31,8 @@ const PATTERNS: { name: RouteName; segments: string[] }[] = [
   { name: 'forum', segments: ['forum'] },
   { name: 'category', segments: ['forum', 'category', ':id'] },
   { name: 'topic', segments: ['forum', 'post', ':id'] },
+  // Deep link to a floor, used by notifications.
+  { name: 'topic', segments: ['forum', 'post', ':id', ':postNumber'] },
   { name: 'compose', segments: ['forum', 'editor'] },
   { name: 'works', segments: ['works'] },
   { name: 'work', segments: ['works', ':id'] },

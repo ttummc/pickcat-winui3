@@ -1062,3 +1062,20 @@ html.pc-mounted body > *:not(#pickcat-root) {
   font-size: 12px;
   color: var(--text-tertiary);
 }
+
+
+/* Landing on a specific floor from a notification: hold the accent ring while the
+   floor is highlighted, then fade out when the class is removed. */
+.pc-post--flash {
+  border-color: color-mix(in srgb, var(--pc-accent, #ff6b60) 65%, transparent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pc-accent, #ff6b60) 45%, transparent);
+  transition:
+    box-shadow 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    border-color 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.pc-post {
+  transition:
+    box-shadow 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    border-color 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}

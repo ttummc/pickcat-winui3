@@ -174,6 +174,12 @@ function onNavInvoked(_sender: unknown, args: unknown): void {
       ? item
       : ((item?.Tag ?? item?.tag ?? payload.Tag) as string | undefined)
   if (!tag) return
+
+  // The NavigationView reflects the current route, so navigating already changes
+  // its selection and fires SelectionChanged again. Without this guard a jump
+  // from Notifications to a topic bounced through '/forum' and lost the topic.
+  if (tag === activeSection.value) return
+
   if (tag === 'home') navigate('/')
   else if (tag === 'forum') navigate('/forum')
   else if (tag === 'works') navigate('/works')

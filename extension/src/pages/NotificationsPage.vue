@@ -100,7 +100,10 @@ async function markAllRead(): Promise<void> {
 }
 
 function target(item: NotificationItem): string {
-  if (item.topic?.id) return `/forum/post/${item.topic.id}`
+  if (item.topic?.id) {
+    const floor = item.post?.postNumber
+    return floor ? `/forum/post/${item.topic.id}/${floor}` : `/forum/post/${item.topic.id}`
+  }
   if (item.work?.id) return `/works/${item.work.id}`
   return ''
 }

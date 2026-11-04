@@ -55,8 +55,55 @@ function seedPost(post: Post): void {
   likeCounts.value[post.id] = post.likeCount ?? 0
 }
 
-onMounted(load)
-watch(topicId, load)
+onMounted(async () => {
+  await load()
+  await scrollToFloor()
+})
+watch(topicId, async () => {
+  await load()
+  await scrollToFloor()
+})
+
+/**
+ * Notifications deep-link to a floor (/forum/post/<id>/<n>). Right after the
+ * replies are rendered, jump to it and flash it so the user can see which one it
+ * was, instead of landing at the top of the thread.
+ */
+const highlighted = ref<number | null>(null)
+
+async function scrollToFloor(): Promise<void> {
+  const raw = route.params.postNumber
+  const floor = Number(raw)
+  if (!raw || !Number.isFinite(floor)) return
+
+  const jump = (): boolean => {
+    const el = document.getElementById(`pc-post-${floor}`)
+    const scroller = document.querySelector('#pickcat-root .pc-page-scroll') as HTMLElement | null
+    if (!el || !scroller) return false
+    // offsetTop is relative to `win-nav-content`, not to the scroll container, so
+    // measure with rects instead.
+    const top = scroller.scrollTop + (el.getBoundingClientRect().top - scroller.getBoundingClientRect().top) - 96
+    scroller.scrollTop = Math.max(0, top)
+    return true
+  }
+
+  // The thread keeps growing while images and quotes settle, which pushed the
+  // target out of view again; re-apply a few times instead of trusting one jump.
+  await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+  if (!jump()) {
+    await new Promise((resolve) => setTimeout(resolve, 240))
+    if (!jump()) return
+  }
+  for (const delay of [120, 360, 700]) {
+    await new Promise((resolve) => setTimeout(resolve, delay))
+    jump()
+  }
+
+  highlighted.value = floor
+  window.setTimeout(() => {
+    if (highlighted.value === floor) highlighted.value = null
+  }, 3200)
+}
 
 async function toggleLike(post: Post): Promise<void> {
   if (!sessionState.user) {
@@ -245,7 +292,7 @@ async function submitReport(reasonCode: string): Promise<void> {
           </div>
         </header>
 
-        <article v-if="topic.firstPost" class="pc-card pc-post">
+        <article v-if="topic.firstPost" :id="`pc-post-${topic.firstPost.postNumber}`" class="pc-card pc-post">
           <div class="pc-post-head">
             <AuthorChip :user="topic.firstPost.author" :size="36" />
             <span class="pc-grow" />
@@ -280,7 +327,13 @@ async function submitReport(reasonCode: string): Promise<void> {
         />
 
         <div v-else class="pc-replies">
-          <article v-for="post in posts" :key="post.id" class="pc-card pc-post">
+          <article
+            v-for="post in posts"
+            :id="`pc-post-${post.postNumber}`"
+            :key="post.id"
+            class="pc-card pc-post"
+            :class="{ 'pc-post--flash': highlighted === post.postNumber }"
+          >
             <div class="pc-post-head">
               <AuthorChip :user="post.author" :size="32" />
               <span class="pc-grow" />
