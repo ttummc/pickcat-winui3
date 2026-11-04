@@ -235,6 +235,14 @@ export interface NotificationItem {
   post?: { id: string; postNumber: number } | null
   work?: { id: string; workName: string } | null
   payload?: Record<string, unknown>
+  /** The API actually nests actor/topic/post/work in here. */
+  details?: {
+    actor?: UserRef | null
+    topic?: { id: string; title: string } | null
+    post?: { id?: string; postNumber?: number } | null
+    work?: { id: string; workName: string } | null
+    [key: string]: unknown
+  } | null
 }
 
 export interface LevelProgress {

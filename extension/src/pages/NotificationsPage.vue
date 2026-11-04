@@ -47,6 +47,21 @@ const TYPE_GLYPH: Record<string, string> = {
 
 const typeGlyph = (type: string): string => TYPE_GLYPH[type] ?? '\uE946'
 
+/**
+ * The payload puts the actors and targets under `details`, but the flat shape was
+ * assumed here, so every row rendered "系统". Flatten it once, at the boundary.
+ */
+function normalize(item: NotificationItem): NotificationItem {
+  const d = item.details ?? {}
+  return {
+    ...item,
+    actor: item.actor ?? d.actor ?? null,
+    topic: item.topic ?? d.topic ?? null,
+    work: item.work ?? d.work ?? null,
+    post: item.post ?? (d.post as NotificationItem['post']) ?? null,
+  }
+}
+
 const unread = computed(() => summary.value?.unreadCount ?? 0)
 
 async function load(): Promise<void> {
@@ -61,7 +76,7 @@ async function load(): Promise<void> {
       api.get<Page<NotificationItem>>('/notifications', { limit: 20 }),
       api.get<NotificationSummary>('/notification-summary'),
     ])
-    items.value = page.items ?? []
+    items.value = (page.items ?? []).map(normalize)
     summary.value = sum
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
@@ -149,6 +164,7 @@ onMounted(load)
           </div>
           <p v-if="item.topic?.title || item.work?.workName" class="pc-feed-excerpt" style="margin: 0">
             {{ item.topic?.title || item.work?.workName }}
+            <span v-if="item.post?.postNumber" class="pc-notif-post">#{{ item.post.postNumber }}</span>
           </p>
         </article>
       </div>
