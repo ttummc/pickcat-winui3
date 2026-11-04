@@ -129,11 +129,28 @@
     font-size: 13.5px; color: var(--text);
   }
 
-  /* shots gallery */
-  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-  .gallery figure { margin: 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
-  .gallery img { display: block; width: 100%; }
-  .gallery figcaption { padding: 8px 12px; font-size: 12.5px; color: var(--muted); }
+  /* showcase */
+  .showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+  }
+  .showcase-item { margin: 0; }
+  .showcase-item a { display: block; text-decoration: none; color: inherit; }
+  .showcase-frame {
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: 0 14px 40px #0000004d;
+    transition: transform 160ms var(--ease), border-color 160ms var(--ease);
+  }
+  .showcase-item a:hover .showcase-frame { transform: translateY(-3px); border-color: #ffffff33; }
+  .showcase-frame img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top center; }
+  .showcase-item figcaption { display: flex; align-items: baseline; gap: 8px; padding: 9px 2px 0; font-size: 12.5px; }
+  .showcase-item figcaption b { font-size: 13px; font-weight: 600; }
+  .showcase-item figcaption span { color: var(--muted); }
 
   /* faq */
   details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 8px; }
@@ -273,13 +290,57 @@
   </section>
 
   <section id="shots">
-    <h2>界面</h2>
-    <p class="sub">深色主题，实际渲染截图。</p>
-    <div class="gallery">
-      <figure><img src="store/screenshot-1.png" alt="首页" loading="lazy"><figcaption>首页信息流</figcaption></figure>
-      <figure><img src="store/screenshot-2.png" alt="帖子详情" loading="lazy"><figcaption>帖子详情</figcaption></figure>
-      <figure><img src="store/screenshot-3.png" alt="作品" loading="lazy"><figcaption>作品</figcaption></figure>
-      <figure><img src="store/screenshot-4.png" alt="设置" loading="lazy"><figcaption>设置</figcaption></figure>
+    <h2>界面展示</h2>
+    <p class="sub">全部是当前版本的实际渲染截图，点开可看原图。</p>
+    <div class="showcase">
+      <figure class="showcase-item">
+        <a href="screenshots/site/home.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/home.png" alt="首页" loading="lazy"></span>
+          <figcaption><b>首页</b><span>推荐 / 最新信息流，卡片逐条入场</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/forum.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/forum.png" alt="论坛" loading="lazy"></span>
+          <figcaption><b>论坛</b><span>分类、标签与活跃度</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/topic.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/topic.png" alt="帖子详情" loading="lazy"></span>
+          <figcaption><b>帖子详情</b><span>正文、楼层、点赞与举报</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/works.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/works.png" alt="作品" loading="lazy"></span>
+          <figcaption><b>作品</b><span>精选轮播 + 发现</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/work.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/work.png" alt="作品详情" loading="lazy"></span>
+          <figcaption><b>作品详情</b><span>点赞、收藏、评论互动</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/profile.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/profile.png" alt="个人主页" loading="lazy"></span>
+          <figcaption><b>个人主页</b><span>左卡片 + 右侧内容，贡献热力图</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/search.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/search.png" alt="搜索" loading="lazy"></span>
+          <figcaption><b>搜索</b><span>用户与作品</span></figcaption>
+        </a>
+      </figure>
+      <figure class="showcase-item">
+        <a href="screenshots/site/settings.png" target="_blank" rel="noopener">
+          <span class="showcase-frame"><img src="screenshots/site/settings.png" alt="设置" loading="lazy"></span>
+          <figcaption><b>设置</b><span>主题、强调色、账户</span></figcaption>
+        </a>
+      </figure>
     </div>
   </section>
 

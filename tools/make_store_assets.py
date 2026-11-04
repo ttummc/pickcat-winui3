@@ -94,7 +94,7 @@ d.text((72 * SS, 250 * SS), "不是换皮，是重写整个窗口", font=F(F_CJK
 d.text((72 * SS, 292 * SS), "18 个原生 WinUI 控件 · 245 个接口 · 非官方实现", font=F(F_CJK, 18), fill=(*MUTED, 255))
 d.rounded_rectangle([72 * SS, 336 * SS, 240 * SS, 342 * SS], radius=3 * SS, fill=(*ACCENT, 255))
 
-shot = Image.open("docs/screenshots/live/home.png").convert("RGB")
+shot = Image.open("docs/screenshots/site/home.png").convert("RGB")
 tw, th = 620, 388
 thumb = shot.resize((tw * SS, th * SS), Image.LANCZOS)
 thumb, mask = rounded(thumb, 12 * SS)
@@ -112,11 +112,11 @@ mar.convert("RGB").resize((W, H), Image.LANCZOS).save("docs/store/marquee-1400x5
 
 # ---------------------------------------------------------------- screenshots 1280x800
 shots = [
-    ("home", "docs/screenshots/live/home.png"),
-    ("topic", "docs/screenshots/live/topic.png"),
-    ("works", "docs/screenshots/live/works.png"),
-    ("settings-light", "docs/screenshots/live/settings.png"),
-    ("forum", "docs/screenshots/live/forum.png"),
+    ("home", "docs/screenshots/site/home.png"),
+    ("topic", "docs/screenshots/site/topic.png"),
+    ("works", "docs/screenshots/site/works.png"),
+    ("settings-light", "docs/screenshots/site/settings.png"),
+    ("forum", "docs/screenshots/site/forum.png"),
 ]
 for i, (name, path) in enumerate(shots, start=1):
     if not os.path.exists(path):
