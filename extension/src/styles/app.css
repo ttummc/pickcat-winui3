@@ -1132,3 +1132,56 @@ html.pc-mounted body > *:not(#pickcat-root) {
   color: var(--text-secondary);
   flex: 0 0 auto;
 }
+
+/* ---------------------------------------------------------------- scrollbars
+
+   Chrome on Windows 11 draws the Fluent scrollbar with arrow buttons, which
+   showed up as a chunky column right next to the SelectorBar. WinUI hides
+   scrollbars until hover and never draws arrows, so thin the thumb down and
+   remove the buttons everywhere inside our surface. */
+#pickcat-root,
+#pickcat-root * {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 26%, transparent) transparent;
+}
+
+#pickcat-root ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+#pickcat-root ::-webkit-scrollbar-track,
+#pickcat-root ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+#pickcat-root ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+#pickcat-root ::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-primary) 38%, transparent);
+  background-clip: content-box;
+}
+
+#pickcat-root ::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* the tab strip itself must never scroll */
+.pc-selector {
+  overflow: hidden;
+}
+/* Work comments: the "reply to #N" hint above a comment body. */
+.pc-comment-replyto {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-left: 2px solid color-mix(in srgb, var(--pc-accent, #ff6b60) 55%, transparent);
+  border-radius: 2px;
+  margin-bottom: 2px;
+}

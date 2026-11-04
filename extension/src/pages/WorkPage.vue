@@ -7,7 +7,12 @@ import { route, navigate } from '@/router'
 import { relativeTime, compactNumber } from '@/lib/format'
 import { notify, notifyError } from '@/stores/ui'
 import { sessionState } from '@/stores/session'
-import { setWorkLike, setWorkFavorite } from '@/api/interactions'
+import {
+  setWorkLike,
+  setWorkFavorite,
+  setWorkCommentLike,
+  deleteWorkComment,
+} from '@/api/interactions'
 import AuthorChip from '@/components/AuthorChip.vue'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -28,6 +33,7 @@ async function load(): Promise<void> {
     work.value = await api.get<Work>(`/works/${workId.value}`)
     const page = await api.get<Page<WorkComment>>(`/works/${workId.value}/comments`, { limit: 30 })
     comments.value = page.items ?? []
+    for (const comment of comments.value) seedComment(comment)
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
     work.value = null
@@ -52,8 +58,12 @@ async function submitComment(): Promise<void> {
   }
   submitting.value = true
   try {
-    await api.post(`/works/${workId.value}/comments`, { markdown, replyToCommentNumber: null })
+    await api.post(`/works/${workId.value}/comments`, {
+      markdown,
+      replyToCommentNumber: replyToComment.value?.commentNumber ?? null,
+    })
     commentText.value = ''
+    replyToComment.value = null
     notify('已发布', '评论已发送', 'Success')
     await load()
   } catch (err) {
@@ -68,6 +78,60 @@ async function submitComment(): Promise<void> {
 const liked = ref(false)
 const favorited = ref(false)
 const likeCount = ref(0)
+
+// ---------------------------------------------------------------- comments
+
+const commentLikes = ref<Record<number, boolean>>({})
+const commentLikeCounts = ref<Record<string, number>>({})
+const replyToComment = ref<WorkComment | null>(null)
+const deletingComment = ref<number | null>(null)
+
+function seedComment(comment: WorkComment): void {
+  commentLikes.value[comment.commentNumber] = Boolean(comment.viewerState?.liked)
+  commentLikeCounts.value[comment.commentNumber] = comment.likeCount ?? 0
+}
+
+async function toggleCommentLike(comment: WorkComment): Promise<void> {
+  if (!sessionState.user) {
+    navigate('/login')
+    return
+  }
+  const n = comment.commentNumber
+  const next = !commentLikes.value[n]
+  commentLikes.value[n] = next
+  commentLikeCounts.value[n] = Math.max(0, (commentLikeCounts.value[n] ?? 0) + (next ? 1 : -1))
+  try {
+    await setWorkCommentLike(workId.value, n, next)
+  } catch (err) {
+    commentLikes.value[n] = !next
+    commentLikeCounts.value[n] = Math.max(0, (commentLikeCounts.value[n] ?? 0) + (next ? -1 : 1))
+    notifyError(err, '操作失败')
+  }
+}
+
+function startCommentReply(comment: WorkComment): void {
+  replyToComment.value = comment
+  document.querySelector('.pc-reply-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+function canDelete(comment: WorkComment): boolean {
+  const me = sessionState.user?.id
+  return Boolean(me && comment.author?.id === me && !comment.deleted)
+}
+
+async function removeComment(comment: WorkComment): Promise<void> {
+  if (deletingComment.value !== null) return
+  deletingComment.value = comment.commentNumber
+  try {
+    await deleteWorkComment(workId.value, comment.commentNumber)
+    notify('已删除', '', 'Success')
+    await load()
+  } catch (err) {
+    notifyError(err, '删除失败')
+  } finally {
+    deletingComment.value = null
+  }
+}
 
 watch(
   work,
@@ -187,12 +251,41 @@ async function toggleWorkFavorite(): Promise<void> {
                     #{{ comment.commentNumber }} · {{ relativeTime(comment.createdAt) }}
                   </span>
                 </div>
+                <div v-if="comment.replyToCommentNumber" class="pc-muted pc-comment-replyto">
+                  回复 #{{ comment.replyToCommentNumber }}
+                </div>
                 <RichHtml :html="commentHtml(comment)" />
+                <div class="pc-post-actions pc-comment-actions">
+                  <button
+                    class="pc-action"
+                    :class="{ 'pc-action--on': commentLikes[comment.commentNumber] }"
+                    @click="toggleCommentLike(comment)"
+                  >
+                    <span class="pc-meta-glyph">&#xEB51;</span>
+                    {{ compactNumber(commentLikeCounts[comment.commentNumber] ?? 0) }}
+                  </button>
+                  <button class="pc-action" @click="startCommentReply(comment)">
+                    <span class="pc-meta-glyph">&#xE97A;</span> 回复
+                  </button>
+                  <button
+                    v-if="canDelete(comment)"
+                    class="pc-action"
+                    :disabled="deletingComment === comment.commentNumber"
+                    @click="removeComment(comment)"
+                  >
+                    <span class="pc-meta-glyph">&#xE74D;</span> 删除
+                  </button>
+                </div>
               </article>
             </div>
 
             <section class="pc-reply-box pc-card">
-              <strong style="font-size: 14px">写评论</strong>
+              <div class="pc-row pc-row--between" style="margin-bottom: 8px">
+                <strong style="font-size: 14px">写评论</strong>
+                <button v-if="replyToComment" class="pc-link pc-muted" @click="replyToComment = null">
+                  取消回复 #{{ replyToComment.commentNumber }}
+                </button>
+              </div>
               <TextBox
                 v-model:Text="commentText"
                 PlaceholderText="说点什么…"
