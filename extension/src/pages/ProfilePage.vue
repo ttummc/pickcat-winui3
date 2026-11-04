@@ -39,6 +39,7 @@ const featuredTopics = ref<Topic[]>([])
 const featuredWorks = ref<Work[]>([])
 const contributions = ref<LevelContribution[]>([])
 const tabLoading = ref(false)
+const tabError = ref<string | null>(null)
 
 const isSelf = computed(() => sessionState.user?.id === userId.value)
 
@@ -86,6 +87,7 @@ async function loadFeatured(): Promise<void> {
 
 async function loadTab(key: string): Promise<void> {
   tabLoading.value = true
+  tabError.value = null
   try {
     if (key === 'topics') {
       const result = await api.get<Page<Topic>>(`/users/${userId.value}/topics`, { limit: 20 })
@@ -100,11 +102,12 @@ async function loadTab(key: string): Promise<void> {
       })
       replies.value = result.items ?? []
     } else if (key === 'following') {
-      const result = await api.get<Page<UserProfile>>(`/users/${userId.value}/following`, { limit: 30 })
-      followings.value = result.items ?? []
+      // The API wraps each entry as { user, followedAt }, not a bare user object.
+      const result = await api.get<Page<FollowEdge>>(`/users/${userId.value}/following`, { limit: 50 })
+      followings.value = (result.items ?? []).map((edge) => edge.user).filter(Boolean)
     } else if (key === 'followers') {
-      const result = await api.get<Page<UserProfile>>(`/users/${userId.value}/followers`, { limit: 30 })
-      followers.value = result.items ?? []
+      const result = await api.get<Page<FollowEdge>>(`/users/${userId.value}/followers`, { limit: 50 })
+      followers.value = (result.items ?? []).map((edge) => edge.user).filter(Boolean)
     } else if (key === 'home') {
       const result = await api.get<Page<ProfileActivity>>(`/users/${userId.value}/profile-activities`, {
         year: new Date().getFullYear(),
@@ -112,8 +115,11 @@ async function loadTab(key: string): Promise<void> {
       })
       activities.value = result.items ?? []
     }
-  } catch {
-    /* leave the tab empty; the parent error state covers real failures */
+  } catch (err) {
+    // Never swallow silently again: a wrong payload shape looked like "everyone
+    // has no avatar and no name" for two days.
+    console.warn('[PickCat] profile tab failed', key, err)
+    tabError.value = err instanceof Error ? err.message : '加载失败'
   } finally {
     tabLoading.value = false
   }

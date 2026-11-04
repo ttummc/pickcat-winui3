@@ -1,67 +1,48 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { signIn, sessionState } from '@/stores/session'
+import { ref, onMounted } from 'vue'
 import { navigate } from '@/router'
+import { sessionState, loadSession } from '@/stores/session'
 import { notify } from '@/stores/ui'
-import { createLoginCaptcha, type CaptchaHandle } from '@/lib/captcha'
-import { PickCatApiError } from '@/api/client'
 
-const account = ref('')
-const password = ref('')
-const brandIcon = '/favicon.png'
-const error = ref<string | null>(null)
-const busy = ref(false)
-const captchaReady = ref(false)
+/**
+ * Sign-in is the official page, untouched.
+ *
+ * The extension deliberately does not rebuild it: the real form carries the Aliyun
+ * CAPTCHA, and any injected CSS or blocked resource breaks it. This screen only
+ * hands the user over to the stock page and picks the session up afterwards.
+ */
+const opening = ref(false)
+const checking = ref(false)
 
-const anchor = ref<HTMLButtonElement | null>(null)
-const host = ref<HTMLDivElement | null>(null)
-let captcha: CaptchaHandle | null = null
+const loginUrl = 'https://pickcat.dao3.fun/login'
+const brandIcon = chrome.runtime?.getURL?.('icons/pickcat.png') ?? '/favicon.png'
 
-const canSubmit = computed(() => account.value.trim().length > 0 && password.value.length > 0 && !busy.value)
+function openOfficial(): void {
+  opening.value = true
+  window.open(loginUrl, '_blank', 'noopener')
+  window.setTimeout(() => {
+    opening.value = false
+  }, 1200)
+}
 
-onMounted(async () => {
-  if (!anchor.value || !host.value) return
+async function checkAgain(): Promise<void> {
+  checking.value = true
   try {
-    captcha = await createLoginCaptcha(anchor.value, host.value, (message) => {
-      error.value = message
-    })
-    captchaReady.value = true
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : '人机验证加载失败'
-  }
-})
-
-onBeforeUnmount(() => captcha?.destroy())
-
-async function submit(): Promise<void> {
-  if (!canSubmit.value) return
-  error.value = null
-  busy.value = true
-  try {
-    if (!captcha) throw new Error('人机验证尚未就绪，请刷新后重试')
-    const captchaVerifyParam = await captcha.verify()
-    await signIn({
-      account: account.value.trim(),
-      password: password.value,
-      captchaVerifyParam,
-    })
-    notify('登录成功', `欢迎回来，${sessionState.user?.username ?? ''}`, 'Success')
-    navigate('/')
-  } catch (err) {
-    if (err instanceof PickCatApiError) {
-      error.value =
-        err.code === 'CAPTCHA_INVALID'
-          ? '人机验证未通过，请重试'
-          : err.status === 401 || err.status === 403
-            ? '账号或密码不正确'
-            : err.message
+    await loadSession()
+    if (sessionState.user) {
+      notify('登录成功', `欢迎回来，${sessionState.user.username}`, 'Success')
+      navigate('/')
     } else {
-      error.value = err instanceof Error ? err.message : '登录失败'
+      notify('还没检测到登录', '请先在官方页面完成登录，再点这里', 'Warning')
     }
   } finally {
-    busy.value = false
+    checking.value = false
   }
 }
+
+onMounted(() => {
+  if (sessionState.user) navigate('/')
+})
 </script>
 
 <template>
@@ -70,56 +51,86 @@ async function submit(): Promise<void> {
       <div class="pc-login-brand">
         <img :src="brandIcon" alt="" width="36" height="36" />
         <div>
-          <div class="pc-login-title">欢迎回来</div>
-          <div class="pc-muted">登录后继续参与讨论、发布作品和查看消息。</div>
+          <div class="pc-login-title">登录使用官方页面</div>
+          <div class="pc-muted">
+            登录表单原样保留 PickCat 官方页面，我们不做任何改动 —— 滑块验证、账号保护都在那边完成。
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="pc-field-label">邮箱 / 手机号</label>
-        <TextBox v-model:Text="account" PlaceholderText="输入已验证的邮箱或手机号" />
+      <div class="pc-login-steps">
+        <div class="pc-login-step">
+          <span class="pc-login-step-num">1</span>
+          <span>点下面的按钮，在新标签页打开官方登录页</span>
+        </div>
+        <div class="pc-login-step">
+          <span class="pc-login-step-num">2</span>
+          <span>完成账号密码与滑块验证</span>
+        </div>
+        <div class="pc-login-step">
+          <span class="pc-login-step-num">3</span>
+          <span>回到这个页面，点「我已完成登录」</span>
+        </div>
       </div>
 
-      <div>
-        <label class="pc-field-label">密码</label>
-        <PasswordBox v-model:Password="password" PlaceholderText="输入你的密码" />
+      <div class="pc-login-actions">
+        <Button Style="AccentButtonStyle" @Click="openOfficial">
+          <span class="pc-btn-content">
+            <span class="pc-btn-icon">&#xE8A7;</span>
+            {{ opening ? '已打开官方页面…' : '打开官方登录页' }}
+          </span>
+        </Button>
+        <Button :IsEnabled="!checking" @Click="checkAgain">
+          <span class="pc-btn-content">
+            <span class="pc-btn-icon">&#xE72C;</span>
+            {{ checking ? '检测中…' : '我已完成登录' }}
+          </span>
+        </Button>
       </div>
-
-      <div v-if="error">
-        <InfoBar IsOpen="True" Title="无法登录" :Message="error" Severity="Error" IsClosable="True" />
-      </div>
-
-      <Button Style="AccentButtonStyle" :IsEnabled="canSubmit" @Click="submit">
-        {{ busy ? '正在登录…' : '登录' }}
-      </Button>
 
       <div class="pc-row pc-row--between">
-        <span class="pc-muted">{{ captchaReady ? '登录时会弹出滑块验证' : '正在加载人机验证…' }}</span>
+        <span class="pc-muted">登录状态与官方页面共享，返回后自动带上</span>
         <button class="pc-link" @click="navigate('/')">先去逛逛</button>
       </div>
-
-      <!-- The captcha library triggers from this hidden anchor; the visible
-           button above drives the flow so our own submit logic stays in control. -->
-      <button ref="anchor" class="pc-captcha-anchor" tabindex="-1" aria-hidden="true"></button>
-      <div ref="host" class="pc-captcha-host" />
     </div>
   </div>
 </template>
 
 <style>
-.pc-captcha-anchor {
-  position: absolute;
-  left: -9999px;
-  top: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
+.pc-login-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
 }
 
-.pc-captcha-host {
-  position: absolute;
-  left: -9999px;
-  top: -9999px;
+.pc-login-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.pc-login-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 18%, transparent);
+  color: var(--pc-accent, #ff6b60);
+  font-size: 11px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.pc-login-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 </style>

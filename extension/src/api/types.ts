@@ -115,6 +115,12 @@ export interface PageInfo {
   nextCursor: string | null
 }
 
+/** GET /users/{id}/followers | /following returns wrappers, not bare users. */
+export interface FollowEdge {
+  user: UserProfile
+  followedAt?: string
+}
+
 export interface Page<T> {
   items: T[]
   pageInfo: PageInfo

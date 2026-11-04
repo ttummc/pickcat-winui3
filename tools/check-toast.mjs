@@ -1,0 +1,23 @@
+﻿import fs from "node:fs";
+import { connectBrowser, connectWs, sleep } from "./cdp.mjs";
+const b = await connectBrowser();
+const created = await b.send("Target.createTarget", { url: "https://pickcat.dao3.fun/" });
+await sleep(8000);
+const list = await (await fetch("http://127.0.0.1:9333/json/list")).json();
+const cdp = await connectWs(list.find(t => t.id === created.targetId).webSocketDebuggerUrl);
+await cdp.send("Runtime.enable");
+const ev = async (e) => (await cdp.send("Runtime.evaluate", { expression: e, returnByValue: true })).result.value;
+console.log("caption buttons:", await ev(`document.querySelectorAll('#pickcat-root .win-titlebar-caption-button').length`));
+await ev(`(() => { const b = document.querySelector('#pickcat-root .win-titlebar-caption-button'); if (b) b.click(); return !!b })()`);
+await sleep(1000);
+console.log("toast:", await ev(`(() => {
+  const bar = document.querySelector('.pc-infobar-stack .win-infobar');
+  if (!bar) return 'still none';
+  const cs = getComputedStyle(bar);
+  const panel = bar.querySelector('.win-infobar-panel');
+  return JSON.stringify({ radius: cs.borderRadius, overflow: cs.overflow, panelRadius: panel ? getComputedStyle(panel).borderRadius : null, bg: cs.backgroundColor });
+})()`));
+const shot = await cdp.send("Page.captureScreenshot", { format: "png", clip: { x: 900, y: 700, width: 500, height: 190, scale: 2 } });
+fs.writeFileSync("docs/screenshots/live/toast-radius.png", Buffer.from(shot.data, "base64"));
+await b.send("Target.closeTarget", { targetId: created.targetId }).catch(()=>{});
+cdp.close(); b.close();

@@ -304,7 +304,7 @@ function reopen(): void {
       </Transition>
     </div>
 
-    <div class="pc-infobar-stack">
+    <TransitionGroup name="pc-toast" tag="div" class="pc-infobar-stack">
       <InfoBar
         v-for="message in uiState.messages"
         :key="message.id"
@@ -315,7 +315,7 @@ function reopen(): void {
         IsClosable="True"
         @CloseButtonClick="dismiss(message.id)"
       />
-    </div>
+    </TransitionGroup>
 
     <CardContextMenu />
     <ToolTipService />

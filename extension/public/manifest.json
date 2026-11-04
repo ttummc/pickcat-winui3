@@ -10,20 +10,12 @@
     "128": "icons/pickcat.png"
   },
   "permissions": [
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "tabs"
   ],
   "host_permissions": [
     "https://pickcat.dao3.fun/*"
   ],
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "block_original_shell",
-        "enabled": true,
-        "path": "rules.json"
-      }
-    ]
-  },
   "content_scripts": [
     {
       "matches": [
@@ -43,9 +35,6 @@
       "js": [
         "content.js"
       ],
-      "css": [
-        "content.css"
-      ],
       "run_at": "document_start",
       "all_frames": false
     }
@@ -54,11 +43,15 @@
     {
       "resources": [
         "icons/*",
-        "assets/*"
+        "assets/*",
+        "content.css"
       ],
       "matches": [
         "https://pickcat.dao3.fun/*"
       ]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }

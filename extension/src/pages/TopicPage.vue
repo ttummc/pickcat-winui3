@@ -6,6 +6,12 @@ import { route, navigate } from '@/router'
 import { relativeTime, compactNumber } from '@/lib/format'
 import { notify, notifyError } from '@/stores/ui'
 import { sessionState } from '@/stores/session'
+import {
+  createBookmark,
+  deleteBookmark,
+  reportPost,
+  REPORT_REASONS,
+} from '@/api/interactions'
 import AuthorChip from '@/components/AuthorChip.vue'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -89,7 +95,10 @@ async function submitReply(): Promise<void> {
     notify('已发布', '回复已发送', 'Success')
     await load()
   } catch (err) {
-    if (err instanceof PickCatApiError && err.status === 422) {
+    if (err instanceof PickCatApiError && err.code === 'PARTICIPATION_LEVEL_REQUIRED') {
+      // The server rejects level-0 accounts; say so instead of failing silently.
+      notify('等级不够', '社区等级达到 Lv.1 才能发帖和回复（需要通过入站考试）', 'Warning')
+    } else if (err instanceof PickCatApiError && err.status === 422) {
       notify('内容未通过审核', err.message, 'Warning')
     } else {
       notifyError(err, '回复失败')
@@ -103,6 +112,82 @@ function startReply(post: Post): void {
   replyTo.value = post
   replyText.value = `@${post.author.username} `
   document.querySelector('.pc-reply-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+// ---------------------------------------------------------------- bookmark (收藏)
+
+const bookmarkId = ref<string | null>(null)
+const bookmarkCount = ref(0)
+const bookmarking = ref(false)
+
+watch(
+  topic,
+  (value) => {
+    bookmarkId.value = value?.viewerState?.bookmarkId ?? null
+    bookmarkCount.value = value?.bookmarkCount ?? 0
+  },
+  { immediate: true },
+)
+
+async function toggleBookmark(): Promise<void> {
+  if (!sessionState.user) {
+    navigate('/login')
+    return
+  }
+  if (bookmarking.value) return
+  bookmarking.value = true
+  const wasBookmarked = Boolean(bookmarkId.value)
+  try {
+    if (wasBookmarked) {
+      await deleteBookmark(bookmarkId.value as string)
+      bookmarkId.value = null
+      bookmarkCount.value = Math.max(0, bookmarkCount.value - 1)
+      notify('已取消收藏', '', 'Informational')
+    } else {
+      bookmarkId.value = (await createBookmark('TOPIC', topicId.value)) || 'created'
+      bookmarkCount.value += 1
+      notify('已收藏', '可以在个人主页的收藏里找到', 'Success')
+    }
+  } catch (err) {
+    notifyError(err, wasBookmarked ? '取消收藏失败' : '收藏失败')
+  } finally {
+    bookmarking.value = false
+  }
+}
+
+// ---------------------------------------------------------------- report (举报)
+
+const reportTarget = ref<Post | null>(null)
+const reportDetail = ref('')
+const reporting = ref(false)
+
+function openReport(post: Post): void {
+  if (!sessionState.user) {
+    navigate('/login')
+    return
+  }
+  reportTarget.value = post
+  reportDetail.value = ''
+}
+
+function closeReport(): void {
+  reportTarget.value = null
+  reportDetail.value = ''
+}
+
+async function submitReport(reasonCode: string): Promise<void> {
+  const post = reportTarget.value
+  if (!post || reporting.value) return
+  reporting.value = true
+  try {
+    await reportPost(post.id, reasonCode, reportDetail.value.trim() || undefined)
+    notify('已提交举报', '会由管理员处理', 'Success')
+    closeReport()
+  } catch (err) {
+    notifyError(err, '举报失败')
+  } finally {
+    reporting.value = false
+  }
 }
 
 </script>
@@ -144,7 +229,19 @@ function startReply(post: Post): void {
             <span class="pc-meta-item">浏览 {{ compactNumber(topic.viewCount) }}</span>
             <span class="pc-meta-item">回复 {{ compactNumber(topic.replyCount) }}</span>
             <span class="pc-meta-item">点赞 {{ compactNumber(topic.likeCount) }}</span>
+            <span class="pc-meta-item">收藏 {{ compactNumber(bookmarkCount) }}</span>
             <span class="pc-meta-item">{{ relativeTime(topic.createdAt) }}</span>
+          </div>
+          <div class="pc-topic-actions">
+            <button
+              class="pc-action pc-action--pill"
+              :class="{ 'pc-action--on': Boolean(bookmarkId) }"
+              :disabled="bookmarking"
+              @click="toggleBookmark"
+            >
+              <span class="pc-meta-glyph">&#xE734;</span>
+              {{ bookmarkId ? '已收藏' : '收藏' }}
+            </button>
           </div>
         </header>
 
@@ -202,6 +299,9 @@ function startReply(post: Post): void {
               <button class="pc-action" @click="startReply(post)">
                 <span class="pc-meta-glyph">&#xE97A;</span> 回复
               </button>
+              <button class="pc-action" @click="openReport(post)">
+                <span class="pc-meta-glyph">&#xE7BA;</span> 举报
+              </button>
             </div>
           </article>
         </div>
@@ -226,6 +326,31 @@ function startReply(post: Post): void {
           </div>
         </section>
       </template>
+    </div>
+
+    <!-- 举报：原站是模态选择理由，这里用轻量浮层 -->
+    <div v-if="reportTarget" class="pc-modal-scrim" @click.self="closeReport">
+      <div class="pc-modal" role="dialog" aria-modal="true">
+        <h3 class="pc-modal-title">举报这条回复</h3>
+        <p class="pc-muted pc-modal-sub">
+          #{{ reportTarget.postNumber }} · {{ reportTarget.author?.username }}
+        </p>
+        <div class="pc-modal-reasons">
+          <button
+            v-for="reason in REPORT_REASONS"
+            :key="reason.code"
+            class="pc-modal-reason"
+            :disabled="reporting"
+            @click="submitReport(reason.code)"
+          >
+            {{ reason.label }}
+          </button>
+        </div>
+        <TextBox v-model:Text="reportDetail" PlaceholderText="补充说明（可选）" />
+        <div class="pc-modal-actions">
+          <button class="pc-modal-cancel" @click="closeReport">取消</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -300,5 +425,94 @@ function startReply(post: Post): void {
 
 .pc-reply-box {
   margin-top: 24px;
+}
+
+.pc-topic-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pc-action--pill {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 14px;
+}
+
+.pc-action--pill.pc-action--on {
+  border-color: color-mix(in srgb, var(--pc-accent, #ff6b60) 55%, transparent);
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 12%, transparent);
+}
+
+/* report sheet */
+.pc-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.pc-modal {
+  width: min(420px, calc(100vw - 40px));
+  padding: 20px;
+  border-radius: 8px;
+  background: var(--card-bg, #2b2b2b);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 45%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pc-modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.pc-modal-sub {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.pc-modal-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pc-modal-reason {
+  padding: 7px 12px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pc-modal-reason:hover {
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.pc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pc-modal-cancel {
+  padding: 7px 16px;
+  border-radius: 4px;
+  border: none;
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }
 </style>

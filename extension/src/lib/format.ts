@@ -45,7 +45,10 @@ export function greeting(): string {
 
 export function avatarUrl(user?: { avatar?: { url?: string } | null } | null): string {
   const url = user?.avatar?.url
-  return url ? url : ''
+  if (!url) return ''
+  // The API hands back site-relative paths like /api/v1/avatars/<id>.
+  if (/^https?:/i.test(url)) return url
+  return `https://pickcat.dao3.fun${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 export function initials(name?: string | null): string {

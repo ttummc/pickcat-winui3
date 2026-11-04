@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>PickCat.WinUI3</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Unpackaged: a plain .exe the installer can drop anywhere.
+         Self-contained so users don't need the .NET or Windows App SDK runtimes. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>false</PublishReadyToRun>
+
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <AssemblyName>PickCatWinUI3</AssemblyName>
+    <Product>PickCat WinUI 3</Product>
+    <AssemblyTitle>PickCat WinUI 3</AssemblyTitle>
+    <Company>PickCat WinUI 3 contributors</Company>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.*" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.*" />
+  </ItemGroup>
+
+  <!-- The web UI is the same bundle the extension ships: built once, used twice. -->
+  <ItemGroup>
+    <Content Include="..\..\extension\dist\content.js" Link="Assets\content.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\extension\dist\content.css" Link="Assets\content.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\app.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- `dotnet publish` for an unpackaged, self-contained WinUI 3 app drops the app's own
+       .pri resource index (the Microsoft.UI.*.pri files make it through, this one does not).
+       Without it XAML initialisation fails before App's constructor with 0xc000027b. -->
+  <Target Name="CopyPriToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <PriFiles Include="$(TargetDir)*.pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PriFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

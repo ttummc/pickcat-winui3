@@ -63,14 +63,9 @@ onMounted(async () => {
     loading.value = false
   }
 
-  try {
-    const raw = await api.get<Record<string, unknown>>('/file-storage-quotas')
-    const used = Number(raw.used ?? raw.usedBytes ?? raw.usage ?? NaN)
-    const limit = Number(raw.limit ?? raw.quota ?? raw.total ?? NaN)
-    if (Number.isFinite(used) && Number.isFinite(limit) && limit > 0) quota.value = { used, limit }
-  } catch {
-    quota.value = null
-  }
+  // GET /file-storage-quotas does not exist on this API (404), so there is no
+  // quota to show. Keep the field so the template stays simple.
+  quota.value = null
 })
 </script>
 

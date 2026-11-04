@@ -9,7 +9,7 @@ body {
   overflow: hidden;
 }
 
-body > *:not(#pickcat-root) {
+html.pc-mounted body > *:not(#pickcat-root) {
   display: none !important;
 }
 
@@ -921,4 +921,198 @@ body > *:not(#pickcat-root) {
 }
 .pc-scroll::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Caption glyphs must use the Windows icon font.
+
+   In the desktop (WebView2) host the library's own icon-font rule loses the
+   cascade inside the title bar, so the three caption buttons were rendered with
+   the text font: the maximise glyph came out as a split rectangle and close as a
+   doubled cross. Scoped to the title bar so emoji/vector icons elsewhere keep
+   their own families. */
+#pickcat-root .win-titlebar .win-font-icon,
+#pickcat-root .win-titlebar .win-icon-element {
+  font-family: 'WinUIOnWebFontIcons', 'Segoe Fluent Icons', 'Segoe MDL2 Assets' !important;
+}
+/* Work detail: like / favorite toggles sit in the meta row. */
+.pc-meta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.pc-meta-btn:hover {
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  color: var(--text-primary);
+}
+
+.pc-meta-btn--on {
+  color: var(--pc-accent, #ff6b60);
+  border-color: color-mix(in srgb, var(--pc-accent, #ff6b60) 45%, transparent);
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 10%, transparent);
+}
+
+/* ---------------------------------------------------------------- toasts
+
+   The severity fill is painted on an inner panel, so rounding only the root left
+   square corners bleeding past the border. Clip the whole stack item. */
+.pc-toast-radius,
+.pc-infobar-stack .win-infobar {
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.pc-infobar-stack .win-infobar .win-infobar-panel,
+.pc-infobar-stack .win-infobar .win-infobar-content-area {
+  border-radius: 8px;
+}
+
+/* ---------------------------------------------------------------- scroll cost
+
+   Long feeds: let the engine skip layout/paint for offscreen cards. */
+.pc-card,
+.pc-feed-item,
+.pc-media-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 180px;
+}
+
+/* ---------------------------------------------------------------- motion */
+
+.pc-card {
+  transition:
+    border-color var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    box-shadow var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    transform var(--faster-duration, 83ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.pc-card--interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 32%);
+}
+
+.pc-card--interactive:active {
+  transform: translateY(0) scale(0.997);
+  box-shadow: none;
+}
+
+/* images fade in instead of popping */
+.pc-card img,
+.pc-media-item img {
+  animation: pc-img-in 0.22s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)) both;
+}
+
+@keyframes pc-img-in {
+  from { opacity: 0; transform: scale(1.01); }
+  to { opacity: 1; transform: none; }
+}
+
+/* nav items get the WinUI press feedback */
+.win-navigation-view-item:active {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-card,
+  .pc-card--interactive:hover,
+  .pc-card--interactive:active,
+  .pc-card img,
+  .pc-media-item img,
+  .win-navigation-view-item:active {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* ---------------------------------------------------------------- toast layout
+
+   The title column is flexible inside the library's horizontal InfoBar and gets
+   squeezed until a two-character title wraps. Give the stack more room and pin
+   the title to one line; the message is what should wrap. */
+.pc-infobar-stack {
+  width: 440px;
+}
+
+.pc-infobar-stack .win-infobar-title {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* enter / leave */
+.pc-toast-enter-active,
+.pc-toast-leave-active {
+  transition:
+    opacity 0.18s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    transform 0.18s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.pc-toast-enter-from,
+.pc-toast-leave-to {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+}
+
+.pc-toast-move {
+  transition: transform 0.18s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+
+/* ---------------------------------------------------------------- interactive polish */
+
+.pc-action,
+.pc-meta-btn,
+.pc-tag,
+.pc-link,
+.pc-menu-btn,
+.pc-modal-reason {
+  transition:
+    background-color var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    color var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    border-color var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
+    transform var(--faster-duration, 83ms) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.pc-tag:hover {
+  transform: translateY(-1px);
+}
+
+.pc-link {
+  text-decoration: underline transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--fast-duration, 0.167s) var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
+}
+
+.pc-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* avatars get the same subtle press as cards */
+.pc-person-card:active,
+.pc-author-chip:active {
+  transform: scale(0.99);
+}
+
+/* section headings ease in with the list instead of snapping */
+.pc-section-title {
+  animation: pc-rise-in 0.24s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-action, .pc-meta-btn, .pc-tag, .pc-link, .pc-menu-btn, .pc-modal-reason,
+  .pc-section-title, .pc-person-card:active, .pc-author-chip:active {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

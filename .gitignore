@@ -27,3 +27,14 @@ session_cookie.txt
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# desktop app build output (publish/dist are large, rebuilt by desktop/build-installer.ps1)
+desktop/publish/
+desktop/dist/
+desktop/PickCat.WinUI3/bin/
+desktop/PickCat.WinUI3/obj/
+desktop/publish/data/
+
+# downloaded site bundle chunks used only for extracting request bodies
+research/chunks/
+research/.tmp-endpoints.txt

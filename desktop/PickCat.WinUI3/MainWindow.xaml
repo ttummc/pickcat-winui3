@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PickCat.WinUI3.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    Title="PickCat">
+
+    <Grid x:Name="RootGrid" Background="#141418">
+        <controls:WebView2 x:Name="Browser" />
+    </Grid>
+</Window>

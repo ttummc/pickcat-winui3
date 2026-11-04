@@ -7,6 +7,7 @@ import { route, navigate } from '@/router'
 import { relativeTime, compactNumber } from '@/lib/format'
 import { notify, notifyError } from '@/stores/ui'
 import { sessionState } from '@/stores/session'
+import { setWorkLike, setWorkFavorite } from '@/api/interactions'
 import AuthorChip from '@/components/AuthorChip.vue'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -61,6 +62,55 @@ async function submitComment(): Promise<void> {
     submitting.value = false
   }
 }
+
+// ---------------------------------------------------------------- like / favorite
+
+const liked = ref(false)
+const favorited = ref(false)
+const likeCount = ref(0)
+
+watch(
+  work,
+  (value) => {
+    liked.value = Boolean(value?.viewerState?.liked)
+    favorited.value = Boolean(value?.viewerState?.favorited ?? value?.viewerState?.bookmarked)
+    likeCount.value = value?.likeCount ?? 0
+  },
+  { immediate: true },
+)
+
+async function toggleWorkLike(): Promise<void> {
+  if (!sessionState.user) {
+    navigate('/login')
+    return
+  }
+  const next = !liked.value
+  liked.value = next
+  likeCount.value = Math.max(0, likeCount.value + (next ? 1 : -1))
+  try {
+    await setWorkLike(workId.value, next)
+  } catch (err) {
+    liked.value = !next
+    likeCount.value = Math.max(0, likeCount.value + (next ? -1 : 1))
+    notifyError(err, next ? '点赞失败' : '取消点赞失败')
+  }
+}
+
+async function toggleWorkFavorite(): Promise<void> {
+  if (!sessionState.user) {
+    navigate('/login')
+    return
+  }
+  const next = !favorited.value
+  favorited.value = next
+  try {
+    await setWorkFavorite(workId.value, next)
+    notify(next ? '已收藏' : '已取消收藏', '', 'Informational')
+  } catch (err) {
+    favorited.value = !next
+    notifyError(err, next ? '收藏失败' : '取消收藏失败')
+  }
+}
 </script>
 
 <template>
@@ -97,11 +147,18 @@ async function submitComment(): Promise<void> {
             <div class="pc-feed-meta" style="margin: 10px 0 18px">
               <AuthorChip :user="work.author" :time="relativeTime(work.createdAt)" />
               <span class="pc-grow" />
+              <button class="pc-meta-btn" :class="{ 'pc-meta-btn--on': liked }" @click="toggleWorkLike">
+                <span class="pc-meta-glyph">&#xEB51;</span>{{ compactNumber(likeCount) }}
+              </button>
+              <button
+                class="pc-meta-btn"
+                :class="{ 'pc-meta-btn--on': favorited }"
+                @click="toggleWorkFavorite"
+              >
+                <span class="pc-meta-glyph">&#xE734;</span>{{ favorited ? '已收藏' : '收藏' }}
+              </button>
               <span class="pc-meta-item">
                 <span class="pc-meta-glyph">&#xE7B3;</span>{{ compactNumber(work.viewCount) }}
-              </span>
-              <span class="pc-meta-item">
-                <span class="pc-meta-glyph">&#xEB51;</span>{{ compactNumber(work.likeCount) }}
               </span>
               <span class="pc-meta-item">
                 <span class="pc-meta-glyph">&#xE90A;</span>{{ compactNumber(work.commentCount ?? comments.length) }}
