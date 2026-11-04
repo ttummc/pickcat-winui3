@@ -25,6 +25,7 @@ import MediaLibraryPage from './pages/MediaLibraryPage.vue'
 import LoginPage from './pages/LoginPage.vue'
 import NotFoundPage from './pages/NotFoundPage.vue'
 import CardContextMenu from './components/CardContextMenu.vue'
+import ToastHost from './components/ToastHost.vue'
 
 const PAGES = {
   home: HomePage,
@@ -304,18 +305,7 @@ function reopen(): void {
       </Transition>
     </div>
 
-    <TransitionGroup name="pc-toast" tag="div" class="pc-infobar-stack">
-      <InfoBar
-        v-for="message in uiState.messages"
-        :key="message.id"
-        IsOpen="True"
-        :Title="message.title"
-        :Message="message.message"
-        :Severity="message.severity"
-        IsClosable="True"
-        @CloseButtonClick="dismiss(message.id)"
-      />
-    </TransitionGroup>
+    <ToastHost />
 
     <CardContextMenu />
     <ToolTipService />

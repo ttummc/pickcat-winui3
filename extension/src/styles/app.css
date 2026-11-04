@@ -662,48 +662,6 @@ html.pc-mounted body > *:not(#pickcat-root) {
   padding: 48px;
 }
 
-.pc-infobar-stack {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 380px;
-  max-width: calc(100vw - 40px);
-  /* never let a pile of toasts run off the top of the window */
-  max-height: calc(100vh - 56px);
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.pc-infobar-stack > * {
-  pointer-events: auto;
-  /* Informational uses a 3%-white severity brush, i.e. it reads as transparent
-     over page content. Give toasts a real WinUI surface. */
-  --SystemFillColorAttentionBackgroundBrush: #2b2b2bf2;
-}
-
-.pc-infobar-stack .win-infobar {
-  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 45%), 0 2px 6px rgb(0 0 0 / 30%);
-  backdrop-filter: blur(20px) saturate(1.1);
-  animation: pc-toast-in 0.2s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)) both;
-}
-
-@keyframes pc-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* Login window */
 .pc-login {
   flex: 1 1 auto;
@@ -961,21 +919,6 @@ html.pc-mounted body > *:not(#pickcat-root) {
   background: color-mix(in srgb, var(--pc-accent, #ff6b60) 10%, transparent);
 }
 
-/* ---------------------------------------------------------------- toasts
-
-   The severity fill is painted on an inner panel, so rounding only the root left
-   square corners bleeding past the border. Clip the whole stack item. */
-.pc-toast-radius,
-.pc-infobar-stack .win-infobar {
-  border-radius: 8px !important;
-  overflow: hidden;
-}
-
-.pc-infobar-stack .win-infobar .win-infobar-panel,
-.pc-infobar-stack .win-infobar .win-infobar-content-area {
-  border-radius: 8px;
-}
-
 /* ---------------------------------------------------------------- scroll cost
 
    Long feeds: let the engine skip layout/paint for offscreen cards. */
@@ -1034,20 +977,11 @@ html.pc-mounted body > *:not(#pickcat-root) {
   }
 }
 
-
 /* ---------------------------------------------------------------- toast layout
 
    The title column is flexible inside the library's horizontal InfoBar and gets
    squeezed until a two-character title wraps. Give the stack more room and pin
    the title to one line; the message is what should wrap. */
-.pc-infobar-stack {
-  width: 440px;
-}
-
-.pc-infobar-stack .win-infobar-title {
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
 
 /* enter / leave */
 .pc-toast-enter-active,
@@ -1066,7 +1000,6 @@ html.pc-mounted body > *:not(#pickcat-root) {
 .pc-toast-move {
   transition: transform 0.18s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
-
 
 /* ---------------------------------------------------------------- interactive polish */
 
@@ -1116,7 +1049,6 @@ html.pc-mounted body > *:not(#pickcat-root) {
     transform: none !important;
   }
 }
-
 
 /* Activity rows: a glyph tile instead of the raw enum text. */
 .pc-activity-icon {
