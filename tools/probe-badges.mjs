@@ -1,0 +1,12 @@
+﻿import { connectBrowser, connectWs, sleep } from "./cdp.mjs";
+const U = "01a0faca-3c45-7654-bea1-4147d7af5165";
+const b = await connectBrowser();
+const created = await b.send("Target.createTarget", { url: "https://pickcat.dao3.fun/" });
+await sleep(7000);
+const list = await (await fetch("http://127.0.0.1:9333/json/list")).json();
+const cdp = await connectWs(list.find(t => t.id === created.targetId).webSocketDebuggerUrl);
+await cdp.send("Runtime.enable");
+const ev = async (e) => (await cdp.send("Runtime.evaluate", { expression: e, returnByValue: true, awaitPromise: true })).result.value;
+console.log("badges:", await ev(`fetch('/api/v1/users/${U}/badges?limit=5',{credentials:'include'}).then(async r=>{const t=await r.text();return r.status+' '+t.slice(0,500)})`));
+await b.send("Target.closeTarget", { targetId: created.targetId }).catch(()=>{});
+cdp.close(); b.close();

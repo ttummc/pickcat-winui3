@@ -38,6 +38,9 @@ const followings = ref<UserProfile[]>([])
 const featuredTopics = ref<Topic[]>([])
 const featuredWorks = ref<Work[]>([])
 const contributions = ref<LevelContribution[]>([])
+const badges = ref<
+    { badgeId: string; badge?: { name?: string; image?: { url?: string } | null } | null }[]
+  >([])
 const tabLoading = ref(false)
 const tabError = ref<string | null>(null)
 
@@ -66,6 +69,7 @@ async function loadProfile(): Promise<void> {
     const [contrib] = await Promise.allSettled([
       api.get<{ days?: LevelContribution[] }>(`/users/${userId.value}/level-contributions/${year}`),
       loadFeatured(),
+      loadBadges(),
     ])
     if (contrib.status === 'fulfilled') contributions.value = contrib.value.days ?? []
   } catch (err) {
@@ -73,6 +77,17 @@ async function loadProfile(): Promise<void> {
     profile.value = null
   } finally {
     loading.value = false
+  }
+}
+
+async function loadBadges(): Promise<void> {
+  try {
+    const result = await api.get<
+      Page<{ badgeId: string; badge?: { name?: string; image?: { url?: string } | null } | null }>
+    >(`/users/${userId.value}/badges`, { limit: 12 })
+    badges.value = result.items ?? []
+  } catch {
+    badges.value = []
   }
 }
 
@@ -203,10 +218,42 @@ const heatmap = computed(() => {
   return weeks
 })
 
+const monthLabels = computed<(string | null)[]>(() => {
+  const out: (string | null)[] = []
+  let lastMonth = -1
+  for (const week of heatmap.value) {
+    const first = week[0]?.date
+    if (!first) {
+      out.push(null)
+      continue
+    }
+    const month = new Date(first).getMonth()
+    if (month !== lastMonth) {
+      lastMonth = month
+      out.push(`${month + 1}月`)
+    } else {
+      out.push(null)
+    }
+  }
+  return out
+})
+
 const joined = computed(() => (profile.value ? relativeTime(profile.value.createdAt) : ''))
 
 const bannerVisible = ref(true)
-const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
+const bannerUrl = computed(() => {
+  const fileId = profile.value?.backgroundFileId
+  return fileId
+    ? `https://pickcat.dao3.fun/api/v1/files/${fileId}`
+    : `https://pickcat.dao3.fun/api/v1/users/${userId.value}/background`
+})
+/** Badge artwork is a site-relative url inside the grant payload. */
+function badgeImage(url?: string): string {
+  if (!url) return ''
+  return /^https?:/i.test(url)
+    ? url
+    : `https://pickcat.dao3.fun${url.startsWith('/') ? '' : '/'}${url}`
+}
 </script>
 
 <template>
@@ -224,80 +271,106 @@ const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
       />
 
       <template v-else>
-        <section class="pc-profile-hero">
-          <div class="pc-profile-banner">
-            <img
-              v-if="bannerVisible"
-              class="pc-profile-banner-img"
-              :src="bannerUrl"
-              alt=""
-              @error="bannerVisible = false"
-            />
-          </div>
-          <div class="pc-profile-body">
-            <PersonPicture
-              class="pc-profile-avatar"
-              :DisplayName="profile.username"
-              :Initials="initials(profile.username)"
-              :ProfilePicture="avatarUrl(profile) || undefined"
-              :Width="100"
-              :Height="100"
-            />
+        <div class="pc-profile-layout">
+          <aside class="pc-profile-side">
+            <section class="pc-profile-card">
+              <div class="pc-card-banner">
+                <img
+                  v-if="bannerVisible"
+                  class="pc-card-banner-img"
+                  :src="bannerUrl"
+                  alt=""
+                  @error="bannerVisible = false"
+                />
+              </div>
 
-            <div class="pc-grow" style="padding-bottom: 6px">
-              <div class="pc-row" style="gap: 8px; flex-wrap: wrap">
-                <h1 class="pc-profile-name">{{ profile.username }}</h1>
-                <span class="pc-level">Lv.{{ profile.level?.current ?? 1 }}</span>
-                <span v-if="profile.displayedBadge" class="pc-badge-pill">
-                  {{ profile.displayedBadge.name }}
+              <div class="pc-card-avatar">
+                <PersonPicture
+                  :DisplayName="profile.username"
+                  :Initials="initials(profile.username)"
+                  :ProfilePicture="avatarUrl(profile) || undefined"
+                  :Width="96"
+                  :Height="96"
+                />
+              </div>
+
+              <div class="pc-card-info">
+                <div class="pc-row" style="gap: 8px; flex-wrap: wrap; align-items: center">
+                  <h1 class="pc-profile-name">{{ profile.username }}</h1>
+                  <span class="pc-level">Lv.{{ profile.level?.current ?? 1 }}</span>
+                  <span v-if="profile.displayedBadge" class="pc-badge-pill">
+                    {{ profile.displayedBadge.name }}
+                  </span>
+                </div>
+
+                <p v-if="profile.bio" class="pc-profile-bio">{{ profile.bio }}</p>
+                <p class="pc-muted pc-card-meta">
+                  {{ joined }}加入<template v-if="profile.region"> · {{ profile.region }}</template>
+                </p>
+
+                <div class="pc-stat-grid">
+                  <div class="pc-stat">
+                    <span class="pc-stat-value">{{ compactNumber(profile.stats?.followers) }}</span>
+                    <span class="pc-stat-label">位粉丝</span>
+                  </div>
+                  <div class="pc-stat">
+                    <span class="pc-stat-value">{{ compactNumber(profile.stats?.following) }}</span>
+                    <span class="pc-stat-label">正在关注</span>
+                  </div>
+                  <div class="pc-stat">
+                    <span class="pc-stat-value">{{ compactNumber(profile.stats?.topics) }}</span>
+                    <span class="pc-stat-label">篇帖子</span>
+                  </div>
+                  <div class="pc-stat">
+                    <span class="pc-stat-value">{{ compactNumber(profile.stats?.replies) }}</span>
+                    <span class="pc-stat-label">条回复</span>
+                  </div>
+                </div>
+
+                <Button v-if="isSelf" class="pc-card-action" @Click="navigate('/settings')">
+                  <span class="pc-btn-content">
+                    <span class="pc-btn-icon">&#xE70F;</span><span>编辑资料</span>
+                  </span>
+                </Button>
+                <Button
+                  v-else
+                  class="pc-card-action"
+                  :Style="following ? '' : 'AccentButtonStyle'"
+                  :IsEnabled="!followBusy"
+                  @Click="toggleFollow"
+                >
+                  {{ following ? '已关注' : '关注' }}
+                </Button>
+              </div>
+            </section>
+
+            <section v-if="badges.length" class="pc-side-badges">
+              <h2 class="pc-section-title">徽章</h2>
+              <div class="pc-badge-row">
+                <span
+                  v-for="grant in badges"
+                  :key="grant.badgeId"
+                  class="pc-badge-item"
+                  :title="grant.badge?.name || ''"
+                >
+                  <img
+                    v-if="grant.badge?.image?.url"
+                    :src="badgeImage(grant.badge?.image?.url)"
+                    :alt="grant.badge?.name || ''"
+                    class="pc-badge-img"
+                    loading="lazy"
+                  />
+                  <span v-else class="pc-badge-fallback">&#xE734;</span>
                 </span>
               </div>
-              <p class="pc-muted" style="margin: 2px 0 0">
-                {{ joined }}加入<template v-if="profile.region"> · {{ profile.region }}</template>
-              </p>
+            </section>
+          </aside>
+
+          <main class="pc-profile-main">
+            <div class="pc-profile-tabs">
+              <PcSelector v-model="tab" :tabs="tabs" />
             </div>
 
-            <div class="pc-row" style="padding-bottom: 6px">
-              <Button v-if="isSelf" @Click="navigate('/settings')">
-                <span class="pc-btn-content"><span class="pc-btn-icon">&#xE70F;</span><span>编辑资料</span></span>
-              </Button>
-              <Button
-                v-else
-                :Style="following ? '' : 'AccentButtonStyle'"
-                :IsEnabled="!followBusy"
-                @Click="toggleFollow"
-              >
-                {{ following ? '已关注' : '关注' }}
-              </Button>
-            </div>
-          </div>
-
-          <div style="padding: 0 20px 18px">
-            <p v-if="profile.bio" class="pc-profile-bio">{{ profile.bio }}</p>
-            <div class="pc-stat-grid">
-              <div class="pc-stat">
-                <span class="pc-stat-value">{{ compactNumber(profile.stats?.followers) }}</span>
-                <span class="pc-stat-label">粉丝</span>
-              </div>
-              <div class="pc-stat">
-                <span class="pc-stat-value">{{ compactNumber(profile.stats?.following) }}</span>
-                <span class="pc-stat-label">关注</span>
-              </div>
-              <div class="pc-stat">
-                <span class="pc-stat-value">{{ compactNumber(profile.stats?.topics) }}</span>
-                <span class="pc-stat-label">帖子</span>
-              </div>
-              <div class="pc-stat">
-                <span class="pc-stat-value">{{ compactNumber(profile.stats?.replies) }}</span>
-                <span class="pc-stat-label">回复</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div style="margin-top: 20px">
-          <PcSelector v-model="tab" :tabs="tabs" />
-        </div>
 
         <div v-if="tabLoading" class="pc-spin">
           <ProgressRing IsActive="True" :Width="28" :Height="28" />
@@ -322,6 +395,32 @@ const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
             </section>
 
             <section>
+              <h2 class="pc-section-title">贡献</h2>
+              <div class="pc-card">
+                <div class="pc-heatmap-months">
+                  <span v-for="(label, wi) in monthLabels" :key="wi">{{ label || '' }}</span>
+                </div>
+                <div class="pc-heatmap">
+                  <div v-for="(week, wi) in heatmap" :key="wi" class="pc-heat-column">
+                    <span
+                      v-for="cell in week"
+                      :key="cell.date"
+                      class="pc-heat-cell"
+                      :data-level="cell.level"
+                      :title="`${cell.date}`"
+                    />
+                  </div>
+                </div>
+                <div class="pc-heatmap-footer">
+                  <span class="pc-muted">少</span>
+                  <span class="pc-heat-legend" v-for="level in [0, 1, 2, 3, 4]" :key="level" :data-level="level" />
+                  <span class="pc-muted">多</span>
+                  <span class="pc-grow" />
+                  <span class="pc-muted">近一年</span>
+                </div>
+              </div>
+            </section>
+            <section>
               <h2 class="pc-section-title">最近动态</h2>
               <div v-if="activities.length" class="pc-card">
                 <div v-for="activity in activities" :key="activity.id" class="pc-activity">
@@ -335,23 +434,6 @@ const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
               <EmptyState v-else glyph="&#xE81C;" title="还没有动态" />
             </section>
 
-            <section>
-              <h2 class="pc-section-title">贡献</h2>
-              <div class="pc-card">
-                <div class="pc-heatmap">
-                  <div v-for="(week, wi) in heatmap" :key="wi" class="pc-heat-column">
-                    <span
-                      v-for="cell in week"
-                      :key="cell.date"
-                      class="pc-heat-cell"
-                      :data-level="cell.level"
-                      :title="`${cell.date}`"
-                    />
-                  </div>
-                </div>
-                <p class="pc-muted" style="margin: 10px 0 0">最近一年在 PickCat 的活跃程度</p>
-              </div>
-            </section>
           </div>
 
           <div v-else-if="tab === 'topics'">
@@ -415,6 +497,8 @@ const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
             />
           </div>
         </template>
+          </main>
+        </div>
       </template>
     </div>
   </div>

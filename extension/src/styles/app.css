@@ -1079,3 +1079,196 @@ html.pc-mounted body > *:not(#pickcat-root) {
     box-shadow 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1)),
     border-color 0.35s var(--fast-out-slow-in, cubic-bezier(0, 0, 0, 1));
 }
+
+/* ---------------------------------------------------------------- two-column profile
+
+   Layout follows the original site: a sticky identity card on the left, tabs and
+   sections on the right. Same library controls as the rest of the app
+   (PersonPicture, Button, SelectorBar via PcSelector). */
+.pc-profile-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .pc-profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pc-profile-side {
+  position: sticky;
+  top: 0;
+}
+
+.pc-profile-card {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.pc-card-banner {
+  height: 108px;
+  background: linear-gradient(120deg, #2a3d66, #1b2b45);
+  overflow: hidden;
+}
+
+.pc-card-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pc-card-avatar {
+  margin: -56px 0 0 18px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 4px solid var(--app-bg, #202020);
+  background: var(--app-bg, #202020);
+}
+
+.pc-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 18px 18px;
+}
+
+.pc-card-meta {
+  margin: 0;
+  font-size: 12px;
+}
+
+.pc-profile-bio {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.pc-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  padding: 4px 0;
+}
+
+.pc-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pc-card-action {
+  width: 100%;
+  margin-top: 2px;
+}
+
+/* No sticky background: it painted a dark band behind the tab strip. */
+.pc-profile-tabs {
+  position: relative;
+  padding: 0 0 6px;
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.pc-profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+/* identity card: inline metrics and badges, matching the original profile layout */
+.pc-profile-card .pc-stat {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.pc-profile-card .pc-stat-value {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.pc-profile-card .pc-stat-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.pc-side-badges {
+  margin-top: 18px;
+}
+
+.pc-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pc-badge-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.pc-badge-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.pc-badge-fallback {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+/* contribution heatmap: month ruler + legend */
+.pc-heatmap-months {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.pc-heatmap-months > span {
+  width: 10px;
+  flex: 0 0 10px;
+  white-space: nowrap;
+}
+
+.pc-heatmap-footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 11.5px;
+}
+
+.pc-heat-legend {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.pc-heat-legend[data-level='1'] { background: color-mix(in srgb, var(--pc-accent, #ff6b60) 30%, transparent); }
+.pc-heat-legend[data-level='2'] { background: color-mix(in srgb, var(--pc-accent, #ff6b60) 50%, transparent); }
+.pc-heat-legend[data-level='3'] { background: color-mix(in srgb, var(--pc-accent, #ff6b60) 72%, transparent); }
+.pc-heat-legend[data-level='4'] { background: var(--pc-accent, #ff6b60); }
