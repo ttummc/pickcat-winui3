@@ -9,8 +9,7 @@
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "ext:build": "cd extension && vite build",
-    "ext:dev": "cd extension && vite build --watch",
-    "site:build": "node tools/build-site.mjs"
+    "ext:dev": "cd extension && vite build --watch"
   },
   "dependencies": {
     "vue": "^3.5.32",

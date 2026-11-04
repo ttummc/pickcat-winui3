@@ -198,7 +198,7 @@ d2.text((118 * SS + w1 * SS + 12 * SS, base * SS), "重制", font=f_cjk, fill=(*
 d2.rounded_rectangle([120 * SS, 216 * SS, 320 * SS, 220 * SS], radius=2 * SS, fill=(*ACCENT, 255))
 d2.text((120 * SS, 252 * SS), "用 WinUIonWeb 从零重写 · 不是换皮", font=F(FONT_CJK, 25), fill=(*MUTED, 255), anchor="ls")
 
-d2.text((1796 * SS, 132 * SS), "v1.0.0", font=F(FONT_BOLD_LATIN, 25), fill=(*MUTED, 255), anchor="ra")
+d2.text((1796 * SS, 132 * SS), "v1.0.1", font=F(FONT_BOLD_LATIN, 25), fill=(*MUTED, 255), anchor="ra")
 d2.text((1796 * SS, 164 * SS), "Chrome 扩展", font=F(FONT_CJK, 21), fill=(*MUTED, 255), anchor="ra")
 
 # ------------------------------------------------------------------ grain
