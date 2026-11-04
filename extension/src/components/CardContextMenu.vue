@@ -97,6 +97,26 @@ async function paste(): Promise<void> {
   }
 }
 
+/** First http(s) URL inside an arbitrary string, if any. */
+function extractUrl(text: string): string | null {
+  const match = text.match(/https?:\/\/[^\s<>"'）)】]+/i)
+  if (!match) return null
+  try {
+    return new URL(match[0]).toString()
+  } catch {
+    return null
+  }
+}
+
+function openInNewTab(href: string): void {
+  closeContextMenu()
+  window.open(href, '_blank', 'noopener')
+}
+
+function copyText2(text: string, label: string): void {
+  void copyText(text, label)
+}
+
 function copyPageLink(): void {
   void copyText(location.href, '已复制页面链接')
 }
@@ -173,7 +193,20 @@ const items = computed<(MenuItem | Separator)[]>(() => {
 
   if (context.hasSelection) {
     list.push({ key: 'copy-sel', label: '复制选中文字', glyph: '\uE8C8', run: copySelection })
+    const selectedUrl = extractUrl(context.selectedText)
+    if (selectedUrl) {
+      list.push({ key: 'open-sel-url', label: '打开选中的链接', glyph: '\uE8A7', run: () => openInNewTab(selectedUrl) })
+      list.push({ key: 'copy-sel-url', label: '复制这个链接', glyph: '\uE71B', run: () => copyText2(selectedUrl, '已复制链接') })
+    }
     list.push({ key: 'sel-sep', separator: true })
+  }
+
+  const link = context.link
+  if (link) {
+    list.push({ key: 'open-link', label: '打开链接', glyph: '\uE8E5', run: () => openInNewTab(link.href) })
+    list.push({ key: 'tab-link', label: '在新标签页打开链接', glyph: '\uE8A7', run: () => openInNewTab(link.href) })
+    list.push({ key: 'copy-link-addr', label: '复制链接地址', glyph: '\uE71B', run: () => copyText2(link.href, '已复制链接地址') })
+    list.push({ key: 'link-sep', separator: true })
   }
 
   if (context.editable) {

@@ -14,6 +14,8 @@ export interface MenuContext {
   editable: HTMLElement | null
   hasSelection: boolean
   selectedText: string
+  /** The <a href> that was right-clicked, if any. */
+  link: { href: string; text: string } | null
 }
 
 /**

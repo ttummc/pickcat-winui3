@@ -126,6 +126,7 @@ function onDocumentContextMenu(event: MouseEvent): void {
   const element = event.target as Element | null
   const cardNode = element?.closest?.('.pc-topic-card, .pc-work-card') as HTMLElement | null
   const editable = (element?.closest?.('input, textarea, [contenteditable="true"]') ?? null) as HTMLElement | null
+  const anchor = element?.closest?.('a[href]') as HTMLAnchorElement | null
   const selection = window.getSelection()
   const selectedText = selection && !selection.isCollapsed ? selection.toString() : ''
 
@@ -136,6 +137,7 @@ function onDocumentContextMenu(event: MouseEvent): void {
     editable,
     hasSelection: selectedText.trim().length > 0,
     selectedText,
+    link: anchor ? { href: anchor.href, text: (anchor.textContent ?? '').trim() } : null,
   })
 }
 
