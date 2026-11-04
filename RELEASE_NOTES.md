@@ -1,46 +1,33 @@
-# v1.0.0
+# v1.0.1
 
-First usable release: [PickCat](https://pickcat.dao3.fun/)'s web UI is replaced entirely with an
-application that looks and feels like Windows 11.
+A round of fixes after living with v1.0.0 for a few days, plus a rebuilt profile page.
+
+## What's new
+
+- **Profile pages rebuilt**: a sticky identity card on the left (banner, avatar, level, badges,
+  inline stats, follow/edit action) with tabs and sections on the right, matching the original
+  site's information architecture. The contribution heatmap now has month labels and a
+  less/more legend, and the badge wall loads real artwork.
+- **Message toasts rebuilt** on the library `InfoBar`: opaque surface, single-line text, proper
+  rounding, and enter/exit/move transitions.
+- **Floor deep links**: clicking a notification now jumps straight to the reply and highlights it
+  instead of landing at the top of the thread.
+
+## Fixes
+
+- Notifications showed "系统" (system) for every row — the API nests actor/topic/post under `details`.
+- Clicking a notification bounced to the forum list before showing the topic (the sidebar reacted
+  to its own selection change).
+- Context menu gained link actions: open link, open in new tab, copy link address, and open or copy
+  a URL contained in the selected text.
+- Removed a global scrollbar style that forced classic scrollbars (with arrows) onto text inputs.
+- Long notification text no longer wraps inside the toast.
 
 ## Install
 
-### Four steps
+Unchanged: download the zip, extract it somewhere permanent (never `C:\Program Files`), enable
+Developer mode on `chrome://extensions`, then **Load unpacked** and pick that folder.
 
-1. Download **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)** and extract it somewhere permanent
-   (do **not** leave it in a temp folder — Chrome needs the files to stay put)
-2. Open `chrome://extensions`
-3. Enable **Developer mode** (top right)
-4. Click **Load unpacked** and select the extracted folder (the one containing `manifest.json`)
-
-Then open <https://pickcat.dao3.fun/> — the new UI is already there.
-
-> Step-by-step guide with screenshots: <https://kitter.cn/pickcat-winui3/>
+Full guide: <https://ttummc.github.io/pickcat-winui3/>
 
 > Only active on `pickcat.dao3.fun`. Disable the extension and the original site returns.
-
-## What's in it
-
-- **Real WinUI controls**: `TitleBar`, `NavigationView`, `SelectorBar`, `SettingsCard`,
-  `ContentDialog`, `MenuFlyout`, `PipsPager`, `Expander`, `PersonPicture`, `InfoBar`, `ProgressRing`
-- **Page transitions**: drill-in slides from the right, back slides from the left, siblings fade;
-  list items rise in staggered
-- **Context menu everywhere**: card actions, "copy selected text", page actions — including on empty space
-- **Markdown editor**: toolbar, shortcuts (Ctrl+B/I/E/K), live preview, character/word count
-- **Themes**: light / dark / follow system, four accent colours
-- **14 pages**: home, forum, category, topic, compose, works, work detail, profile, notifications,
-  search, personal file board, personal library, settings, sign-in
-
-## Known limitations
-
-- Pages that need an account (compose, notifications, file board) require signing in first; sign-in
-  shows an Aliyun slider CAPTCHA
-- Pages that have not been rebuilt (register, password reset, circles, create, entrance exam,
-  moderation) show "this page has not been rebuilt yet" with an **Open on the original site** button
-- All data and sessions come from the official API; the extension stores no user data
-
-## Licence
-
-GPL-3.0. The UI controls come from [WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb) (GPL-3.0).
-
-Unofficial fan project. Not affiliated with PickCat.

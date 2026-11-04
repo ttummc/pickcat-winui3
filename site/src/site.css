@@ -33,17 +33,12 @@ body {
 .pc-site-body {
   flex: 1 1 auto;
   min-height: 0;
-  display: flex;
+  overflow: hidden;
 }
 
-.pc-site-nav {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-}
 
 .pc-site-scroll {
-  flex: 1 1 auto;
+  height: 100%;
   min-width: 0;
   overflow-y: auto;
   padding: 28px 40px 64px;
@@ -323,4 +318,81 @@ body {
 .win-button .win-font-icon {
   margin-right: 8px;
   font-size: 15px;
+}
+
+
+
+
+
+
+
+/* floating top navigation */
+.pc-topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 22px;
+  background: color-mix(in srgb, var(--app-bg, #202020) 78%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+  z-index: 10;
+}
+
+.pc-topbar-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.pc-topbar-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pc-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 18px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.pc-topbar-link {
+  position: relative;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.pc-topbar-link:hover {
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  color: var(--text-primary);
+}
+
+.pc-topbar-link--on {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.pc-topbar-link--on::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 1px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--pc-accent, #ff6b60);
 }

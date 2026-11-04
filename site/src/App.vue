@@ -16,13 +16,7 @@ const sections = [
 const section = ref<string>('overview')
 const scrollRef = ref<HTMLElement | null>(null)
 
-function onNav(_sender: unknown, args: unknown): void {
-  const payload = (args ?? {}) as Record<string, unknown>
-  const item = (payload.SelectedItem ?? payload.InvokedItemContainer ?? payload) as
-    | Record<string, unknown>
-    | undefined
-  const tag = (item?.Tag ?? item?.tag) as string | undefined
-  if (!tag) return
+function go(tag: string): void {
   section.value = tag
   scrollRef.value?.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -101,31 +95,29 @@ function openInNewTab(url: string): void {
 
 <template>
   <div class="pc-site">
-    <TitleBar Title="PickCat WinUI 3 — 官网" IsCaptionButtonsVisible="False" />
+    <header class="pc-topbar">
+      <img class="pc-topbar-icon" :src="`./store/icon-128.png`" alt="" />
+      <b class="pc-topbar-name">PickCat WinUI 3</b>
+
+      <nav class="pc-topbar-nav">
+        <button
+          v-for="item in sections"
+          :key="item.tag"
+          type="button"
+          class="pc-topbar-link"
+          :class="{ 'pc-topbar-link--on': section === item.tag }"
+          @click="go(item.tag)"
+        >
+          {{ item.label }}
+        </button>
+      </nav>
+
+      <Button Style="AccentButtonStyle" @Click="openInNewTab(RELEASE)">
+        <span class="pc-btn-content"><FontIcon Glyph="&#xE896;" /> 下载</span>
+      </Button>
+    </header>
 
     <div class="pc-site-body">
-      <NavigationView
-        class="pc-site-nav"
-        PaneDisplayMode="Left"
-        IsBackButtonVisible="Collapsed"
-        IsPaneToggleButtonVisible="False"
-        :IsSettingsVisible="false"
-        :SelectedItem="section"
-        @SelectionChanged="onNav"
-      >
-        <NavigationView.MenuItems>
-          <NavigationViewItem
-            v-for="item in sections"
-            :key="item.tag"
-            :Content="item.label"
-            :Tag="item.tag"
-          >
-            <NavigationViewItem.Icon>
-              <FontIcon :Glyph="item.glyph" />
-            </NavigationViewItem.Icon>
-          </NavigationViewItem>
-        </NavigationView.MenuItems>
-
         <div class="pc-site-scroll" ref="scrollRef">
         <!-- overview -->
         <section v-if="section === 'overview'" class="pc-section">
@@ -289,7 +281,6 @@ function openInNewTab(url: string): void {
           </span>
           </footer>
         </div>
-      </NavigationView>
     </div>
   </div>
 </template>
