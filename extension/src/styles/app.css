@@ -1116,3 +1116,19 @@ html.pc-mounted body > *:not(#pickcat-root) {
     transform: none !important;
   }
 }
+
+
+/* Activity rows: a glyph tile instead of the raw enum text. */
+.pc-activity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}

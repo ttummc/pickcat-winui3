@@ -85,6 +85,26 @@ async function loadFeatured(): Promise<void> {
   if (w.status === 'fulfilled') featuredWorks.value = w.value.items ?? []
 }
 
+/**
+ * Activity rows used to print the raw enum (POSTED / REPLIED / …). Map them to
+ * the same Fluent glyphs the rest of the app uses, with a Chinese label that
+ * shows on hover.
+ */
+const ACTIVITY_KINDS: Record<string, { glyph: string; label: string }> = {
+  POSTED: { glyph: '\uE7C3', label: '发帖' },
+  REPLIED: { glyph: '\uE90A', label: '回复' },
+  LIKED: { glyph: '\uEB51', label: '点赞' },
+  FOLLOWED: { glyph: '\uE8D4', label: '关注' },
+  MENTIONED: { glyph: '\uE77B', label: '提及' },
+  BADGE_GRANTED: { glyph: '\uE734', label: '获得徽章' },
+  LEVEL_UP: { glyph: '\uE9D9', label: '等级提升' },
+  WORK_PUBLISHED: { glyph: '\uE8A5', label: '发布作品' },
+}
+
+function kindMeta(kind?: string | null): { glyph: string; label: string } {
+  return (kind && ACTIVITY_KINDS[kind]) || { glyph: '\uE946', label: '动态' }
+}
+
 async function loadTab(key: string): Promise<void> {
   tabLoading.value = true
   tabError.value = null
@@ -305,7 +325,9 @@ const bannerUrl = computed(() => `/api/v1/users/${userId.value}/background`)
               <h2 class="pc-section-title">最近动态</h2>
               <div v-if="activities.length" class="pc-card">
                 <div v-for="activity in activities" :key="activity.id" class="pc-activity">
-                  <span class="pc-activity-kind">{{ activity.kind }}</span>
+                  <span class="pc-activity-icon" :title="kindMeta(activity.kind).label">
+                    {{ kindMeta(activity.kind).glyph }}
+                  </span>
                   <span class="pc-grow pc-activity-title">{{ activity.title }}</span>
                   <span class="pc-muted">{{ relativeTime(activity.occurredAt) }}</span>
                 </div>
