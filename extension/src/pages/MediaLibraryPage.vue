@@ -29,13 +29,25 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const quota = ref<{ used: number; limit: number } | null>(null)
 
-const isImage = (file: PcFile): boolean => {
-  const type = file.contentType ?? file.mimeType ?? ''
-  if (type.startsWith('image/')) return true
-  return /\.(png|jpe?g|gif|webp|avif|svg)(\?|$)/i.test(file.url ?? file.name ?? file.filename ?? '')
+/**
+ * Files are served from GET /api/v1/files/{id} (verified: 200 + image/webp), and
+ * the listing does not necessarily expose a URL or a mime type. So always point
+ * <img> at the content endpoint and fall back to a file icon if it fails.
+ */
+function fileUrl(file: PcFile): string {
+  const url = file.url ?? file.fileUrl ?? file.contentUrl
+  if (url) return /^https?:/i.test(url) ? url : `https://pickcat.dao3.fun${url.startsWith('/') ? '' : '/'}${url}`
+  return `https://pickcat.dao3.fun/api/v1/files/${file.id}`
 }
 
-const label = (file: PcFile): string => file.name ?? file.filename ?? file.id ?? '未命名文件'
+const failed = ref<Record<string, boolean>>({})
+
+function onImageError(file: PcFile): void {
+  failed.value[file.id ?? fileUrl(file)] = true
+}
+
+const label = (file: PcFile): string =>
+  file.name ?? file.filename ?? file.originalName ?? file.id ?? '未命名文件'
 
 function formatSize(bytes?: number): string {
   if (!bytes || !Number.isFinite(bytes)) return ''
@@ -119,7 +131,14 @@ onMounted(async () => {
           rel="noopener noreferrer"
           @click="!file.url && $event.preventDefault()"
         >
-          <img v-if="isImage(file)" :src="file.url" :alt="label(file)" loading="lazy" />
+          <img
+            v-if="!failed[file.id ?? fileUrl(file)]"
+            :src="fileUrl(file)"
+            :alt="label(file)"
+            loading="lazy"
+            decoding="async"
+            @error="onImageError(file)"
+          />
           <span v-else class="pc-media-file-icon">&#xE8A5;</span>
           <span class="pc-media-meta">
             <span class="pc-media-name">{{ label(file) }}</span>

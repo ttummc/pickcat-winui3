@@ -241,8 +241,13 @@ onMounted(async () => {
 }
 
 .pc-settings-avatar {
+  /* SettingsCard's icon slot is a flex child: without an explicit flex basis the
+     image shrinks horizontally and the circle turns into an ellipse. */
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
 }
