@@ -3,364 +3,238 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PickCat WinUI 3 — 把社区重做成一个应用</title>
-<meta name="description" content="用 WinUI 3 控件从零重写的 PickCat 界面。Chrome / Edge 扩展，解压即用，不收集数据。">
-<meta property="og:type" content="website">
+<title>PickCat WinUI 3</title>
+<meta name="description" content="用 WinUI 3 控件从零重写的 PickCat 界面。Chrome / Edge 扩展。">
 <meta property="og:title" content="PickCat WinUI 3">
 <meta property="og:description" content="不是换皮，是重写整个窗口。">
 <meta property="og:image" content="promo/pickcat-promo.png">
 <meta name="theme-color" content="#141218">
 <link rel="icon" href="store/icon-128.png">
 <style>
-  /* Material Design 3 — dark scheme, red/coral seed */
+  /* Material Design 3 · dark · one screen, no navigation */
   :root {
     color-scheme: dark;
-
     --primary: #ffb4ab;
     --on-primary: #690005;
-    --primary-container: #93000a;
-    --on-primary-container: #ffdad6;
-
     --surface: #141218;
-    --surface-container-lowest: #0f0d13;
-    --surface-container-low: #1d1b20;
-    --surface-container: #211f26;
-    --surface-container-high: #2b2930;
-    --surface-container-highest: #36343b;
-
+    --surface-1: #1d1b20;
+    --surface-3: #2b2930;
     --on-surface: #e6e0e9;
     --on-surface-variant: #cac4d0;
-    --outline: #938f99;
-    --outline-variant: #49454f;
-
-    --shape-xs: 4px;
-    --shape-sm: 8px;
-    --shape-md: 12px;
-    --shape-lg: 16px;
-    --shape-xl: 28px;
-
+    --outline: #49454f;
     --ease: cubic-bezier(0.2, 0, 0, 1);
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
 
   body {
-    margin: 0;
     background: var(--surface);
     color: var(--on-surface);
     font-family: 'Roboto', 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
     font-size: 14px;
-    line-height: 20px;
-    letter-spacing: 0.25px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
   a { color: var(--primary); text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
-  /* ---------- top app bar ---------- */
-  .appbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--outline-variant);
+  /* one screen: two columns, everything visible */
+  .stage {
+    position: relative;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(24px, 4vw, 56px) clamp(24px, 5vw, 72px) clamp(64px, 8vw, 84px);
+    max-width: 1320px;
+    margin: 0 auto;
   }
-  .appbar__inner { display: flex; align-items: center; gap: 8px; height: 64px; }
-  .appbar__brand { display: flex; align-items: center; gap: 12px; margin-right: 16px; }
-  .appbar__brand img { width: 24px; height: 24px; border-radius: var(--shape-sm); }
-  .appbar__title { font-size: 16px; line-height: 24px; letter-spacing: 0.15px; font-weight: 500; }
-  .appbar__nav { display: flex; gap: 4px; margin-left: auto; }
-  .navlink {
-    border: 0;
-    background: none;
-    color: var(--on-surface-variant);
-    font: inherit;
-    font-size: 14px;
+
+  /* ---------- left: copy ---------- */
+  .copy { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+
+  .eyebrow {
+    margin: 0 0 14px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     font-weight: 500;
-    padding: 10px 14px;
-    border-radius: var(--shape-xl);
-    cursor: pointer;
-    transition: background 150ms var(--ease), color 150ms var(--ease);
+    color: var(--primary);
   }
-  .navlink:hover { background: color-mix(in srgb, var(--on-surface) 8%, transparent); color: var(--on-surface); }
-  .navlink[aria-current='true'] { background: var(--surface-container-high); color: var(--on-surface); }
 
-  /* ---------- buttons ---------- */
+  h1 {
+    margin: 0 0 16px;
+    font-size: clamp(30px, 4.2vw, 52px);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--primary); }
+
+  .sub {
+    margin: 0 0 26px;
+    max-width: 46ch;
+    font-size: clamp(13px, 1.1vw, 15px);
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+  }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
   .btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
     height: 40px;
-    padding: 0 24px;
+    padding: 0 22px;
     border: 0;
-    border-radius: var(--shape-xl);
+    border-radius: 20px;
     font: inherit;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 500;
-    letter-spacing: 0.1px;
     cursor: pointer;
-    text-decoration: none;
     transition: box-shadow 150ms var(--ease), background 150ms var(--ease), transform 100ms var(--ease);
   }
   .btn:active { transform: scale(0.98); }
   .btn--filled { background: var(--primary); color: var(--on-primary); }
-  .btn--filled:hover { box-shadow: 0 1px 3px #0006, 0 1px 2px #0004; }
-  .btn--outlined { background: transparent; color: var(--primary); box-shadow: inset 0 0 0 1px var(--outline); }
-  .btn--outlined:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
-  .btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .btn--filled:hover { box-shadow: 0 1px 3px #0006; }
+  .btn--outlined { background: none; color: var(--primary); box-shadow: inset 0 0 0 1px var(--outline); }
+  .btn--outlined:hover { background: #ffb4ab14; }
+  .btn svg { width: 17px; height: 17px; fill: currentColor; }
 
-  /* ---------- hero ---------- */
-  .hero { padding: 96px 0 40px; }
-  .eyebrow {
-    margin: 0 0 16px;
-    font-size: 11px;
-    line-height: 16px;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: var(--primary);
-  }
-  .display {
-    margin: 0 0 24px;
-    font-size: clamp(36px, 6vw, 57px);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
-    font-weight: 400;
-    text-wrap: balance;
-  }
-  .display em { font-style: normal; color: var(--primary); }
-  .support {
-    margin: 0 0 32px;
-    max-width: 60ch;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0.5px;
-    color: var(--on-surface-variant);
-  }
-  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 32px;
-    padding: 0 14px;
-    border-radius: var(--shape-sm);
-    border: 1px solid var(--outline-variant);
-    color: var(--on-surface-variant);
-    font-size: 13px;
-    letter-spacing: 0.16px;
-  }
-  .chip b { color: var(--on-surface); font-weight: 500; }
-
-  .shot-card {
-    margin: 40px 0 0;
-    border-radius: var(--shape-lg);
-    overflow: hidden;
-    background: var(--surface-container-low);
-    border: 1px solid var(--outline-variant);
-  }
-  .shot-card img { display: block; width: 100%; }
-
-  /* ---------- sections ---------- */
-  section { padding: 64px 0 8px; }
-  .h2 { margin: 0 0 8px; font-size: 24px; line-height: 32px; letter-spacing: 0; font-weight: 400; }
-  .h2-sub { margin: 0 0 28px; color: var(--on-surface-variant); font-size: 14px; line-height: 20px; letter-spacing: 0.25px; }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-  .card { padding: 20px; border-radius: var(--shape-md); background: var(--surface-container-high); }
-  .card__icon {
-    display: grid;
-    place-items: center;
-    width: 40px;
-    height: 40px;
-    margin-bottom: 14px;
-    border-radius: 50%;
-    background: var(--primary-container);
-    color: var(--on-primary-container);
-    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
-    font-size: 17px;
-  }
-  .card h3 { margin: 0 0 6px; font-size: 15px; line-height: 22px; letter-spacing: 0.1px; font-weight: 500; }
-  .card p { margin: 0; color: var(--on-surface-variant); font-size: 13.5px; line-height: 20px; letter-spacing: 0.25px; }
-
-  /* ---------- screenshot rail ---------- */
-  .rail {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 4px 24px 20px;
-    margin: 0 -24px;
-    scrollbar-width: thin;
-  }
-  .rail::-webkit-scrollbar { height: 4px; }
-  .rail::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 2px; }
-  .rail__item {
-    flex: 0 0 auto;
-    width: 460px;
-    max-width: 82vw;
-    scroll-snap-align: start;
-    border-radius: var(--shape-md);
-    overflow: hidden;
-    background: var(--surface-container-low);
-    border: 1px solid var(--outline-variant);
-  }
-  .rail__item img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top center; }
-  .rail__cap { display: flex; align-items: baseline; gap: 8px; padding: 12px 16px 14px; }
-  .rail__cap b { font-size: 14px; font-weight: 500; }
-  .rail__cap span { color: var(--on-surface-variant); font-size: 12.5px; }
-
-  /* ---------- steps ---------- */
-  .steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
-  .step { display: flex; gap: 16px; padding: 16px; border-radius: var(--shape-md); background: var(--surface-container-low); }
-  .step__num {
-    flex: 0 0 auto;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--primary-container);
-    color: var(--on-primary-container);
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .step b { display: block; font-size: 14px; font-weight: 500; margin-bottom: 3px; }
-  .step p { margin: 0; color: var(--on-surface-variant); font-size: 13.5px; line-height: 20px; }
-  code {
-    background: var(--surface-container-highest);
-    padding: 1px 6px;
-    border-radius: var(--shape-xs);
-    font-family: 'Roboto Mono', Consolas, monospace;
-    font-size: 0.9em;
-  }
-  .note {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    padding: 14px 16px;
-    border-radius: var(--shape-md);
-    background: var(--surface-container-high);
-    border-left: 3px solid var(--primary);
-    font-size: 13.5px;
-    line-height: 20px;
-  }
-  .note span { color: var(--on-surface-variant); }
-
-  /* ---------- faq ---------- */
-  .faq { border-top: 1px solid var(--outline-variant); }
-  .faq__item { border-bottom: 1px solid var(--outline-variant); }
-  .faq__q {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    width: 100%;
-    padding: 18px 4px;
-    background: none;
-    border: 0;
-    color: var(--on-surface);
-    font: inherit;
-    font-size: 14.5px;
-    font-weight: 500;
-    text-align: left;
-    cursor: pointer;
-  }
-  .faq__q::after {
-    content: '';
-    width: 8px;
-    height: 8px;
-    flex: 0 0 auto;
-    border-right: 2px solid var(--on-surface-variant);
-    border-bottom: 2px solid var(--on-surface-variant);
-    transform: rotate(45deg);
-    transition: transform 200ms var(--ease);
-  }
-  .faq__item[open] .faq__q::after { transform: rotate(-135deg); }
-  .faq__a { margin: 0; padding: 0 4px 20px; color: var(--on-surface-variant); font-size: 13.5px; line-height: 21px; }
-
-  /* ---------- fab ---------- */
-  .fab {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 20;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 56px;
-    padding: 0 22px;
-    border-radius: var(--shape-lg);
-    background: var(--primary-container);
-    color: var(--on-primary-container);
-    font-size: 14px;
-    font-weight: 500;
-    box-shadow: 0 4px 12px #0007;
-    transition: box-shadow 150ms var(--ease), transform 100ms var(--ease);
-  }
-  .fab:hover { box-shadow: 0 6px 18px #0008; }
-  .fab:active { transform: scale(0.97); }
-
-  /* ---------- footer ---------- */
-  footer {
-    margin-top: 72px;
-    padding: 24px 0 96px;
-    border-top: 1px solid var(--outline-variant);
+  .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 20px;
-    justify-content: space-between;
-    color: var(--on-surface-variant);
+    gap: 6px 18px;
+    margin-top: 22px;
     font-size: 12.5px;
-    letter-spacing: 0.4px;
+    color: var(--on-surface-variant);
   }
-  footer a { color: var(--on-surface-variant); }
-  footer a:hover { color: var(--on-surface); }
+  .meta b { color: var(--on-surface); font-weight: 500; }
+
+  /* ---------- right: stacked screenshot deck ---------- */
+  .deck {
+    position: relative;
+    width: 100%;
+    max-height: calc(100vh - 150px);
+    aspect-ratio: 16 / 10;
+    justify-self: end;
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface-1);
+    border: 1px solid var(--outline);
+    box-shadow: 0 18px 48px #00000080;
+    transition:
+      transform 380ms var(--ease),
+      opacity 280ms var(--ease),
+      box-shadow 380ms var(--ease);
+    will-change: transform;
+    cursor: pointer;
+  }
+  .layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  /* depth: each level behind is smaller, offset up-right and dimmed */
+  .layer[data-depth='0'] { transform: translate3d(0, 0, 0) scale(1); z-index: 5; opacity: 1; }
+  .layer[data-depth='1'] { transform: translate3d(26px, -26px, 0) scale(0.955); z-index: 4; opacity: 0.72; }
+  .layer[data-depth='2'] { transform: translate3d(50px, -50px, 0) scale(0.91); z-index: 3; opacity: 0.42; }
+  .layer[data-depth='3'] { transform: translate3d(72px, -72px, 0) scale(0.865); z-index: 2; opacity: 0.2; }
+
+  .layer:hover { box-shadow: 0 24px 60px #000000a0; }
+
+  .layer__label {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background: #141218d9;
+    color: var(--on-surface);
+    font-size: 12px;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  .layer__label span { color: var(--on-surface-variant); font-weight: 400; }
+  .layer[data-depth='0'] .layer__label { display: inline-flex; }
+  .layer:not([data-depth='0']) .layer__label { display: none; }
+
+  /* ---------- one-line install ---------- */
+  .install {
+    position: absolute;
+    left: clamp(24px, 5vw, 72px);
+    right: clamp(24px, 5vw, 72px);
+    bottom: clamp(16px, 2.4vw, 26px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--on-surface-variant);
+    flex-wrap: wrap;
+  }
+  .install b { color: var(--on-surface); font-weight: 500; }
+  .install code {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    font-family: 'Roboto Mono', Consolas, monospace;
+    font-size: 11.5px;
+    color: var(--on-surface);
+  }
+  .install .sep { opacity: 0.4; }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .btn, .fab, .navlink, .faq__q::after { transition: none; }
+    .layer, .btn { transition: none; }
   }
-  @media (max-width: 720px) {
-    .appbar__nav { display: none; }
-    .hero { padding-top: 56px; }
+
+  @media (max-width: 900px) {
+    html, body { overflow: auto; height: auto; }
+    .stage {
+      grid-template-columns: minmax(0, 1fr);
+      padding-bottom: 24px;
+    }
+    .deck { aspect-ratio: 16 / 10; order: -1; }
+    .install { position: static; margin-top: 20px; }
   }
 </style>
 </head>
 <body>
 
-<div class="appbar">
-  <div class="wrap appbar__inner">
-    <div class="appbar__brand">
-      <img src="store/icon-128.png" alt="">
-      <span class="appbar__title">PickCat WinUI 3</span>
-    </div>
-    <nav class="appbar__nav" id="nav">
-      <button class="navlink" data-goto="features">功能</button>
-      <button class="navlink" data-goto="shots">界面</button>
-      <button class="navlink" data-goto="install">安装</button>
-      <button class="navlink" data-goto="faq">常见问题</button>
-    </nav>
-  </div>
-</div>
-
-<main class="wrap">
-
-  <header class="hero">
-    <p class="eyebrow">非官方 · 开源 · GPL-3.0</p>
-    <h1 class="display">把 PickCat<br>重做成<em>一个应用</em></h1>
-    <p class="support">
-      原站的界面被整个丢掉，按系统应用的逻辑重新做了一遍。窗口、导航、右键菜单、
-      Markdown 编辑器、消息提示 —— 都是真的控件，不是套一层皮。
+<main class="stage">
+  <section class="copy">
+    <p class="eyebrow">非官方 · GPL-3.0</p>
+    <h1>把 PickCat 重做成<em>一个应用</em></h1>
+    <p class="sub">
+      原站界面整个丢掉，按系统应用的逻辑重做。窗口、导航、右键菜单、Markdown 编辑器、
+      消息提示都是真控件，不是套一层皮。
     </p>
 
     <div class="actions">
-      <a class="btn btn--filled" id="download"
+      <a class="btn btn--filled"
          href="https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4L11 14.2V3zM5 19h14v2H5z"/></svg>
         下载扩展
@@ -371,248 +245,76 @@
       </a>
     </div>
 
-    <div class="chips">
-      <span class="chip">版本 <b id="ver">v1.0.1</b></span>
-      <span class="chip">压缩包 <b id="size">1.6 MB</b></span>
-      <span class="chip">14 个页面</span>
-      <span class="chip">Chrome / Edge</span>
+    <div class="meta">
+      <span><b id="ver">v1.0.1</b></span>
+      <span><b id="size">1.6 MB</b> · 解压即用</span>
+      <span><b>14</b> 个页面</span>
+      <span>Chrome / Edge</span>
     </div>
+  </section>
 
-    <figure class="shot-card">
-      <img src="promo/pickcat-promo.png" alt="PickCat WinUI 3 界面">
+  <section class="deck" id="deck">
+    <figure class="layer" data-depth="0">
+      <img src="screenshots/site/home.png" alt="首页">
+      <figcaption class="layer__label">首页 <span>推荐 / 最新</span></figcaption>
     </figure>
-  </header>
-
-  <section id="features">
-    <h2 class="h2">它和原站有什么不同</h2>
-    <p class="h2-sub">不是换一层 CSS，而是让控件承担交互。</p>
-
-    <div class="grid">
-      <article class="card">
-        <div class="card__icon">&#xE7F4;</div>
-        <h3>真控件，不是仿制</h3>
-        <p>窗口标题栏、导航栏、右键菜单、对话框、消息提示都是独立实现的控件，有完整的焦点、悬停和按压状态。</p>
-      </article>
-      <article class="card">
-        <div class="card__icon">&#xE8A7;</div>
-        <h3>页面切换有方向</h3>
-        <p>进入下一层从右滑入，返回时反向退出，同级切换淡入；列表逐条上浮，卡片按压轻微缩回。</p>
-      </article>
-      <article class="card">
-        <div class="card__icon">&#xE8C8;</div>
-        <h3>右键菜单全接管</h3>
-        <p>卡片操作、复制选中文字、打开选中文字里的链接、复制链接地址、回到顶部、刷新 —— 空白处也有菜单。</p>
-      </article>
-      <article class="card">
-        <div class="card__icon">&#xE90A;</div>
-        <h3>登录走官方页面</h3>
-        <p>登录表单完整保留原站，滑块验证在官方页面完成。我们不碰密码，也不接管验证码。</p>
-      </article>
-      <article class="card">
-        <div class="card__icon">&#xE793;</div>
-        <h3>浅色 / 深色 / 跟随系统</h3>
-        <p>四套强调色，标题栏与界面同步切换，深色下不会出现刺眼的白块。</p>
-      </article>
-      <article class="card">
-        <div class="card__icon">&#xE72E;</div>
-        <h3>不收集任何数据</h3>
-        <p>所有请求都发往 pickcat.dao3.fun，本地只保存主题和强调色两项偏好。</p>
-      </article>
-    </div>
+    <figure class="layer" data-depth="1">
+      <img src="screenshots/site/topic.png" alt="帖子详情" loading="lazy">
+      <figcaption class="layer__label">帖子详情 <span>楼层 · 点赞 · 举报</span></figcaption>
+    </figure>
+    <figure class="layer" data-depth="2">
+      <img src="screenshots/site/profile.png" alt="个人主页" loading="lazy">
+      <figcaption class="layer__label">个人主页 <span>资料卡 · 热力图</span></figcaption>
+    </figure>
+    <figure class="layer" data-depth="3">
+      <img src="screenshots/site/works.png" alt="作品" loading="lazy">
+      <figcaption class="layer__label">作品 <span>精选轮播</span></figcaption>
+    </figure>
   </section>
 
-  <section id="shots">
-    <h2 class="h2">界面</h2>
-    <p class="h2-sub">当前版本的实际截图，横向滚动查看。</p>
-
-    <div class="rail">
-      <figure class="rail__item">
-        <img src="screenshots/site/home.png" alt="首页" loading="lazy">
-        <figcaption class="rail__cap"><b>首页</b><span>推荐 / 最新信息流</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/forum.png" alt="论坛" loading="lazy">
-        <figcaption class="rail__cap"><b>论坛</b><span>分类、标签与活跃度</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/topic.png" alt="帖子详情" loading="lazy">
-        <figcaption class="rail__cap"><b>帖子详情</b><span>正文、楼层、点赞与举报</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/works.png" alt="作品" loading="lazy">
-        <figcaption class="rail__cap"><b>作品</b><span>精选轮播 + 发现</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/work.png" alt="作品详情" loading="lazy">
-        <figcaption class="rail__cap"><b>作品详情</b><span>点赞、收藏、评论</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/profile.png" alt="个人主页" loading="lazy">
-        <figcaption class="rail__cap"><b>个人主页</b><span>资料卡 + 贡献热力图</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/search.png" alt="搜索" loading="lazy">
-        <figcaption class="rail__cap"><b>搜索</b><span>用户与作品</span></figcaption>
-      </figure>
-      <figure class="rail__item">
-        <img src="screenshots/site/settings.png" alt="设置" loading="lazy">
-        <figcaption class="rail__cap"><b>设置</b><span>主题、强调色、账户</span></figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section id="install">
-    <h2 class="h2">安装</h2>
-    <p class="h2-sub">不需要命令行，大约一分钟。</p>
-
-    <ol class="steps">
-      <li class="step">
-        <span class="step__num">1</span>
-        <div>
-          <b>下载并解压到固定目录</b>
-          <p>比如 <code>C:\Users\你的用户名\PickCatWinUI3</code>。不要放在「下载」或临时目录 —— 扩展会一直读这些文件。</p>
-        </div>
-      </li>
-      <li class="step">
-        <span class="step__num">2</span>
-        <div>
-          <b>打开扩展页并开启开发者模式</b>
-          <p>地址栏输入 <code>chrome://extensions</code>（Edge 用 <code>edge://extensions</code>），打开右上角的开关。</p>
-        </div>
-      </li>
-      <li class="step">
-        <span class="step__num">3</span>
-        <div>
-          <b>点「加载已解压的扩展程序」</b>
-          <p>开启开发者模式后左上角会出现三个按钮，点第一个。</p>
-        </div>
-      </li>
-      <li class="step">
-        <span class="step__num">4</span>
-        <div>
-          <b>选择解压出来的文件夹</b>
-          <p>选到第 1 步那个文件夹，里面应该能看到 <code>manifest.json</code>。</p>
-        </div>
-      </li>
-      <li class="step">
-        <span class="step__num">5</span>
-        <div>
-          <b>打开 pickcat.dao3.fun</b>
-          <p>扩展列表出现「PickCat WinUI 3」即成功，刷新页面就能看到新界面。</p>
-        </div>
-      </li>
-    </ol>
-
-    <div class="note">
-      <div>
-        <b>不要放在 <code>C:\Program Files</code></b><br>
-        <span>那是受保护目录，Chrome 会报 <code>rules.json: Internal error while parsing rules</code>。</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="faq">
-    <h2 class="h2">常见问题</h2>
-    <p class="h2-sub">点开看答案。</p>
-
-    <div class="faq">
-      <details class="faq__item" open>
-        <summary class="faq__q">装完没有任何变化？</summary>
-        <p class="faq__a">确认扩展已启用、当前标签页确实是 pickcat.dao3.fun，并刷新页面。都不行就移除扩展重新加载一次。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">怎么卸载、恢复原站？</summary>
-        <p class="faq__a">打开 chrome://extensions，找到 PickCat WinUI 3，点「移除」。原站界面立刻恢复。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">需要登录吗？</summary>
-        <p class="faq__a">浏览不需要。发帖、通知、个人图盘要先登录 —— 点登录会打开官方登录页的新标签页，在那里完成滑块验证。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">会上传我的账号信息吗？</summary>
-        <p class="faq__a">不会。扩展只在你已登录的页面里调用官方接口，自身不保存、不转发任何数据。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">怎么校验下载的文件？</summary>
-        <p class="faq__a">当前版本 SHA-256：<code id="sha">见 Release 页面的 SHA256SUMS.txt</code>。Windows 下用
-          <code>certutil -hashfile PickCat-WinUI3-extension.zip SHA256</code> 比对。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">有些页面提示「尚未重建」？</summary>
-        <p class="faq__a">注册、找回密码、圈子、创作、入站考试、审核等页面还没重写，会给出「在原站打开」按钮。</p>
-      </details>
-      <details class="faq__item">
-        <summary class="faq__q">支持 Firefox 或 Safari 吗？</summary>
-        <p class="faq__a">暂不支持，目前只有 Chromium 扩展（Chrome、Edge 等）。</p>
-      </details>
-    </div>
-  </section>
-
-  <footer>
-    <span>GPL-3.0 开源 · 非官方作品，与 PickCat 官方无关</span>
-    <span>
-      <a href="https://github.com/ttummc/pickcat-winui3">源码</a> ·
-      <a href="https://github.com/ttummc/pickcat-winui3/releases">版本历史</a> ·
-      <a href="https://github.com/ttummc/pickcat-winui3/blob/main/PRIVACY.md">隐私</a>
-    </span>
-  </footer>
-
+  <div class="install">
+    <b>安装</b>
+    <span>解压到固定目录</span><span class="sep">→</span>
+    <code>chrome://extensions</code><span class="sep">→</span>
+    <span>开发者模式</span><span class="sep">→</span>
+    <span>加载已解压的扩展程序</span>
+    <span class="sep">·</span>
+    <span>别放 <code>C:\Program Files</code></span>
+  </div>
 </main>
 
-<a class="fab" href="https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip">
-  <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true"><path d="M12 3v11.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4L11 14.2V3zM5 19h14v2H5z"/></svg>
-  下载
-</a>
-
 <script>
-  // top bar: highlight the section in view
+  // click a layer to bring it to the front; the deck rotates
   (function () {
-    var links = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
-    var targets = links
-      .map(function (l) { return document.getElementById(l.dataset.goto); })
-      .filter(Boolean);
+    var layers = Array.prototype.slice.call(document.querySelectorAll('.layer'));
 
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            links.forEach(function (l) {
-              l.setAttribute('aria-current', String(l.dataset.goto === entry.target.id));
-            });
-          });
-        },
-        { rootMargin: '-40% 0px -55% 0px' },
-      );
-      targets.forEach(function (t) { io.observe(t); });
-    }
-
-    links.forEach(function (l) {
-      l.addEventListener('click', function () {
-        var el = document.getElementById(l.dataset.goto);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    layers.forEach(function (el) {
+      el.addEventListener('click', function () {
+        var order = layers
+          .slice()
+          .sort(function (a, b) { return Number(a.dataset.depth) - Number(b.dataset.depth); });
+        var index = order.indexOf(el);
+        if (index <= 0) return;
+        var rotated = order.slice(index).concat(order.slice(0, index));
+        layers.forEach(function (l) { l.dataset.depth = String(rotated.indexOf(l)); });
       });
     });
   })();
 
-  // release metadata, so the page never shows a stale version
+  // keep the version/size honest without a rebuild
   (function () {
     var ver = document.getElementById('ver');
     var size = document.getElementById('size');
-    var sha = document.getElementById('sha');
-
     fetch('https://api.github.com/repos/ttummc/pickcat-winui3/releases/latest', {
       headers: { Accept: 'application/vnd.github+json' },
     })
       .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.tag_name && ver) ver.textContent = data.tag_name;
-        var asset = (data.assets || []).filter(function (a) {
-          return a.name === 'PickCat-WinUI3-extension.zip';
+      .then(function (d) {
+        if (d.tag_name && ver) ver.textContent = d.tag_name;
+        var a = (d.assets || []).filter(function (x) {
+          return x.name === 'PickCat-WinUI3-extension.zip';
         })[0];
-        if (!asset) return;
-        if (size && asset.size) size.textContent = (asset.size / 1024 / 1024).toFixed(2) + ' MB';
-        if (sha && asset.digest) sha.textContent = String(asset.digest).replace('sha256:', '');
+        if (a && a.size && size) size.textContent = (a.size / 1024 / 1024).toFixed(2) + ' MB';
       })
       .catch(function () {});
   })();
