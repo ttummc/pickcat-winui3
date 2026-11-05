@@ -17,7 +17,7 @@ function isStockPath(pathname: string): boolean {
 
 function askBackground(type: 'pc:block-original' | 'pc:allow-original'): void {
   try {
-    chrome.runtime?.sendMessage({ type }, () => void chrome.runtime.lastError)
+    globalThis.chrome?.runtime?.sendMessage?.({ type }, () => void globalThis.chrome.runtime.lastError)
   } catch {
     /* extension context gone: nothing to do */
   }
@@ -25,10 +25,17 @@ function askBackground(type: 'pc:block-original' | 'pc:allow-original'): void {
 
 function injectStylesheet(): void {
   if (document.getElementById(STYLE_ID)) return
+
+  // WebView2 exposes window.chrome but no runtime, and the desktop host injects the
+  // stylesheet itself. Reading chrome.runtime.getURL there threw and aborted boot(),
+  // which left the window blank.
+  const url = globalThis.chrome?.runtime?.getURL?.('content.css')
+  if (!url) return
+
   const link = document.createElement('link')
   link.id = STYLE_ID
   link.rel = 'stylesheet'
-  link.href = chrome.runtime.getURL('content.css')
+  link.href = url
   ;(document.head ?? document.documentElement).appendChild(link)
 }
 

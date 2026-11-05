@@ -1272,3 +1272,50 @@ html.pc-mounted body > *:not(#pickcat-root) {
 .pc-heat-legend[data-level='2'] { background: color-mix(in srgb, var(--pc-accent, #ff6b60) 50%, transparent); }
 .pc-heat-legend[data-level='3'] { background: color-mix(in srgb, var(--pc-accent, #ff6b60) 72%, transparent); }
 .pc-heat-legend[data-level='4'] { background: var(--pc-accent, #ff6b60); }
+/* ---------------------------------------------------------------- work player
+
+   Codemao engines are iframes from their own hosts, so the frame gets a fixed 16:9
+   stage and its own fullscreen entry point. */
+.pc-player {
+  margin-bottom: 4px;
+}
+
+.pc-player-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.pc-player-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #000;
+}
+
+.pc-player-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px 0;
+}
+
+.pc-player-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 16%, transparent);
+  color: var(--pc-accent, #ff6b60);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PickCat WinUI 3 — Windows Installer package.
+
+  perUser scope: installs under %LOCALAPPDATA%\Programs, no UAC prompt, and still
+  produces a proper entry in Settings > Apps (with an uninstaller) plus a Start
+  menu shortcut.
+
+  Build: desktop\build-installer.ps1
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package
+      Name="PickCat WinUI 3"
+      Manufacturer="PickCat WinUI 3 contributors"
+      Version="1.0.0"
+      UpgradeCode="6B2E0C55-71A4-4F3B-9C7D-2A8E5D41C9F3"
+      Scope="perUser"
+      Compressed="yes"
+      InstallerVersion="500">
+
+    <SummaryInformation Description="PickCat WinUI 3 — a Windows 11 style client for PickCat" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of PickCat WinUI 3 is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- %LOCALAPPDATA%\Programs\PickCat WinUI 3 -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="PickCat WinUI 3" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="PickCat WinUI 3" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="Main" Title="PickCat WinUI 3" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="CleanInstallFolder" />
+      <ComponentRef Id="RemoveUserData" />
+    </Feature>
+
+    <!-- Add/Remove Programs metadata -->
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Icon Id="AppIcon" SourceFile="..\desktop\publish\Assets\app.ico" />
+
+  </Package>
+
+  <Fragment>
+    <!-- Everything the self-contained publish produced. -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="..\desktop\publish\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <Component Id="CleanInstallFolder" Directory="INSTALLFOLDER" Guid="E7A2C5D8-4B31-4F60-9D85-1C3A6B7E2F04">
+      <!-- The app writes a WebView2 profile (and logs) at runtime; those files are not
+           tracked by the MSI, so purge the whole folder on uninstall. -->
+      <util:RemoveFolderEx On="uninstall" Property="INSTALLFOLDER" />
+      <RegistryValue Root="HKCU" Key="Software\PickCat\WinUI3" Name="Cleanup" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <Fragment>
+    <!-- %LOCALAPPDATA%\PickCatWinUI3 holds the WebView2 profile and logs; it lives
+         outside the install folder, so the uninstaller removes it explicitly. -->
+    <DirectoryRef Id="LocalAppDataFolder">
+      <Directory Id="UserDataFolder" Name="PickCatWinUI3">
+        <Component Id="RemoveUserData" Guid="B9F41D27-8C63-4A0E-93B7-6E2D5A8C1F48">
+          <util:RemoveFolderEx On="uninstall" Property="USERDATAFOLDER" />
+          <RegistryValue Root="HKCU" Key="Software\PickCat\WinUI3" Name="UserData" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </DirectoryRef>
+    <Property Id="USERDATAFOLDER" Value="[LocalAppDataFolder]PickCatWinUI3" />
+  </Fragment>
+
+  <Fragment>
+    <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="A1C4F7B2-3D68-4E15-8B90-7C2F5E9A4D61">
+      <Shortcut Id="AppShortcut"
+                Name="PickCat WinUI 3"
+                Description="PickCat, rebuilt as a Windows 11 style app"
+                Target="[INSTALLFOLDER]PickCatWinUI3.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveAppMenuFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\PickCat\WinUI3" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <Fragment>
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="C3D8B1E4-5A27-4F96-A0B3-9E6D2C7F8A15">
+      <Shortcut Id="DesktopAppShortcut"
+                Name="PickCat WinUI 3"
+                Target="[INSTALLFOLDER]PickCatWinUI3.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RegistryValue Root="HKCU" Key="Software\PickCat\WinUI3" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+</Wix>

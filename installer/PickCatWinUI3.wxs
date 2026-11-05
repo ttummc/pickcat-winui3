@@ -49,7 +49,7 @@
     <!-- Add/Remove Programs metadata -->
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     <Property Id="ARPNOMODIFY" Value="1" />
-    <Icon Id="AppIcon" SourceFile="..\desktop\publish\Assets\app.ico" />
+    <Icon Id="AppIcon" SourceFile="$(var.PublishDir)\Assets\app.ico" />
 
   </Package>
 

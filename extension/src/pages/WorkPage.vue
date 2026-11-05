@@ -19,7 +19,43 @@ import EmptyState from '@/components/EmptyState.vue'
 
 const workId = computed(() => route.params.id ?? '')
 const work = ref<Work | null>(null)
+/**
+ * Codemao's players are keyed by the source work id, and the host differs per
+ * engine. Types without an external player (NEKO / WOOD / BOX) return null and the
+ * page keeps showing the cover instead.
+ */
+const PLAYER_HOSTS: Record<string, (id: string) => string> = {
+  KITTEN4: (id) => `https://player.codemao.cn/new/${id}`,
+  KITTEN3: (id) => `https://player.codemao.cn/old/${id}?origin=kitten_qrcode`,
+  KITTENN: (id) => `https://kn.codemao.cn/player?type=2&workId=${id}`,
+  COCO: (id) => `https://coco.codemao.cn/editor/player/${id}?channel=h5`,
+  NEMO: (id) => `https://nemo.codemao.cn/w/${id}`,
+}
+
+const playerSrc = computed(() => {
+  const current = work.value
+  if (!current?.sourceWorkId) return null
+  const build = PLAYER_HOSTS[String(current.type ?? '').toUpperCase()]
+  return build ? build(current.sourceWorkId) : null
+})
+const playerFrame = ref<HTMLIFrameElement | null>(null)
 const comments = ref<WorkComment[]>([])
+
+function openPlayerWindow(): void {
+  if (playerSrc.value) window.open(playerSrc.value, '_blank', 'noopener')
+}
+
+async function togglePlayerFullscreen(): Promise<void> {
+  const frame = playerFrame.value
+  if (!frame) return
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen()
+    else await frame.requestFullscreen()
+  } catch {
+    // cross-origin frame refused; the 新窗口 button still works
+    openPlayerWindow()
+  }
+}
 const loading = ref(true)
 const error = ref<string | null>(null)
 const commentText = ref('')
@@ -198,8 +234,37 @@ async function toggleWorkFavorite(): Promise<void> {
 
         <div class="pc-work-detail">
           <div class="pc-work-detail-main">
+            <section v-if="playerSrc" class="pc-player">
+              <div class="pc-player-stage">
+                <iframe
+                  ref="playerFrame"
+                  class="pc-player-frame"
+                  :src="playerSrc"
+                  :title="work.workName"
+                  allow="fullscreen; autoplay; gamepad; clipboard-write"
+                  allowfullscreen
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                />
+              </div>
+              <div class="pc-player-bar">
+                <span class="pc-player-badge">{{ work.type }}</span>
+                <span class="pc-muted pc-grow">在页面内直接运行</span>
+                <Button @Click="openPlayerWindow">
+                  <span class="pc-btn-content">
+                    <span class="pc-btn-icon">&#xE8A7;</span> 新窗口
+                  </span>
+                </Button>
+                <Button @Click="togglePlayerFullscreen">
+                  <span class="pc-btn-content">
+                    <span class="pc-btn-icon">&#xE740;</span> 全屏
+                  </span>
+                </Button>
+              </div>
+            </section>
+
             <img
-              v-if="work.screenshotCoverUrl || work.preview"
+              v-else-if="work.screenshotCoverUrl || work.preview"
               class="pc-work-hero"
               :src="work.screenshotCoverUrl || work.preview || ''"
               :alt="work.workName"

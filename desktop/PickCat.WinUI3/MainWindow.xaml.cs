@@ -173,9 +173,17 @@ public sealed partial class MainWindow : Window
             CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += OnResourceRequested;
 
+        Log.Write("reading assets");
         var css = await ReadAssetAsync("Assets/content.css");
+        var js = await ReadAssetAsync("Assets/content.js");
+        Log.Write($"assets read: css={css.Length} js={js.Length}");
+
+        // Large scripts are the slow part of this call; log around it so a hang here
+        // is visible instead of leaving the window blank with no explanation.
         await core.AddScriptToExecuteOnDocumentCreatedAsync(BuildStyleScript(css + "\n" + HideWebCaptionCss));
-        await core.AddScriptToExecuteOnDocumentCreatedAsync(await ReadAssetAsync("Assets/content.js"));
+        Log.Write("style script registered");
+        await core.AddScriptToExecuteOnDocumentCreatedAsync(js);
+        Log.Write("content script registered");
         core.WebMessageReceived += OnWebMessage;
 
         // The rewritten UI has a login page, but sign-in is the one flow that should
@@ -183,8 +191,13 @@ public sealed partial class MainWindow : Window
         // event, so poll the route and divert it.
         StartRouteWatcher();
 
+        core.NavigationCompleted += (_, e) =>
+            Log.Write($"NavigationCompleted ok={e.IsSuccess} status={e.WebErrorStatus}");
+        core.ProcessFailed += (_, e) => Log.Write($"ProcessFailed: {e.ProcessFailedKind}");
+
         Log.Write("navigating");
         Browser.Source = new Uri(StartUrl);
+        Log.Write("navigate requested");
     }
 
     private void OnResourceRequested(CoreWebView2 sender, CoreWebView2WebResourceRequestedEventArgs args)
