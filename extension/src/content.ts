@@ -99,6 +99,16 @@ async function boot(): Promise<void> {
   const scope = window as unknown as Record<string, unknown>
   if (scope[MOUNTED_FLAG]) return
 
+  // Chrome runs us only in the top frame (all_frames: false), but WebView2 applies
+  // AddScriptToExecuteOnDocumentCreated to every frame, so the Codemao player inside
+  // an iframe booted a second copy of the UI. Leave subframes untouched.
+  try {
+    if (window.top !== window.self) return
+  } catch {
+    // cross-origin parent: definitely a subframe
+    return
+  }
+
   if (isStockPath(location.pathname)) {
     // Official page: leave the document alone.
     askBackground('pc:allow-original')
