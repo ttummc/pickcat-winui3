@@ -239,6 +239,10 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4L11 14.2V3zM5 19h14v2H5z"/></svg>
         下载扩展
       </a>
+      <a class="btn btn--outlined" id="desktop" href="#" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h8v6H3V5zm10 0h8v6h-8V5zM3 13h8v6H3v-6zm10 0h8v6h-8v-6z"/></svg>
+        桌面版
+      </a>
       <a class="btn btn--outlined" href="https://github.com/ttummc/pickcat-winui3">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.4 9.4 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
         源码
@@ -250,6 +254,7 @@
       <span><b id="size">1.6 MB</b> · 解压即用</span>
       <span><b>14</b> 个页面</span>
       <span>Chrome / Edge</span>
+      <span id="desktop-meta" hidden>Windows 10/11 x64 · <b id="msi-size"></b></span>
     </div>
   </section>
 
@@ -280,6 +285,8 @@
     <span>加载已解压的扩展程序</span>
     <span class="sep">·</span>
     <span>别放 <code>C:\Program Files</code></span>
+    <span class="sep">·</span>
+    <span>或装 <b>桌面版</b> MSI，免扩展</span>
   </div>
 </main>
 
@@ -315,6 +322,23 @@
           return x.name === 'PickCat-WinUI3-extension.zip';
         })[0];
         if (a && a.size && size) size.textContent = (a.size / 1024 / 1024).toFixed(2) + ' MB';
+
+        // The desktop installer only exists on releases produced by the Windows job,
+        // so the button stays hidden until the asset is actually there.
+        var msi = (d.assets || []).filter(function (x) {
+          return /^PickCatWinUI3-Setup-.*\.msi$/i.test(x.name);
+        })[0];
+        if (msi) {
+          var btn = document.getElementById('desktop');
+          var meta = document.getElementById('desktop-meta');
+          var msiSize = document.getElementById('msi-size');
+          if (btn) {
+            btn.href = msi.browser_download_url;
+            btn.hidden = false;
+          }
+          if (meta) meta.hidden = false;
+          if (msiSize && msi.size) msiSize.textContent = (msi.size / 1024 / 1024).toFixed(1) + ' MB';
+        }
       })
       .catch(function () {});
   })();

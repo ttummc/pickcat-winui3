@@ -1,7 +1,8 @@
 # PickCat · WinUI 3 Edition
 
 [![Download](https://img.shields.io/badge/⬇_Download_for_Chrome-Latest_release-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
-[![Install guide](https://img.shields.io/badge/Install_guide-Step--by--step_with_screenshots-2ea043?style=for-the-badge)](https://kitter.cn/pickcat-winui3/)
+[![Download](https://img.shields.io/badge/⬇_Download_for_Windows-Desktop_installer-0078d4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest)
+[![Install guide](https://img.shields.io/badge/Install_guide-Step--by--step_with_screenshots-2ea043?style=for-the-badge)](https://ttummc.github.io/pickcat-winui3/)
 
 [![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
 [![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
@@ -11,6 +12,16 @@
 > **Unofficial project.** This is a fan-made client. It is not affiliated with, endorsed by, or
 > authorised by PickCat. It only activates on `pickcat.dao3.fun` and collects no user data
 > (see [PRIVACY.md](PRIVACY.md)).
+
+## Two ways to run it
+
+| | What it is | How to install |
+|---|---|---|
+| **Browser extension** | Runs inside Chrome / Edge on `pickcat.dao3.fun` | Load unpacked — steps below |
+| **Windows app** | A real desktop window (WinUI 3 + WebView2), no browser involved | Run `PickCatWinUI3-Setup-*.msi` from [Releases](https://github.com/ttummc/pickcat-winui3/releases/latest) |
+
+The installer is ~68 MB, needs no administrator rights, adds a Start-menu entry, and uninstalls
+from *Settings → Apps* like any other program. Windows 10/11 x64.
 
 ## Install
 
