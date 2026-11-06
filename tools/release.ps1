@@ -1,9 +1,10 @@
-# 发布流程：改完代码后一条命令跑完全部同步
-#
-#   pwsh -File tools/release.ps1 -Version 1.0.5
-#
-# 依次完成：升版本号 → 构建扩展 → 同步安装目录 → 打包 zip → 同步桌面版 Assets →
-# publish → 构建 MSI → 复制到桌面和 Downloads → 提交并打 tag 触发 CI 发布。
+﻿<#
+  One-shot release: bump version, build, sync everywhere, publish MSI, push + tag.
+
+    powershell -ExecutionPolicy Bypass -File tools\release.ps1 -Version 1.0.6
+
+  PowerShell 5.1 reads non-BOM UTF-8 as ANSI, so this file is saved WITH a BOM.
+#>
 param(
   [Parameter(Mandatory = $true)][string]$Version,
   [switch]$SkipPush
@@ -17,84 +18,79 @@ $env:TEMP = Join-Path $root '.tmp'
 $env:TMP = $env:TEMP
 New-Item -ItemType Directory -Force $env:TEMP | Out-Null
 
-function Step($text) { Write-Host "`n=== $text ===" -ForegroundColor Cyan }
+function Step([string]$text) { Write-Host ""; Write-Host "=== $text ===" -ForegroundColor Cyan }
 
-# 1. 版本号：扩展 manifest 与桌面工程保持一致
-Step "版本 -> $Version"
-$node = @"
-import fs from "node:fs";
-const m = JSON.parse(fs.readFileSync("extension/public/manifest.json", "utf8"));
-m.version = "$Version";
-fs.writeFileSync("extension/public/manifest.json", JSON.stringify(m, null, 2) + "\n");
-const c = "desktop/PickCat.WinUI3/PickCat.WinUI3.csproj";
-let s = fs.readFileSync(c, "utf8").replace(/<Version>[^<]+<\/Version>/, "<Version>$Version</Version>");
+Step "version -> $Version"
+$bump = Join-Path $env:TEMP 'bump.mjs'
+@"
+import fs from 'node:fs';
+const v = '$Version';
+const m = JSON.parse(fs.readFileSync('extension/public/manifest.json', 'utf8'));
+m.version = v;
+fs.writeFileSync('extension/public/manifest.json', JSON.stringify(m, null, 2) + '\n');
+const c = 'desktop/PickCat.WinUI3/PickCat.WinUI3.csproj';
+const s = fs.readFileSync(c, 'utf8').replace(/<Version>[^<]+<\/Version>/, '<Version>' + v + '</Version>');
 fs.writeFileSync(c, s);
-"@
-$node | Out-File -Encoding utf8 .tmp-bump.mjs
-node .tmp-bump.mjs
-Remove-Item .tmp-bump.mjs -Force
+console.log('  manifest + csproj -> ' + v);
+"@ | Out-File -FilePath $bump -Encoding utf8
+node $bump
+Remove-Item $bump -Force
 
-# 2. 构建扩展
-Step '构建扩展'
+Step 'build the extension'
 Push-Location extension
 npx vite build
 Pop-Location
 
-# 3. 同步到扩展安装目录
-Step '同步安装目录'
+Step 'sync the install folder'
 $installDir = Join-Path $env:USERPROFILE 'PickCatWinUI3'
 if (Test-Path (Join-Path $installDir 'manifest.json')) {
   Get-ChildItem $installDir -Force | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
   Copy-Item 'extension\dist\*' $installDir -Recurse -Force
   Write-Host "  -> $installDir"
 } else {
-  Write-Host "  跳过：$installDir 不存在" -ForegroundColor Yellow
+  Write-Host "  skipped: $installDir not found" -ForegroundColor Yellow
 }
 
-# 4. 打包扩展
-Step '打包扩展'
+Step 'package the extension'
 Remove-Item -Recurse -Force extension\dist\_metadata -ErrorAction SilentlyContinue
 if (Test-Path PickCat-WinUI3-extension.zip) { Remove-Item PickCat-WinUI3-extension.zip -Force }
 Compress-Archive -Path 'extension\dist\*' -DestinationPath 'PickCat-WinUI3-extension.zip' -CompressionLevel Optimal
 Copy-Item PickCat-WinUI3-extension.zip (Join-Path $env:USERPROFILE 'Downloads\PickCat-WinUI3-extension.zip') -Force
-Write-Host "  $([Math]::Round((Get-Item 'PickCat-WinUI3-extension.zip').Length/1MB,2)) MB -> Downloads"
+$zipMb = [Math]::Round((Get-Item 'PickCat-WinUI3-extension.zip').Length / 1MB, 2)
+Write-Host "  $zipMb MB -> Downloads"
 
-# 5. 桌面版：同步 Assets 并 publish
-Step '构建桌面版'
+Step 'publish the desktop app'
 Copy-Item extension\dist\content.js desktop\PickCat.WinUI3\Assets -Force
 Copy-Item extension\dist\content.css desktop\PickCat.WinUI3\Assets -Force
 Get-Process PickCatWinUI3, msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 if (Test-Path desktop\publish) { Remove-Item desktop\publish -Recurse -Force }
-& 'C:\Program Files\dotnet\dotnet.exe' publish desktop\PickCat.WinUI3\PickCat.WinUI3.csproj `
-  -c Release -r win-x64 --self-contained -o desktop\publish | Out-Null
-if (-not (Test-Path desktop\publish\PickCatWinUI3.pri)) { throw 'publish 缺少 PickCatWinUI3.pri，程序会静默崩溃' }
+& 'C:\Program Files\dotnet\dotnet.exe' publish desktop\PickCat.WinUI3\PickCat.WinUI3.csproj -c Release -r win-x64 --self-contained -o desktop\publish | Out-Null
+if (-not (Test-Path desktop\publish\PickCatWinUI3.pri)) { throw 'publish is missing PickCatWinUI3.pri (the app would crash silently)' }
 
-# 6. MSI
-Step '构装 MSI'
+Step 'build the MSI'
 $wix = Join-Path $env:USERPROFILE '.dotnet\tools\wix.exe'
 $pub = (Resolve-Path desktop\publish).Path
-& $wix build installer\PickCatWinUI3.wxs `
-  -d PublishDir="$pub" -d Version=$Version `
-  -ext WixToolset.Util.wixext/5.0.2 `
-  -o "desktop\dist\PickCatWinUI3-Setup-$Version.msi"
-if ($LASTEXITCODE -ne 0) { throw 'wix build 失败' }
-
 $msi = "desktop\dist\PickCatWinUI3-Setup-$Version.msi"
+Get-ChildItem desktop\dist -Filter '*.msi' -ErrorAction SilentlyContinue | Remove-Item -Force
+& $wix build installer\PickCatWinUI3.wxs -d "PublishDir=$pub" -d "Version=$Version" -ext WixToolset.Util.wixext/5.0.2 -o $msi
+if ($LASTEXITCODE -ne 0) { throw 'wix build failed' }
+
 Copy-Item $msi (Join-Path $env:USERPROFILE "Downloads\PickCatWinUI3-Setup-$Version.msi") -Force
 Copy-Item $msi (Join-Path ([Environment]::GetFolderPath('Desktop')) "PickCatWinUI3-Setup-$Version.msi") -Force
 $sha = (Get-FileHash $msi -Algorithm SHA256).Hash.ToLower()
-Write-Host "  $([Math]::Round((Get-Item $msi).Length/1MB,2)) MB  SHA256 $sha"
+$msiMb = [Math]::Round((Get-Item $msi).Length / 1MB, 2)
+Write-Host "  $msiMb MB  sha256 $sha"
 
-# 7. 提交并触发 CI
 if (-not $SkipPush) {
-  Step '提交与推送'
+  Step 'commit, tag, push'
   $env:GIT_TERMINAL_PROMPT = '0'
   git add -A | Out-Null
   git commit -m "release: v$Version" -q
   git push origin main
-  git tag -a "v$Version" -m "v$Version" 2>$null
+  git tag -a "v$Version" -m "v$Version"
   git push origin "v$Version"
-  Write-Host "  已推送 tag v$Version，CI 会构建 MSI 并附到 Release"
+  Write-Host "  pushed tag v$Version - CI builds the MSI and attaches it to the release"
 }
 
-Write-Host "`n完成。" -ForegroundColor Green
+Write-Host ""
+Write-Host 'done.' -ForegroundColor Green
