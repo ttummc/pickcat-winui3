@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { api, PickCatApiError } from '@/api/client'
 import type { Tag } from '@/api/types'
 import { navigate } from '@/router'
 import { notify, notifyError } from '@/stores/ui'
 import { isSignedIn } from '@/stores/session'
 import { renderMarkdown } from '@/lib/markdown'
+import { uploadFile, fileMarkdown } from '@/api/files'
 import { sanitizeHtml } from '@/lib/html'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -26,6 +27,13 @@ const error = ref<string | null>(null)
 const showPreview = ref(true)
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+/** Images currently being uploaded; the editor locks paste-upload while non-zero. */
+const uploading = ref(0)
+const dragActive = ref(false)
+
+const isUploading = computed(() => uploading.value > 0)
 
 const previewHtml = computed(() => sanitizeHtml(renderMarkdown(markdown.value)))
 const charCount = computed(() => markdown.value.length)
@@ -93,10 +101,61 @@ const tools: ToolButton[] = [
   { key: 'list', label: '无序列表', glyph: '\uE8FD', run: () => prefixLines('- ') },
   { key: 'heading', label: '标题', glyph: '\uE8D2', run: () => prefixLines('## ') },
   { key: 'link', label: '链接  Ctrl+K', glyph: '\uE71B', run: () => wrap('[', '](https://)', '链接文字') },
-  { key: 'image', label: '图片', glyph: '\uE8B9', run: () => wrap('![', '](https://)', '图片说明') },
+  { key: 'table', label: '表格', glyph: '\uE80A', run: () => insertAt(TABLE_SNIPPET) },
+  { key: 'rule', label: '分割线', glyph: '\uE738', run: () => insertAt('\n---\n') },
+  { key: 'image', label: '上传图片（也可直接粘贴 / 拖入）', glyph: '\uE8B9', run: pickImages },
 ]
 
+const TABLE_SNIPPET = '\n| 列 1 | 列 2 |\n| --- | --- |\n| 内容 | 内容 |\n'
+
+/** Enter inside a list / quote continues it instead of ending it. */
+function continueBlock(event: KeyboardEvent): boolean {
+  const node = el()
+  if (!node || event.key !== 'Enter' || event.shiftKey) return false
+  const value = markdown.value
+  const caret = node.selectionStart
+  const lineStart = value.lastIndexOf('\n', Math.max(0, caret - 1)) + 1
+  const line = value.slice(lineStart, caret)
+
+  const match = /^(\s*)([-*+]|\d+\.)\s+(.*)$/.exec(line)
+  if (match) {
+    // Empty item: drop the marker instead of starting a new one.
+    if (!match[3].trim()) {
+      event.preventDefault()
+      apply(value.slice(0, lineStart) + value.slice(caret), lineStart, lineStart)
+      return true
+    }
+    const marker = /^\d+\.$/.test(match[2]) ? `${Number.parseInt(match[2], 10) + 1}.` : match[2]
+    event.preventDefault()
+    const addition = `\n${match[1]}${marker} `
+    apply(value.slice(0, caret) + addition + value.slice(caret), caret + addition.length, caret + addition.length)
+    return true
+  }
+
+  const quote = /^(\s*)>\s?(.*)$/.exec(line)
+  if (quote) {
+    event.preventDefault()
+    if (!quote[2].trim()) {
+      apply(value.slice(0, lineStart) + value.slice(caret), lineStart, lineStart)
+      return true
+    }
+    const addition = `\n${quote[1]}> `
+    apply(value.slice(0, caret) + addition + value.slice(caret), caret + addition.length, caret + addition.length)
+    return true
+  }
+
+  return false
+}
+
 function onKeydown(event: KeyboardEvent): void {
+  if (continueBlock(event)) return
+
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    event.preventDefault()
+    void submit()
+    return
+  }
+
   if (!(event.ctrlKey || event.metaKey)) return
   const key = event.key.toLowerCase()
   const map: Record<string, () => void> = {
@@ -121,7 +180,108 @@ function onTab(event: KeyboardEvent): void {
   apply(value.slice(0, start) + '  ' + value.slice(end), start + 2, start + 2)
 }
 
+/** Insert text at the caret and keep it selected-free afterwards. */
+function insertAt(text: string): void {
+  const node = el()
+  if (!node) {
+    markdown.value += text
+    return
+  }
+  const { selectionStart: start, selectionEnd: end } = node
+  const value = markdown.value
+  const before = value.slice(0, start)
+  const after = value.slice(end)
+  // Images read better on their own line.
+  const prefix = before && !before.endsWith('\n') ? '\n' : ''
+  const suffix = after && !after.startsWith('\n') ? '\n' : ''
+  apply(before + prefix + text + suffix + after, start + prefix.length + text.length, start + prefix.length + text.length)
+}
+
+/**
+ * Pasting an image uploads it to the site's file storage (the same files the media
+ * library lists) and drops a markdown tag in place.
+ */
+async function uploadImages(files: File[]): Promise<void> {
+  const images = files.filter((f) => f.type.startsWith('image/'))
+  if (!images.length) return
+  if (!isSignedIn.value) {
+    notify('请先登录', '上传图片需要登录状态', 'Warning')
+    return
+  }
+
+  uploading.value += images.length
+  try {
+    for (const image of images) {
+      const name = image.name || '粘贴的图片'
+      try {
+        const stored = await uploadFile(image)
+        insertAt(fileMarkdown(stored, name.replace(/\.[^.]+$/, '')))
+        notify('图片已上传', `${name} 已存入个人图盘`, 'Success')
+      } catch (err) {
+        notifyError(err, '图片上传失败')
+      } finally {
+        uploading.value -= 1
+      }
+    }
+  } finally {
+    uploading.value = Math.max(0, uploading.value)
+  }
+}
+
+function onPaste(event: ClipboardEvent): void {
+  const items = event.clipboardData?.items
+  if (!items) return
+  const files: File[] = []
+  for (const item of Array.from(items)) {
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      const file = item.getAsFile()
+      if (file) files.push(file)
+    }
+  }
+  if (!files.length) return
+  // Prevent the browser from pasting a filename string into the textarea.
+  event.preventDefault()
+  void uploadImages(files)
+}
+
+function onDrop(event: DragEvent): void {
+  dragActive.value = false
+  const files = Array.from(event.dataTransfer?.files ?? [])
+  if (!files.some((f) => f.type.startsWith('image/'))) return
+  event.preventDefault()
+  void uploadImages(files)
+}
+
+function onDragOver(event: DragEvent): void {
+  if (!event.dataTransfer?.types?.includes('Files')) return
+  event.preventDefault()
+  dragActive.value = true
+}
+
+function onDragLeave(): void {
+  dragActive.value = false
+}
+
+function pickImages(): void {
+  fileInputRef.value?.click()
+}
+
+function onFilesPicked(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  input.value = ''
+  void uploadImages(files)
+}
+
+watch([title, markdown], scheduleSave)
+
+onBeforeUnmount(() => {
+  window.clearTimeout(draftTimer)
+  saveDraft()
+})
+
 onMounted(async () => {
+  restoreDraft()
   try {
     const result = await api.get<{ items: Tag[] }>('/tags', { assignable: 'true' })
     tags.value = result.items ?? []
@@ -134,6 +294,46 @@ onMounted(async () => {
     }
   }
 })
+
+const DRAFT_KEY = 'pickcat-composer-draft'
+
+/** Keep the draft on this machine so a reload does not lose the writing. */
+function saveDraft(): void {
+  try {
+    if (!markdown.value && !title.value) localStorage.removeItem(DRAFT_KEY)
+    else localStorage.setItem(DRAFT_KEY, JSON.stringify({ title: title.value, markdown: markdown.value, at: Date.now() }))
+  } catch {
+    /* storage can be unavailable; drafts are a convenience, not a requirement */
+  }
+}
+
+function restoreDraft(): void {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return
+    const draft = JSON.parse(raw) as { title?: string; markdown?: string }
+    if (!draft.markdown && !draft.title) return
+    title.value = draft.title ?? ''
+    markdown.value = draft.markdown ?? ''
+    notify('已恢复草稿', '上次未发布的主题已经恢复', 'Informational')
+  } catch {
+    /* ignore malformed drafts */
+  }
+}
+
+function clearDraft(): void {
+  try {
+    localStorage.removeItem(DRAFT_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+let draftTimer = 0
+function scheduleSave(): void {
+  window.clearTimeout(draftTimer)
+  draftTimer = window.setTimeout(saveDraft, 600)
+}
 
 function toggleTag(id: string): void {
   const index = selected.value.indexOf(id)
@@ -151,6 +351,7 @@ async function submit(): Promise<void> {
       markdown: markdown.value.trim(),
       tagIds: selected.value,
     })
+    clearDraft()
     notify('已发布', '你的主题已经发布', 'Success')
     navigate('/forum')
   } catch (err) {
@@ -242,10 +443,28 @@ async function submit(): Promise<void> {
               v-model="markdown"
               class="pc-editor-input"
               spellcheck="false"
-              placeholder="支持 Markdown：**粗体**、`代码`、> 引用、- 列表、## 标题、![图片](链接)…"
+              placeholder="支持 Markdown；图片可以直接 Ctrl+V 粘贴或拖进来，会自动上传到个人图盘"
               @keydown="onKeydown"
               @keydown.tab.prevent="onTab"
+              @paste="onPaste"
+              @drop="onDrop"
+              @dragover="onDragOver"
+              @dragleave="onDragLeave"
             />
+
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              @change="onFilesPicked"
+            />
+
+            <div v-if="dragActive" class="pc-editor-drop">
+              <span class="pc-editor-drop-glyph">&#xE8B9;</span>
+              <span>松开即可上传到个人图盘</span>
+            </div>
 
             <div v-if="showPreview" class="pc-editor-preview">
               <div class="pc-editor-pane-label">预览</div>
@@ -258,7 +477,12 @@ async function submit(): Promise<void> {
 
           <div class="pc-editor-footer">
             <span class="pc-muted">
-              {{ charCount }} 字 · {{ wordCount }} 词 · 已选 {{ selected.length }} 个分类
+              <template v-if="isUploading">
+                正在上传 {{ uploading }} 张图片…
+              </template>
+              <template v-else>
+                {{ charCount }} 字 · {{ wordCount }} 词 · 已选 {{ selected.length }} 个分类
+              </template>
             </span>
             <Button Style="AccentButtonStyle" :IsEnabled="canSubmit && !submitting" @Click="submit">
               <span class="pc-btn-content">{{ submitting ? '发布中…' : '发布主题' }}</span>

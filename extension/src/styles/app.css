@@ -1319,3 +1319,28 @@ html.pc-mounted body > *:not(#pickcat-root) {
   font-weight: 600;
   letter-spacing: 0.04em;
 }
+/* ---------------------------------------------------------------- composer extras */
+.pc-editor-split { position: relative; }
+
+.pc-editor-drop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 2px dashed color-mix(in srgb, var(--pc-accent, #ff6b60) 70%, transparent);
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 10%, var(--card-bg, #202020));
+  color: var(--text-primary);
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pc-editor-drop-glyph {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 26px;
+  color: var(--pc-accent, #ff6b60);
+}
