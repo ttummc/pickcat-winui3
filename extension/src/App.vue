@@ -48,7 +48,11 @@ const PAGES = {
 
 const pageComponent = computed(() => PAGES[route.name] ?? HomePage)
 
-const pageKey = computed(() => `${route.name}:${route.params.id ?? ''}`)
+// The query is part of the address, so it has to be part of the identity too:
+// otherwise /search?q=A -> /search?q=B kept the old results on screen.
+const pageKey = computed(
+  () => `${route.name}:${route.params.id ?? ''}:${route.query.q ?? ''}`,
+)
 const transitionName = computed(() => `pc-page-${navigationKind.value}`)
 
 const SECTION_FOR_ROUTE: Record<string, string> = {
@@ -160,8 +164,37 @@ watch(
   },
 )
 
-function onNavInvoked(_sender: unknown, args: unknown): void {
+/**
+ * NavigationView reflects the route through :IsSelected, and changing that
+ * selection re-raises SelectionChanged. Navigating from the handler would then
+ * bounce the user (the old topic -> /forum bug), so selection events caused by a
+ * route change are ignored for a moment.
+ */
+let ignoreSelectionEvents = false
+watch(pageKey, () => {
+  ignoreSelectionEvents = true
+  window.setTimeout(() => {
+    ignoreSelectionEvents = false
+  }, 300)
+})
+
+/** True when the destination is the page already on screen. */
+function isAlreadyHere(tag: string): boolean {
+  if (tag === 'profile') {
+    return route.name === 'profile' && route.params.id === sessionState.user?.id
+  }
+  const section = SECTION_FOR_ROUTE[tag === 'media' ? 'media' : tag]
+  if (!section) return false
+  return route.name in SECTION_FOR_ROUTE && SECTION_FOR_ROUTE[route.name] === section && route.params.id === undefined
+}
+
+function onNavInvoked(
+  _sender: unknown,
+  args: unknown,
+  source: 'invoke' | 'selection' = 'invoke',
+): void {
   if (!userHasInteracted) return
+  if (source === 'selection' && ignoreSelectionEvents) return
 
   const payload = (args ?? {}) as Record<string, unknown>
   const item = (payload.InvokedItem ??
@@ -175,10 +208,9 @@ function onNavInvoked(_sender: unknown, args: unknown): void {
       : ((item?.Tag ?? item?.tag ?? payload.Tag) as string | undefined)
   if (!tag) return
 
-  // The NavigationView reflects the current route, so navigating already changes
-  // its selection and fires SelectionChanged again. Without this guard a jump
-  // from Notifications to a topic bounced through '/forum' and lost the topic.
-  if (tag === activeSection.value) return
+  // Clicking the section you are already on is a no-op; clicking it from a child
+  // page (someone else's profile, a single work, a topic) must still navigate.
+  if (isAlreadyHere(tag)) return
 
   if (tag === 'home') navigate('/')
   else if (tag === 'forum') navigate('/forum')
@@ -238,9 +270,9 @@ function reopen(): void {
       IsPaneToggleButtonVisible="False"
       :OpenPaneLength="260"
       :CompactPaneLength="48"
-      @SelectionChanged="onNavInvoked"
+      @SelectionChanged="(s: unknown, e: unknown) => onNavInvoked(s, e, 'selection')"
       @BackRequested="goBack()"
-      @ItemInvoked="onNavInvoked"
+      @ItemInvoked="(s: unknown, e: unknown) => onNavInvoked(s, e, 'invoke')"
     >
       <NavigationView.MenuItems>
         <NavigationViewItem Content="首页" Tag="home" :IsSelected="activeSection === 'home'">

@@ -145,7 +145,13 @@ export function syncRoute(): void {
  */
 export function navigate(path: string, options: { replace?: boolean } = {}): void {
   const hash = path.startsWith('#') ? path : `#${path}`
-  if (location.hash === hash) return
+  if (location.hash === hash) {
+    // The address is already right, but our state may have drifted from it (a
+    // navigation that never fired hashchange, an external hash write). Re-sync
+    // from the hash instead of doing nothing.
+    syncRoute()
+    return
+  }
 
   if (options.replace) {
     window.history.replaceState(null, '', hash)
