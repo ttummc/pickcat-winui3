@@ -10,11 +10,13 @@ import { uploadFile, fileMarkdown } from '@/api/files'
 import { sanitizeHtml } from '@/lib/html'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import EditorIcon from '@/components/EditorIcon.vue'
 
 interface ToolButton {
   key: string
   label: string
-  glyph: string
+  /** Key into EDITOR_ICONS — drawn as SVG, not a font glyph. */
+  icon: string
   run: () => void
 }
 
@@ -94,18 +96,18 @@ function prefixLines(prefix: string): void {
 }
 
 const tools: ToolButton[] = [
-  { key: 'bold', label: '粗体  Ctrl+B', glyph: '\uE8DD', run: () => wrap('**') },
-  { key: 'italic', label: '斜体  Ctrl+I', glyph: '\uE8DB', run: () => wrap('*') },
-  { key: 'strike', label: '删除线', glyph: '\uE8DE', run: () => wrap('~~') },
-  { key: 'code', label: '行内代码  Ctrl+E', glyph: '\uE943', run: () => wrap('`') },
-  { key: 'codeblock', label: '代码块', glyph: '\uE8A5', run: () => wrap('\n```\n', '\n```\n', '代码') },
-  { key: 'quote', label: '引用', glyph: '\uE8BA', run: () => prefixLines('> ') },
-  { key: 'list', label: '无序列表', glyph: '\uE8FD', run: () => prefixLines('- ') },
-  { key: 'heading', label: '标题', glyph: '\uE8D2', run: () => prefixLines('## ') },
-  { key: 'link', label: '链接  Ctrl+K', glyph: '\uE71B', run: () => wrap('[', '](https://)', '链接文字') },
-  { key: 'table', label: '表格', glyph: '\uE80A', run: () => insertAt(TABLE_SNIPPET) },
-  { key: 'rule', label: '分割线', glyph: '\uE738', run: () => insertAt('\n---\n') },
-  { key: 'image', label: '上传图片（也可直接粘贴 / 拖入）', glyph: '\uE8B9', run: pickImages },
+  { key: 'bold', label: '粗体  Ctrl+B', icon: 'bold', run: () => wrap('**') },
+  { key: 'italic', label: '斜体  Ctrl+I', icon: 'italic', run: () => wrap('*') },
+  { key: 'strike', label: '删除线', icon: 'strike', run: () => wrap('~~') },
+  { key: 'code', label: '行内代码  Ctrl+E', icon: 'code', run: () => wrap('`') },
+  { key: 'codeblock', label: '代码块', icon: 'codeblock', run: () => wrap('\n```\n', '\n```\n', '代码') },
+  { key: 'quote', label: '引用', icon: 'quote', run: () => prefixLines('> ') },
+  { key: 'list', label: '无序列表', icon: 'list', run: () => prefixLines('- ') },
+  { key: 'heading', label: '标题', icon: 'heading', run: () => prefixLines('## ') },
+  { key: 'link', label: '链接  Ctrl+K', icon: 'link', run: () => wrap('[', '](https://)', '链接文字') },
+  { key: 'table', label: '表格', icon: 'table', run: () => insertAt(TABLE_SNIPPET) },
+  { key: 'rule', label: '分割线', icon: 'rule', run: () => insertAt('\n---\n') },
+  { key: 'image', label: '上传图片（也可直接粘贴 / 拖入）', icon: 'upload', run: pickImages },
 ]
 
 const TABLE_SNIPPET = '\n| 列 1 | 列 2 |\n| --- | --- |\n| 内容 | 内容 |\n'
@@ -486,7 +488,7 @@ async function submit(): Promise<void> {
                 @mousedown.prevent
                 @click="tool.run()"
               >
-                {{ tool.glyph }}
+                <EditorIcon :name="tool.icon" />
               </button>
             </div>
 
@@ -636,7 +638,8 @@ async function submit(): Promise<void> {
   border-radius: 4px;
   background: transparent;
   color: var(--text-secondary);
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  /* The formatting buttons draw SVG; only the wide buttons still use the icon font. */
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
@@ -661,9 +664,12 @@ async function submit(): Promise<void> {
 }
 
 .pc-tool-btn--wide {
-  font-family: inherit;
   font-size: 12.5px;
   padding: 0 10px;
+}
+
+.pc-tool-btn--wide .pc-tool-glyph {
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
 }
 
 .pc-tool-glyph {
