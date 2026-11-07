@@ -1,4 +1,4 @@
-import { PickCatApiError } from './client'
+import { PickCatApiError, newIdempotencyKey } from './client'
 
 /**
  * Uploads go to the site's own file storage (`POST /api/v1/files`), which is what the
@@ -62,7 +62,11 @@ export async function uploadFile(file: File, signal?: AbortSignal): Promise<Uplo
     method: 'POST',
     credentials: 'include',
     body: form,
-    headers: { accept: 'application/json' },
+    headers: {
+      accept: 'application/json',
+      // Required: the upload endpoint rejects requests without a valid key.
+      'Idempotency-Key': newIdempotencyKey(),
+    },
     signal,
   })
 

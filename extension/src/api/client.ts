@@ -19,6 +19,16 @@ function buildQuery(query?: Query): string {
   return qs ? `?${qs}` : ''
 }
 
+/**
+ * The API rejects writes without a usable key:
+ * "Idempotency-Key must contain 1 to 128 visible ASCII characters".
+ */
+export function newIdempotencyKey(): string {
+  const c = globalThis.crypto as Crypto | undefined
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID()
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   query?: Query
@@ -54,6 +64,8 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     headers: {
       accept: 'application/json',
       ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+      // Writes are idempotent by key, so one is required on POST/PUT/PATCH/DELETE.
+      ...(method === 'GET' ? {} : { 'Idempotency-Key': newIdempotencyKey() }),
       ...headers,
     },
   }
