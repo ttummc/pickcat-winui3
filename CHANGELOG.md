@@ -2,6 +2,14 @@
 
 每个版本的改动都在这里；发版时 CI 会把对应段落同步到 GitHub Release 的说明里。
 
+## v1.1.7
+
+**去掉一条 iframe 警告**
+
+- 作品页的播放器同时写了 `allow="fullscreen; …"` 和 `allowfullscreen`，Chrome 会报
+  “Allow attribute will take precedence over 'allowfullscreen'”。删掉旧属性，
+  `allow` 已经包含 fullscreen
+
 ## v1.1.6
 
 **设置页的版本号不再写死**

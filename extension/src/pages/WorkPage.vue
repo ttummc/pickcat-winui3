@@ -242,7 +242,6 @@ async function toggleWorkFavorite(): Promise<void> {
                   :src="playerSrc"
                   :title="work.workName"
                   allow="fullscreen; autoplay; gamepad; clipboard-write"
-                  allowfullscreen
                   referrerpolicy="no-referrer"
                   loading="lazy"
                 />

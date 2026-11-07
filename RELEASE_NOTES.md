@@ -1,7 +1,8 @@
-﻿**设置页的版本号不再写死**
+﻿**去掉一条 iframe 警告**
 
-- 「关于」里一直显示 `v0.1.0`，是当初写死的占位符。现在版本号在构建时从
-  `manifest.json` 注入，设置页显示的永远是实际发布的版本
+- 作品页的播放器同时写了 `allow="fullscreen; …"` 和 `allowfullscreen`，Chrome 会报
+  “Allow attribute will take precedence over 'allowfullscreen'”。删掉旧属性，
+  `allow` 已经包含 fullscreen
 
 ## 安装
 
