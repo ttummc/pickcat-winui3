@@ -38,3 +38,6 @@ desktop/publish/data/
 # downloaded site bundle chunks used only for extracting request bodies
 research/chunks/
 research/.tmp-endpoints.txt
+
+.chrome-orig*/
+.chrome-*/

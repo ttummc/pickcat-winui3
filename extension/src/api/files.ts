@@ -55,7 +55,10 @@ export async function uploadFile(file: File, signal?: AbortSignal): Promise<Uplo
   }
 
   const form = new FormData()
-  // "file" is the field name every multipart endpoint in this app family uses.
+  // Verified against the site's own client: the endpoint requires exactly one
+  // "ownership" part plus the file, otherwise it answers
+  // "The multipart upload must contain one ownership field and one file".
+  form.append('ownership', 'PERSONAL')
   form.append('file', file, file.name || 'image.png')
 
   const response = await fetch('/api/v1/files', {
