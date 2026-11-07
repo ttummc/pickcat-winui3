@@ -63,6 +63,12 @@ Copy-Item PickCat-WinUI3-extension.zip (Join-Path $env:USERPROFILE 'Downloads\Pi
 $zipMb = [Math]::Round((Get-Item 'PickCat-WinUI3-extension.zip').Length / 1MB, 2)
 Write-Host "  $zipMb MB -> Downloads"
 
+Step 'archive this version'
+New-Item -ItemType Directory -Force "releases\v$Version" | Out-Null
+Copy-Item PickCat-WinUI3-extension.zip "releases\v$Version\PickCat-WinUI3-extension.zip" -Force
+node tools/collect-releases.mjs | Out-Null
+Write-Host "  releases/v$Version/PickCat-WinUI3-extension.zip"
+
 Step 'publish the desktop app'
 Copy-Item extension\dist\content.js desktop\PickCat.WinUI3\Assets -Force
 Copy-Item extension\dist\content.css desktop\PickCat.WinUI3\Assets -Force

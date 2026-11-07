@@ -1,0 +1,28 @@
+# 历史版本
+
+每个目录里是那次发布时的扩展压缩包，内容不会再变；用途是回到旧版本对比或临时降级。
+
+> 桌面版安装包（MSI）体积较大，没有放在仓库里，请到对应的 Release 页面下载。
+
+| 版本 | 大小 | SHA-256 |
+| --- | --- | --- |
+| v1.0.0 | 1.57 MB | `c8cc1a1f251e6a0952f615577b0fdf687204cada8641a23540bdf86de20e17fd` |
+| v1.0.1 | 1.58 MB | `ffebb169be0f66c1ccaafa5b151911f88946ec4d1bfe7cfb95fab1343a92b60d` |
+| v1.0.4 | 1.58 MB | `71116827b98372ccc4f5c211a38b8af0865130a611aa28aaf9d6386b2c5e821a` |
+| v1.0.5 | 1.58 MB | `5dddf1193e2f5e958e3613f060ff3b3cd07a65ab5324ad6c7ad17366098f70c3` |
+| v1.0.6 | 1.58 MB | `4920d2c4a7ec85c10fd2ce54eb5f7d3930b42c092a205a2f2bfbbe9ad526f899` |
+| v1.0.7 | 1.58 MB | `3afdb4e3a266f822106d2d5390e8e96e3744a04431056984f69400435292eb03` |
+| v1.0.8 | 1.58 MB | `874bef48bdb949d8c02bdaaa4742cb9528cdac4320ab5cdb2e292a8f210954aa` |
+| v1.0.9 | 1.58 MB | `9de5ab38a22916c4441a856f0bd92fbaaa361c741294ebc8a2264a1906e4eece` |
+| v1.1.0 | 1.58 MB | `297269e61426e44c45d9629e0f059ecb19b0ef728ff564448cb61a585a2f156a` |
+| v1.1.1 | 1.58 MB | `6428be03d513ffabc5cc76004ce1b00bbd90358cd97bb3a6b7ab61a3a7e51b0d` |
+| v1.1.2 | 1.58 MB | `84d908995a939fe76206acfcfdfc5ebc9b2f71bd851cb4466d2d88a0f9b21580` |
+| v1.1.3 | 1.58 MB | `e98b51ab88ffd46e75476ca4d56385940ef2ecf3a8cffdba53e87479d52bcb62` |
+| v1.1.4 | 1.58 MB | `3f05d276baa4cbf4328c0fd3684739ebed5d99c4126ef8ec7e1fde53fd510b4d` |
+| v1.1.5 | 1.58 MB | `886cd70df7ebe23a0c54e8a07db6cc91fc760f45eea58ee46ba44c73bb33d14d` |
+| v1.1.6 | 1.58 MB | `cccdbc8c92bcfe8a9b1a9eba306287760f13476017dbeefc5b477b531de7b88f` |
+| v1.1.7 | 1.58 MB | `7421bd9beed8a7d6378c96c65a34b0e07ed1954b8aa3442f394b16ca2ae21167` |
+| v1.1.8 | 1.58 MB | `441ffa88e8308d67e24752e097069e7b74011b679515648277187f9f6c2db0c0` |
+| v1.1.9 | 1.58 MB | `30964479c4dc1205f69c30b1c1eed8ebbea38ed66fc95c67bef7e972d5e0b6e3` |
+
+下载地址规律：`https://github.com/ttummc/pickcat-winui3/releases/download/<版本>/PickCat-WinUI3-extension.zip`
