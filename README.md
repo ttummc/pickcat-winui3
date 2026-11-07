@@ -1,291 +1,212 @@
+<div align="center">
+
 # PickCat · WinUI 3 Edition
 
-[![Download](https://img.shields.io/badge/⬇_Download_for_Chrome-Latest_release-ff6b60?style=for-the-badge&logo=googlechrome&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)
-[![Download](https://img.shields.io/badge/⬇_Download_for_Windows-Desktop_installer-0078d4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/ttummc/pickcat-winui3/releases/latest)
-[![Install guide](https://img.shields.io/badge/Install_guide-Step--by--step_with_screenshots-2ea043?style=for-the-badge)](https://ttummc.github.io/pickcat-winui3/)
+**把 PickCat 社区重新做成一个 Windows 应用**
 
-[![build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
-[![license: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+不是给网页套一层皮 —— 原站界面整个丢掉，窗口、导航、右键菜单、编辑器、
+消息提示全部按系统应用的逻辑重写。
 
-**English** · [简体中文](README.zh-CN.md)
+[![Version](https://img.shields.io/github/v/release/ttummc/pickcat-winui3?style=flat-square&color=ff6b60&label=version)](https://github.com/ttummc/pickcat-winui3/releases)
+[![Build](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml/badge.svg)](https://github.com/ttummc/pickcat-winui3/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
+[![Unofficial](https://img.shields.io/badge/unofficial-fan%20project-8a8a8a?style=flat-square)](#声明)
 
-> **Unofficial project.** This is a fan-made client. It is not affiliated with, endorsed by, or
-> authorised by PickCat. It only activates on `pickcat.dao3.fun` and collects no user data
-> (see [PRIVACY.md](PRIVACY.md)).
-
-## Two ways to run it
-
-| | What it is | How to install |
-|---|---|---|
-| **Browser extension** | Runs inside Chrome / Edge on `pickcat.dao3.fun` | Load unpacked — steps below |
-| **Windows app** | A real desktop window (WinUI 3 + WebView2), no browser involved | Run `PickCatWinUI3-Setup-*.msi` from [Releases](https://github.com/ttummc/pickcat-winui3/releases/latest) |
-
-The installer is ~68 MB, needs no administrator rights, adds a Start-menu entry, and uninstalls
-from *Settings → Apps* like any other program. Windows 10/11 x64.
-
-## Install
-
-1. Download **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)**
-2. Extract it into a folder **inside your user profile**, e.g. `C:\Users\<your-name>\PickCatWinUI3`.
-   **Not** `C:\Program Files` — it is protected, and Chrome fails there with
-   `rules.json: Internal error while parsing rules`. Not `Downloads` either, and not a synced folder
-3. Open `chrome://extensions` in Chrome
-4. Turn on **Developer mode** (top right)
-5. Click **Load unpacked** and select the folder that **directly contains `manifest.json`**
-
-Visit <https://pickcat.dao3.fun/> and the new UI is already there.
-
-> Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
-
-📖 **[Full installation guide](docs/INSTALL.md)** — folder layout, every error message and its fix,
-updating, uninstalling.
-
-> Prefer a page with screenshots and step-by-step instructions?
-> **<https://kitter.cn/pickcat-winui3/>** walks through it in five steps.
-
-PickCat's community site, **rebuilt from scratch as a Windows 11 style application**. This is not a
-reskin: the original UI is dropped entirely and replaced with a new interface written against the
-site's own HTTP API.
-
-- UI toolkit: [WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb) (Vue 3 + real WinUI 3 controls)
-- Form factor: Chrome extension (MV3) that takes over the window on the original domain
-- Data: the site's real API — 245 endpoints documented in [docs/API.md](docs/API.md)
-
-**Install:** grab `PickCat-WinUI3-extension.zip` from [Releases](https://github.com/ttummc/pickcat-winui3/releases), or build from source (below).
-
-![The app](docs/store/marquee-1400x560.png)
+</div>
 
 ---
 
-## What it looks like
+## ⬇ 下载
 
-The window is made of actual WinUI controls: `TitleBar` (with the three caption buttons),
-`NavigationView` (left pane plus footer items), `Button`, `TextBox`, `PasswordBox`, `InfoBar`,
-`ProgressRing`, `InfoBadge`, `TeachingTip` and more. Icons come from Segoe Fluent Icons; colours
-come from WinUI's Fluent tokens (`--card-bg`, `--text-primary`, `--accent-base`, …).
+**网盘**（同一份文件，挑一个打得开的）：
 
-Light / dark / follow-system themes, four accent colours (PickCat coral by default).
+<div align="center">
 
----
+[![OneDrive](https://img.shields.io/badge/OneDrive-0078D4?style=for-the-badge&logo=microsoftonedrive&logoColor=white)](https://1drv.ms/f/c/b2c0d7744e9876a7/IgC9Q1_GvXwIQp5IBeGCS_BuAXY-1ZHx1t6pYLS1RNN1ZUc?e=EtPhdu)
+[![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1j9yLswHUpb92_MnlfrdbN2fuZFybJrnx?usp=sharing)
+[![Dropbox](https://img.shields.io/badge/Dropbox-0061FF?style=for-the-badge&logo=dropbox&logoColor=white)](https://www.dropbox.com/scl/fo/y9qakmyil0rafk2bmup9m/AFHY-os6APdT555OFZ3UNW8?rlkey=grg3e4v2rteys0j729sy43bry&st=cmwm5bp5&dl=0)
 
-## Install (from source)
+[![Proton Drive](https://img.shields.io/badge/Proton%20Drive-6D4AFF?style=for-the-badge&logo=proton&logoColor=white)](https://drive.proton.me/urls/EY88C0MZ7G#96gfYMtKmdnk)
+[![pCloud](https://img.shields.io/badge/pCloud-0FADED?style=for-the-badge&logo=pcloud&logoColor=white)](https://u.pcloud.link/publink/show?code=kZigGjJZpkS0XqHtLIXUanaC5dOzm81zMLq7)
+[![MEGA](https://img.shields.io/badge/MEGA-D9272E?style=for-the-badge&logo=mega&logoColor=white)](https://mega.nz/folder/tZVQWL5I#5f9r7yX_TFi5jr3VV7x5mQ)
 
-```powershell
+</div>
+
+**GitHub 发布**（每次发版由 CI 构建，带校验值）：
+
+| 你想要 | 下载 |
+| --- | --- |
+| 浏览器扩展（Chrome / Edge） | **[PickCat-WinUI3-extension.zip](https://github.com/ttummc/pickcat-winui3/releases/latest/download/PickCat-WinUI3-extension.zip)** |
+| Windows 桌面版 | **[Releases](https://github.com/ttummc/pickcat-winui3/releases/latest)** 里的 `PickCatWinUI3-Setup-*.msi` |
+| 历史版本 | [`releases/`](releases) 目录，或 [全部 Release](https://github.com/ttummc/pickcat-winui3/releases) |
+
+> 网盘里放的是同样的文件；核对来源时以 Release 页面的 SHA-256 为准。
+
+<div align="center">
+
+<img src="docs/promo/pickcat-promo.png" alt="PickCat WinUI 3" width="880">
+
+</div>
+
+## 两种用法
+
+| | 是什么 | 怎么装 |
+| --- | --- | --- |
+| **浏览器扩展** | 在 Chrome / Edge 里替换掉 `pickcat.dao3.fun` 的界面 | 解压 → 加载已解压的扩展程序 |
+| **Windows 桌面版** | 真正的桌面窗口（WinUI 3 + WebView2），不用开浏览器 | 双击 `PickCatWinUI3-Setup-*.msi` |
+
+桌面版约 68 MB，不需要管理员权限，开始菜单有条目，可在「设置 → 应用」里卸载。
+系统要求 Windows 10/11 x64。
+
+## 它和原站有什么不同
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🪟 真的控件，不是仿制**
+
+标题栏、导航栏、右键菜单、对话框、消息提示、进度条都是控件实现的，
+焦点、悬停、按压状态齐全。
+
+**🎞 页面切换有方向**
+
+进入下一层从右滑入，返回反向退出，同级切换淡入；列表逐条上浮，
+卡片按压会轻微缩回。
+
+</td>
+<td width="50%" valign="top">
+
+**🖱 右键菜单全接管**
+
+卡片操作、复制选中文字、打开选中文字里的链接、复制链接地址、
+回到顶部、刷新 —— 空白处也有菜单。
+
+**🔐 登录走官方页面**
+
+登录表单完整保留原站，滑块验证在官方页面完成，我们不碰密码。
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**🎨 浅色 / 深色 / 跟随系统**
+
+四套强调色，标题栏与界面同步切换。
+
+</td>
+<td valign="top">
+
+**🛡 不收集任何数据**
+
+所有请求都发往 `pickcat.dao3.fun`，本地只保存主题和强调色两项偏好。
+
+</td>
+</tr>
+</table>
+
+## 安装
+
+### 浏览器扩展（五分钟）
+
+1. 下载 `PickCat-WinUI3-extension.zip`，解压到一个**长期保留**的目录，
+   例如 `C:\Users\<你的用户名>\PickCatWinUI3`
+2. 打开 `chrome://extensions`（Edge 用 `edge://extensions`），打开右上角**开发者模式**
+3. 点 **加载已解压的扩展程序**，选择第 1 步那个文件夹（里面能看到 `manifest.json`）
+4. 打开 <https://pickcat.dao3.fun/>
+
+> **不要放在 `C:\Program Files`** —— 受保护目录，Chrome 会报
+> `rules.json: Internal error while parsing rules`。也不要放 `Downloads` 或同步盘。
+
+### Windows 桌面版
+
+从 [Releases](https://github.com/ttummc/pickcat-winui3/releases/latest) 下载
+`PickCatWinUI3-Setup-*.msi` 双击安装。安装包未签名，SmartScreen 提示时选
+「更多信息 → 仍要运行」。
+
+## 已经重写的页面
+
+首页 · 论坛 · 分类 · 帖子详情 · 发帖编辑器 · 作品列表 · 作品详情（内嵌播放器）·
+个人主页 · 通知 · 搜索 · 个人图盘 · 个人作品库 · 设置
+
+未重建的页面（注册、找回密码、圈子、创作、入站考试、审核）会给一个
+「在原站打开」的按钮，不会假装它们存在。
+
+## 从源码构建
+
+```bash
 npm install
-cd extension
-npx vite build          # output goes to extension/dist
+
+# 扩展
+npx vite build            # 产物在 extension/dist，可直接当扩展加载
+
+# 桌面版（需要 .NET 10 SDK）
+dotnet publish desktop/PickCat.WinUI3/PickCat.WinUI3.csproj \
+  -c Release -r win-x64 --self-contained -o desktop/publish
 ```
 
-Then in Chrome:
-
-1. Open `chrome://extensions`
-2. Enable **Developer mode** (top right)
-3. Click **Load unpacked** and pick the `extension/dist` folder
-4. Open <https://pickcat.dao3.fun/> — the new UI is already there
-
-> Only active on `pickcat.dao3.fun`. Disable the extension and the original site comes back.
-
----
-
-## How it works
-
-```
-┌─────────────────────────────── pickcat.dao3.fun ───────────────────────────────┐
-│                                                                                │
-│  rules.json (declarativeNetRequest)  ── blocks the site's own /_nuxt/ JS/CSS    │
-│                                                                                │
-│  content.css  ── hides everything on <body> except #pickcat-root                │
-│                                                                                │
-│  content.js (isolated world) ── Vue 3 + winuionweb, mounted into #pickcat-root  │
-│         │                                                                      │
-│         └── fetch('/api/v1/...')  ← same origin, cookies just work, no CORS     │
-│                                                                                │
-│  bridge.js (MAIN world) ── the only code that can reach the page's             │
-│                             window.initAliyunCaptcha; talks to content.js       │
-│                             over CustomEvents with JSON-string payloads         │
-└────────────────────────────────────────────────────────────────────────────────┘
-```
-
-Three deliberate decisions:
-
-1. **Block the original bundle instead of covering it.** A static `declarativeNetRequest` rule blocks
-   `/_nuxt/`, so the Nuxt app never boots — it cannot fight us for the DOM or fire its own requests.
-2. **The UI is genuinely rewritten.** Routing is our own hash router (`#/forum/post/<id>`); every page
-   is a new Vue component with layout, hierarchy and interaction redesigned around WinUI conventions.
-3. **The CAPTCHA needs a world bridge.** An MV3 content script lives in the isolated world and cannot
-   see the page's `window.initAliyunCaptcha`, and MV3 forbids injecting inline scripts. The bridge is
-   therefore declared with `content_scripts[].world = "MAIN"`.
-
----
-
-## Pages
-
-| Route | Page | Main endpoints |
-| --- | --- | --- |
-| `#/` | Home (recommended / latest feed) | `/topic-recommendations`, `/topics`, `/tags` |
-| `#/forum` | Forum overview + categories | `/topics?sort=latest`, `/tags` |
-| `#/forum/category/:slug` | Topics in a category | `/topics?tag=<slug>` |
-| `#/forum/post/:id` | Topic detail (body, nested replies) | `/topics/{id}`, `/topics/{id}/posts`, `POST /posts`, `PUT /posts/{id}/like` |
-| `#/forum/editor` | New topic | `POST /posts` |
-| `#/works` | Works (featured carousel + discovery) | `/featured-works`, `/work-recommendations` |
-| `#/works/:id` | Work detail + comments | `/works/{id}`, `/works/{id}/comments` |
-| `#/profile/:uid` | Profile (about, posts, works, replies, following, followers, contribution heatmap) | `/users/{id}`, `/users/{id}/*` |
-| `#/notifications` | Notifications | `/notifications`, `/notification-summary`, `PATCH /notifications` |
-| `#/search` | Search (users / works) | `/search/users`, `/search/works` |
-| `#/library` | Personal work library | `/users/{id}/works`, `/users/{id}/topics` |
-| `#/personal-library` | Personal file board | `/files`, `/file-storage-quotas` |
-| `#/settings` | Settings (theme / accent / account / sign out) | `/level-progress`, `/avatar-presets`, `DELETE /session` |
-| `#/login` | Sign in (Aliyun slider CAPTCHA) | `POST /session` + `initAliyunCaptcha` |
-
----
-
-## WinUI controls actually used
-
-These are not CSS lookalikes — the library's controls do the work:
-
-| Category | Control | Where |
-| --- | --- | --- |
-| Window / navigation | `TitleBar`, `NavigationView` (Left mode + footer items) | Whole shell; back, pane toggle, caption buttons |
-| Badge | `InfoBadge` | Unread count on the "Notifications" item |
-| Selection | `SelectorBar` | Home recommended/latest, forum latest/active, six profile tabs, search users/works, library works/posts, work recommendations |
-| Menu | `MenuFlyout` (superseded by a hand-rolled menu) | Card right-click menu and the "⋯" button |
-| Settings rows | `SettingsCard` | Every row on the settings page (header + description + action + header icon) |
-| Dialogs | `ContentDialog` | Modal sign-out confirmation (`ShowAsync()`) |
-| Progress | `ProgressBar`, `ProgressRing` | Level progress, page loading states |
-| Paging | `PipsPager` | Featured carousel on the works page |
-| Disclosure | `Expander` | "How to use" on the work detail page |
-| Input | `TextBox`, `PasswordBox` | Search, compose, reply, sign-in |
-| Avatar | `PersonPicture` | Profile avatar (initials fallback, `role="img"`) |
-| Status | `InfoBar` | Bottom-right message stack (success / warning / error) |
-| Basics | `FontIcon`, `ImageIconSource`, `ToolTipService` | Icons, app icon, global tooltips |
-
-> `BreadcrumbBar` was evaluated and dropped: its `ItemTemplate` resolves `{x:Bind Name}` through the
-> XAML binding pipeline, which never produced labels inside our components (both `Mode=OneWay` and
-> function templates were tried) — it rendered a row of empty buttons. Topic pages use a back link.
-
----
-
-## Motion
-
-Half of the WinUI feel is motion, so it gets its own section. All of it reuses the library's Fluent
-tokens (`--fast-out-slow-in`, `--fast-duration`, `--faster-duration`) rather than inventing easing.
-
-| Case | Behaviour |
-| --- | --- |
-| Drill in (list → detail) | New page slides in 56px from the right and fades in; old page exits left (`drill`, 300ms / 120ms) |
-| Back | Mirrored: slides in from the left, exits right (`back`) |
-| Sibling switch (forum ↔ works ↔ search) | Fade + 10px rise (`fade`) |
-| List entrance | Cards rise 12px and fade in, staggered +30ms per item (`pc-rise-in`) |
-| Press feedback | Card `scale(0.995)`, 83ms |
-| Segments / expanders / menus | The library's own animations |
-
-Direction is derived, not guessed: the router assigns every page a depth (home 0 → forum 1 →
-category 2 → topic 3) and compares old vs new to decide `drill` or `back`, so forward and backward
-animations are genuinely opposite.
-
-Under `prefers-reduced-motion: reduce` all animation collapses to 0.01ms.
-
----
-
-## Layout
-
-```
-extension/
-  public/            manifest.json / rules.json / bridge.js / icons
-  src/
-    content.ts       content script entry (mounts the Vue app)
-    App.vue          WinUI window shell (TitleBar + NavigationView)
-    router.ts        hand-written hash router
-    api/             API client and types (mirrors docs/API.md)
-    stores/          session, theme/accent, notifications, context menu, card registry
-    lib/             captcha bridge, HTML sanitising, formatting
-    components/      cards, tabs, empty states, menus
-    pages/           14 pages
-  dist/              build output (loadable as-is)
-docs/
-  API.md             245 endpoints
-  gallery/           WinUIonWeb control reference (~8,900 lines, control by control)
-  original-ui/       screenshots of the site before the rewrite (for feature parity)
-  screenshots/live/  post-rewrite screenshots, page by page
-  store/             Chrome Web Store assets
-research/            raw material collected while mapping the API
-tools/               CDP verification scripts
-vendor/              winuionweb 0.2.0 tarball
-```
-
----
-
-## Development
+发版（构建 + 同步安装目录 + 打包 + MSI + 归档 + 打 tag）：
 
 ```powershell
-# build
-npm run ext:build
-
-# build + restart Chrome + reload extension + screenshot every page
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/check.ps1
-
-# verify a single page
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/check.ps1 -Name topic -Hash "#/forum/post/<id>"
+powershell -File tools\release.ps1 -Version 1.2.0
 ```
 
-Scripts under `tools/` drive Chrome over CDP:
+## 技术细节
 
-- `verify-all.mjs` — walks every route, detects a hung renderer, screenshots to `shots/`
-- `debug-hang.mjs` — attaches a debugger and captures the main-thread stack of a hang (this is how the
-  `Tag="settings"` trap was found)
-- `capture_routes.mjs` — screenshots the original site, used as the before/after reference
+<details>
+<summary><b>用到的 WinUI 控件</b></summary>
 
-### Traps we hit
+`TitleBar` `NavigationView` `SelectorBar` `Button` `TextBox` `InfoBar`
+`ContentDialog` `ProgressBar` `ProgressRing` `InfoBadge` `PersonPicture`
+`SettingsCard` `Expander` `ToolTip` `MenuFlyout` `PipsPager` `FontIcon`
 
-- **`const history = []` shadows `window.history`.** The router declared a same-named stack array, so
-  `navigate()` pushed onto it: URL never changed, page never changed — the whole UI looked frozen.
-  Fixed by assigning `location.hash`.
-- **`NavigationView` fires `SelectionChanged` during mount**, overriding the route the user actually
-  opened (visit `/` and land on the forum). Guarded behind a "has the user interacted yet" flag.
-- **`Tag="settings"` is reserved.** It collides with NavigationView's built-in Settings item and sends
-  Vue into an infinite update loop that hangs the renderer. Renamed to `prefs`.
-- `NavigationView` events are `(sender, args)`, not plain Vue events. `ItemInvoked` never fires;
-  `SelectionChanged` is the usable one.
-- `ContentDialog` is imperative (`ShowAsync()`); there is no `v-model:isOpen`.
-- **`NavigationView` ships its own back button**, which duplicates the `TitleBar` one and pushes the
-  first nav item down ~130px, shoving the footer items off a short window. Fixed with
-  `IsBackButtonVisible="Collapsed"`.
-- **A `position: relative` banner covers an avatar pulled up by a negative margin.** The avatar looked
-  cropped; it was painted underneath. Fixed with `position: relative; z-index: 1` on the body.
-- The topic list's `sort` only accepts `hot | latest | earliest`.
-- **MV3 forbids content scripts injecting inline scripts**, so the main-world CAPTCHA bridge must be
-  declared via `content_scripts[].world = "MAIN"`, not appended at runtime.
-- **Reload the extension (or restart Chrome) after every rebuild**, otherwise you are testing the old bundle.
-- **CDP click tests must send `mouseMoved` before `mousePressed`**, otherwise WinUI controls never enter
-  their pointerover state and ignore the press — which reads as "the button does nothing".
+</details>
 
----
+<details>
+<summary><b>目录结构</b></summary>
 
-## Release
+```
+extension/         Chrome 扩展（Vue 3 + WinUIonWeb）
+  src/pages/       各页面
+  src/components/  共用组件
+  public/          manifest / background
+site/              官网（早期版本，现用 docs/index.html 单文件）
+docs/              GitHub Pages 站点 + 截图 + 文档
+releases/          每个版本的扩展压缩包
+desktop/           WinUI 3 桌面版
+installer/         WiX 安装包定义
+tools/             构建、验证、录屏脚本
+```
 
-| File | Purpose |
-| --- | --- |
-| `PickCat-WinUI3-extension.zip` | v1.0.0 build, loadable with "Load unpacked" |
-| `LICENSE` | GPL-3.0 (required: WinUIonWeb is GPL-3.0) |
-| `PRIVACY.md` | Privacy policy: no data collected |
-| `STORE.md` | Store copy, permission justifications, asset list, pre-submission checklist |
-| `PUBLISH.md` | How to publish / cut a release |
-| `docs/store/` | 440×280 tile, 1400×560 marquee, 1280×800 screenshots, 128 icon |
+</details>
 
-⚠️ **Read [STORE.md](STORE.md) before submitting to the Chrome Web Store.** Three things will block
-review today: a third-party script loaded at runtime ("remote code"), replacing another site's UI, and
-a name that contains someone else's trademark.
+<details>
+<summary><b>踩过的坑</b></summary>
 
----
+- **WebView2 里没有 `chrome.runtime`**：content script 直接崩，窗口全白。现在所有
+  `chrome.*` 调用都有存在性判断
+- **`AddScriptToExecuteOnDocumentCreatedAsync` 在所有 frame 执行**：播放器 iframe 里
+  也会挂一份我们的 UI。用 `window.top !== window.self` 挡住
+- **全屏元素不能在 DOM 里移动**：移动会让浏览器立刻退出全屏，表现是「闪一下」
+- **页面的 `transform` 会让 `position: fixed` 失效**：它相对那个祖先定位，而不是视口
+- **上传要 `Idempotency-Key` + `ownership=PERSONAL`**：否则 400
+- **`/topics` 只接受 `sort=latest|relevance`**：「活跃」只能前端算
 
-## Third party
+</details>
 
-| Component | Licence |
-| --- | --- |
-| [WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb) | GPL-3.0-only |
-| [Vue 3](https://vuejs.org/) | MIT |
+## 相关链接
 
-Because it bundles GPL-3.0 WinUIonWeb, this extension as a whole is distributed under
-**GPL-3.0-only**. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- 官网：<https://ttummc.github.io/pickcat-winui3/>
+- 更新日志：[CHANGELOG.md](CHANGELOG.md)
+- 历史版本：[releases/](releases)
+- 隐私说明：[PRIVACY.md](PRIVACY.md)
 
-Not affiliated with Microsoft. Not an official PickCat client.
+## 声明
+
+非官方作品，与 PickCat 官方无关。只在 `pickcat.dao3.fun` 生效，停用扩展后原站界面
+立刻恢复。代码以 GPL-3.0 发布；使用的 UI 库
+[WinUIonWeb](https://github.com/Furry-Xiyi/WinUIonWeb) 同样是 GPL-3.0。
+
+<sub>English: an unofficial WinUI 3 restyle of the PickCat community, shipped as a Chrome
+extension and a Windows desktop app. Downloads are listed at the top.</sub>
