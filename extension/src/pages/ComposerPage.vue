@@ -593,11 +593,13 @@ async function submit(): Promise<void> {
   font-size: 14px;
 }
 
+/* The split needs a definite height, otherwise the preview grows with its content
+   and the whole page scrolls instead of the pane. */
 .pc-editor-split {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  min-height: 380px;
-  max-height: 520px;
+  align-items: stretch;
+  height: clamp(380px, 58vh, 640px);
 }
 
 .pc-editor-split--preview {
@@ -620,8 +622,9 @@ async function submit(): Promise<void> {
   font-size: 13.5px;
   line-height: 22px;
   padding: 14px 16px;
-  min-height: 380px;
-  max-height: 520px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
   tab-size: 2;
 }
@@ -646,6 +649,8 @@ async function submit(): Promise<void> {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   padding: 10px 14px 14px;
   gap: 8px;
 }
@@ -661,7 +666,25 @@ async function submit(): Promise<void> {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 4px;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+}
+
+/* own scrollbar, so the pane reads as a separate surface */
+.pc-editor-preview-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.pc-editor-preview-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 5px;
+}
+
+.pc-editor-preview-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+  background-clip: content-box;
 }
 
 .pc-editor-footer {
