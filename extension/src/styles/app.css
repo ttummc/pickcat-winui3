@@ -1350,7 +1350,8 @@ html.pc-mounted body > *:not(#pickcat-root) {
    Chrome and in the desktop WebView2 host, and keeps our own toolbar visible. */
 .pc-editor--full {
   position: fixed;
-  inset: 0;
+  /* 标题栏保留，侧栏和内容区被覆盖 */
+  inset: var(--pc-titlebar-height, 32px) 0 0 0;
   z-index: 60;
   display: flex;
   flex-direction: column;

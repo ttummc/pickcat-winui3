@@ -272,6 +272,11 @@ const FULL_LOCK = 'pc-editor-full'
 
 function applyFullscreenLock(on: boolean): void {
   document.documentElement.classList.toggle(FULL_LOCK, on)
+  // Measure the real title bar so the overlay starts right below it instead of
+  // guessing a constant.
+  const host = document.querySelector('.pc-titlebar-host')
+  const height = host?.getBoundingClientRect().height ?? 32
+  document.documentElement.style.setProperty('--pc-titlebar-height', `${Math.round(height)}px`)
 }
 
 watch(fullscreen, applyFullscreenLock)
@@ -440,7 +445,8 @@ async function submit(): Promise<void> {
           </div>
         </div>
 
-        <div class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
+        <Teleport to="#pickcat-root" :disabled="!fullscreen">
+          <div class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
           <div class="pc-editor-bar">
             <div class="pc-editor-tools">
               <button
@@ -533,7 +539,8 @@ async function submit(): Promise<void> {
               <span class="pc-btn-content">{{ submitting ? '发布中…' : '发布主题' }}</span>
             </Button>
           </div>
-        </div>
+          </div>
+        </Teleport>
 
         <div v-if="error">
           <InfoBar IsOpen="True" Title="发布失败" :Message="error" Severity="Error" IsClosable="True" />
