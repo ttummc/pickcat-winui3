@@ -60,17 +60,35 @@ function fileUrl(file: StoredFile): string {
 
 const failed = ref<Record<string, boolean>>({})
 
+/** Dimensions come free with the <img> that already renders the thumbnail. */
+const dimensions = ref<Record<string, string>>({})
+
+function onImageLoad(file: StoredFile, event: Event): void {
+  const img = event.target as HTMLImageElement
+  if (img.naturalWidth && img.naturalHeight) {
+    dimensions.value[file.id] = `${img.naturalWidth}×${img.naturalHeight}`
+  }
+}
+
 function label(file: StoredFile): string {
   return file.name || file.id
 }
 
+/**
+ * The listing response carries no size field, so "0 B" was a lie. Print nothing
+ * when the number is unknown and let the card fall back to dimensions / date.
+ */
 function formatSize(bytes?: number): string {
-  if (!bytes || !Number.isFinite(bytes) || bytes <= 0) return '0 B'
-  if (bytes < 1024) return `${bytes} B`
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes <= 0) return ''
+  if (bytes < 1024) return `${Math.round(bytes)} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
   return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
+
+const UNLIMITED = 2 ** 53 - 1
+
+const unlimited = computed(() => (storage.value?.limitBytes ?? 0) >= UNLIMITED)
 
 const usedBytes = computed(() => {
   const s = storage.value
@@ -81,7 +99,7 @@ const usedBytes = computed(() => {
 
 const usedPercent = computed(() => {
   const limit = storage.value?.limitBytes ?? 0
-  if (!limit) return 0
+  if (!limit || unlimited.value) return 0
   return Math.min(100, Math.round((usedBytes.value / limit) * 100))
 })
 
@@ -239,12 +257,14 @@ onMounted(async () => {
         <div v-if="isSignedIn" class="pc-storage">
           <div class="pc-storage-line">
             <span :class="{ 'pc-storage-low': lowSpace }">
-              {{ formatSize(usedBytes) }} / {{ storage ? formatSize(storage.limitBytes) : '—' }}
+              已用 {{ formatSize(usedBytes) || '0 B' }}
+              <template v-if="!unlimited && storage"> / {{ formatSize(storage.limitBytes) }}</template>
             </span>
             <span v-if="storageError" class="pc-muted">额度读取失败</span>
+            <span v-else-if="unlimited" class="pc-muted">无上限</span>
             <span v-else class="pc-muted">{{ usedPercent }}%</span>
           </div>
-          <span class="pc-quota-bar">
+          <span v-if="!unlimited" class="pc-quota-bar">
             <span :class="{ 'pc-quota-bar--low': lowSpace }" :style="{ width: `${usedPercent}%` }" />
           </span>
         </div>
@@ -326,6 +346,7 @@ onMounted(async () => {
               :alt="label(file)"
               loading="lazy"
               decoding="async"
+              @load="onImageLoad(file, $event)"
               @error="failed[file.id] = true"
             />
             <span v-else class="pc-media-file-icon">&#xE8A5;</span>
@@ -341,9 +362,10 @@ onMounted(async () => {
             <span class="pc-media-meta">
               <span class="pc-media-name">{{ label(file) }}</span>
               <span class="pc-muted">
-                {{ formatSize(file.size) }}
-                <template v-if="inTrash && file.deletedAt"> · {{ relativeTime(file.deletedAt) }}删除</template>
-                <template v-else-if="file.createdAt"> · {{ relativeTime(file.createdAt) }}</template>
+                <template v-if="formatSize(file.size)">{{ formatSize(file.size) }} · </template>
+                <template v-else-if="dimensions[file.id]">{{ dimensions[file.id] }} · </template>
+                <template v-if="inTrash && file.deletedAt">{{ relativeTime(file.deletedAt) }}删除</template>
+                <template v-else-if="file.createdAt">{{ relativeTime(file.createdAt) }}</template>
               </span>
             </span>
           </div>
