@@ -1,8 +1,11 @@
-﻿**去掉一条 iframe 警告**
+﻿**全屏编辑改用系统级全屏**
 
-- 作品页的播放器同时写了 `allow="fullscreen; …"` 和 `allowfullscreen`，Chrome 会报
-  “Allow attribute will take precedence over 'allowfullscreen'”。删掉旧属性，
-  `allow` 已经包含 fullscreen
+- 上一版只是把编辑器做成固定定位浮层，结果被侧栏和页面内容压在下面（侧栏的
+  堆叠顺序更高），文字还会透出来
+- 现在优先调用浏览器 Fullscreen API：元素进入浏览器的顶层（top layer），
+  不受任何堆叠上下文影响；拿不到权限时（例如 WebView2）才退回固定定位浮层，
+  并且浮层挂到 `body`、z-index 拉满
+- 用原生全屏时按 Esc 退出会同步状态
 
 ## 安装
 

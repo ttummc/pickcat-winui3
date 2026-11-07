@@ -1350,9 +1350,10 @@ html.pc-mounted body > *:not(#pickcat-root) {
    Chrome and in the desktop WebView2 host, and keeps our own toolbar visible. */
 .pc-editor--full {
   position: fixed;
-  /* 标题栏保留，侧栏和内容区被覆盖 */
-  inset: var(--pc-titlebar-height, 32px) 0 0 0;
-  z-index: 60;
+  /* fallback 时保留标题栏；原生全屏时会被下面的 :fullscreen 覆盖成 0 */
+  inset: var(--pc-titlebar-height, 46px) 0 0 0;
+  /* must beat the shell's nav/content stacking order */
+  z-index: 2147483000;
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -1382,4 +1383,21 @@ html.pc-mounted body > *:not(#pickcat-root) {
 html.pc-editor-full,
 html.pc-editor-full body {
   overflow: hidden;
+}
+
+/* Native fullscreen: the browser puts the element in the top layer and paints the
+   backdrop black, so drop the title-bar offset and use our own surface colour. */
+.pc-editor--full:fullscreen,
+.pc-editor:fullscreen {
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  background: var(--app-bg, #202020);
+}
+
+.pc-editor:fullscreen::backdrop {
+  background: var(--app-bg, #202020);
 }

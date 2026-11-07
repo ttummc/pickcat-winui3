@@ -31,6 +31,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 
 /** Images currently being uploaded; the editor locks paste-upload while non-zero. */
 const fullscreen = ref(false)
+const editorRef = ref<HTMLElement | null>(null)
 const uploading = ref(0)
 const dragActive = ref(false)
 
@@ -264,9 +265,10 @@ function onDragLeave(): void {
 }
 
 /**
- * Fullscreen here means the editor fills the window (固定定位), not the browser's
- * Fullscreen API: that needs a user gesture on an element the page owns, and it
- * behaves differently inside WebView2.
+ * Two layers of support:
+ *   1. the real Fullscreen API — the browser moves the element to the top layer,
+ *      which is the only thing that reliably sits above the shell's stacking order;
+ *   2. a fixed overlay as fallback (WebView2 / blocked fullscreen).
  */
 const FULL_LOCK = 'pc-editor-full'
 
@@ -282,8 +284,32 @@ function applyFullscreenLock(on: boolean): void {
 watch(fullscreen, applyFullscreenLock)
 onBeforeUnmount(() => applyFullscreenLock(false))
 
-function toggleFullscreen(): void {
-  fullscreen.value = !fullscreen.value
+async function toggleFullscreen(): Promise<void> {
+  if (!fullscreen.value) {
+    try {
+      await editorRef.value?.requestFullscreen?.()
+      fullscreen.value = true
+      return
+    } catch {
+      /* fall through to the CSS overlay */
+    }
+    fullscreen.value = true
+    return
+  }
+
+  if (document.fullscreenElement) {
+    try {
+      await document.exitFullscreen()
+    } catch {
+      /* ignore */
+    }
+  }
+  fullscreen.value = false
+}
+
+/** Keep our state in step when the user leaves native fullscreen with Esc. */
+function onFullscreenChange(): void {
+  if (!document.fullscreenElement && fullscreen.value) fullscreen.value = false
 }
 
 function onFullscreenKey(event: KeyboardEvent): void {
@@ -314,12 +340,14 @@ watch([title, markdown], scheduleSave)
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onFullscreenKey, true)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
   window.clearTimeout(draftTimer)
   saveDraft()
 })
 
 onMounted(async () => {
   window.addEventListener('keydown', onFullscreenKey, true)
+  document.addEventListener('fullscreenchange', onFullscreenChange)
   restoreDraft()
   try {
     const result = await api.get<{ items: Tag[] }>('/tags', { assignable: 'true' })
@@ -445,8 +473,8 @@ async function submit(): Promise<void> {
           </div>
         </div>
 
-        <Teleport to="#pickcat-root" :disabled="!fullscreen">
-          <div class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
+        <Teleport to="body" :disabled="!fullscreen">
+          <div ref="editorRef" class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
           <div class="pc-editor-bar">
             <div class="pc-editor-tools">
               <button
