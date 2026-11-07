@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { InfoBadge } from 'winuionweb'
 import { route, navigate, goBack, navigationKind } from './router'
 import { uiState, dismiss, notify } from './stores/ui'
@@ -150,6 +150,17 @@ onMounted(() => {
   window.addEventListener('pointerdown', markInteraction, true)
   window.addEventListener('keydown', markInteraction, true)
   void refreshNotifications()
+
+  // New notifications arrive without any navigation, so the badge would otherwise
+  // keep showing a stale number until the next route change.
+  const poll = window.setInterval(() => {
+    if (isSignedIn.value && !document.hidden) void refreshNotifications()
+  }, 60_000)
+  window.addEventListener('focus', () => void refreshNotifications())
+  window.addEventListener('visibilitychange', () => {
+    if (!document.hidden) void refreshNotifications()
+  })
+  onBeforeUnmount(() => window.clearInterval(poll))
 })
 
 watch(

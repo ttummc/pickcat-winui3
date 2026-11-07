@@ -6,6 +6,7 @@ import { navigate } from '@/router'
 import { relativeTime } from '@/lib/format'
 import { notify, notifyError } from '@/stores/ui'
 import { sessionState, isSignedIn } from '@/stores/session'
+import { unreadCount, unreadByType, refreshNotifications, clearUnread } from '@/stores/notifications'
 import AuthorChip from '@/components/AuthorChip.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
@@ -78,6 +79,9 @@ async function load(): Promise<void> {
     ])
     items.value = (page.items ?? []).map(normalize)
     summary.value = sum
+    // Keep the sidebar badge in step with what this page just saw.
+    unreadCount.value = Math.max(0, sum?.unreadCount ?? 0)
+    unreadByType.value = sum?.unreadCountByType ?? {}
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载失败'
   } finally {
@@ -91,6 +95,9 @@ async function markAllRead(): Promise<void> {
   try {
     await api.patch('/notifications', { read: true })
     await load()
+    // Clear the badge immediately, then let the server confirm.
+    clearUnread()
+    void refreshNotifications()
     notify('已全部标记为已读', '', 'Success')
   } catch (err) {
     notifyError(err, '操作失败')
