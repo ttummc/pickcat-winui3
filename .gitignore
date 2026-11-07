@@ -3,8 +3,7 @@ node_modules/
 
 # build output (the release zip is built by CI / `npm run ext:build`)
 extension/dist/
-PickCat-WinUI3-extension.zip
-
+/PickCat-WinUI3-extension.zip
 # local browser profiles used by the CDP recording tools
 .chrome-profile*/
 .tmp/
