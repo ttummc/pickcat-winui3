@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/** Baked in at build time from the manifest, so it always matches the release. */
+const appVersion = __PC_VERSION__
 import { ref, computed, onMounted } from 'vue'
 import { SettingsCard, ContentDialog, ProgressBar } from 'winuionweb'
 import { api } from '@/api/client'
@@ -194,7 +196,7 @@ onMounted(async () => {
             Description="用 WinUIonWeb 从零重构的客户端 —— 窗口、导航、列表、对话框都是重写的。"
           >
             <template #HeaderIcon><FontIcon Glyph="&#xE946;" :FontSize="16" /></template>
-            <span class="pc-muted">v0.1.0</span>
+            <span class="pc-muted">v{{ appVersion }}</span>
           </SettingsCard>
 
           <SettingsCard
