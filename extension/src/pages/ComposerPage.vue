@@ -30,6 +30,7 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 /** Images currently being uploaded; the editor locks paste-upload while non-zero. */
+const fullscreen = ref(false)
 const uploading = ref(0)
 const dragActive = ref(false)
 
@@ -262,6 +263,37 @@ function onDragLeave(): void {
   dragActive.value = false
 }
 
+/**
+ * Fullscreen here means the editor fills the window (固定定位), not the browser's
+ * Fullscreen API: that needs a user gesture on an element the page owns, and it
+ * behaves differently inside WebView2.
+ */
+const FULL_LOCK = 'pc-editor-full'
+
+function applyFullscreenLock(on: boolean): void {
+  document.documentElement.classList.toggle(FULL_LOCK, on)
+}
+
+watch(fullscreen, applyFullscreenLock)
+onBeforeUnmount(() => applyFullscreenLock(false))
+
+function toggleFullscreen(): void {
+  fullscreen.value = !fullscreen.value
+}
+
+function onFullscreenKey(event: KeyboardEvent): void {
+  if (event.key === 'Escape' && fullscreen.value) {
+    event.preventDefault()
+    fullscreen.value = false
+    return
+  }
+  // Ctrl+Shift+F also toggles, matching most editors.
+  if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'f') {
+    event.preventDefault()
+    toggleFullscreen()
+  }
+}
+
 function pickImages(): void {
   fileInputRef.value?.click()
 }
@@ -276,11 +308,13 @@ function onFilesPicked(event: Event): void {
 watch([title, markdown], scheduleSave)
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onFullscreenKey, true)
   window.clearTimeout(draftTimer)
   saveDraft()
 })
 
 onMounted(async () => {
+  window.addEventListener('keydown', onFullscreenKey, true)
   restoreDraft()
   try {
     const result = await api.get<{ items: Tag[] }>('/tags', { assignable: 'true' })
@@ -406,7 +440,7 @@ async function submit(): Promise<void> {
           </div>
         </div>
 
-        <div class="pc-editor">
+        <div class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
           <div class="pc-editor-bar">
             <div class="pc-editor-tools">
               <button
@@ -433,6 +467,17 @@ async function submit(): Promise<void> {
               >
                 <span class="pc-tool-glyph">&#xE890;</span>
                 <span>预览</span>
+              </button>
+
+              <button
+                class="pc-tool-btn pc-tool-btn--wide"
+                type="button"
+                :class="{ 'pc-tool-btn--on': fullscreen }"
+                :title="fullscreen ? '退出全屏  Esc' : '全屏编辑  Ctrl+Shift+F'"
+                @click="toggleFullscreen"
+              >
+                <span class="pc-tool-glyph">{{ fullscreen ? '\uE73F' : '\uE740' }}</span>
+                <span>{{ fullscreen ? '退出全屏' : '全屏' }}</span>
               </button>
             </div>
           </div>

@@ -1344,3 +1344,41 @@ html.pc-mounted body > *:not(#pickcat-root) {
   font-size: 26px;
   color: var(--pc-accent, #ff6b60);
 }
+/* ---------------------------------------------------------------- fullscreen editor
+
+   A fixed overlay rather than the browser Fullscreen API: it works the same in
+   Chrome and in the desktop WebView2 host, and keeps our own toolbar visible. */
+.pc-editor--full {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border-radius: 0;
+  background: var(--app-bg, #202020);
+  border: none;
+}
+
+.pc-editor--full .pc-editor-bar {
+  flex: 0 0 auto;
+  border-radius: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+.pc-editor--full .pc-editor-split {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+.pc-editor--full .pc-editor-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+/* the page behind must not scroll while the overlay is open */
+html.pc-editor-full,
+html.pc-editor-full body {
+  overflow: hidden;
+}
