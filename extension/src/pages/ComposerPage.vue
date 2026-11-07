@@ -473,8 +473,7 @@ async function submit(): Promise<void> {
           </div>
         </div>
 
-        <Teleport to="body" :disabled="!fullscreen">
-          <div ref="editorRef" class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
+        <div ref="editorRef" class="pc-editor" :class="{ 'pc-editor--full': fullscreen }">
           <div class="pc-editor-bar">
             <div class="pc-editor-tools">
               <button
@@ -567,8 +566,7 @@ async function submit(): Promise<void> {
               <span class="pc-btn-content">{{ submitting ? '发布中…' : '发布主题' }}</span>
             </Button>
           </div>
-          </div>
-        </Teleport>
+        </div>
 
         <div v-if="error">
           <InfoBar IsOpen="True" Title="发布失败" :Message="error" Severity="Error" IsClosable="True" />
