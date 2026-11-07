@@ -1,168 +1,393 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { api } from '@/api/client'
-import type { Page } from '@/api/types'
 import { navigate } from '@/router'
 import { relativeTime } from '@/lib/format'
 import { isSignedIn } from '@/stores/session'
+import { notify, notifyError } from '@/stores/ui'
+import {
+  listFiles,
+  fetchStorage,
+  uploadFile,
+  trashFile,
+  restoreFile,
+  purgeFile,
+  type StoredFile,
+  type FileState,
+  type FileStorage,
+} from '@/api/files'
 import EmptyState from '@/components/EmptyState.vue'
+import PcSelector from '@/components/PcSelector.vue'
 
 /**
- * 个人图盘 — the site's own file board (not the works library).
- * Backed by /files (+ quotas); shapes are read defensively because the file
- * payloads are only reachable with a session.
+ * 个人图盘 — the site's own file board.
+ *
+ * Endpoints (verified against the site's client):
+ *   GET /files?scope=OWN&state=READY|DELETED  — gallery and recycle bin
+ *   GET /file-storage                          — limitBytes / remainingBytes
+ *   PUT /files/{id}/deletion                   — move to the bin
+ *   PATCH /files/{id}/deletion {state: RESTORED} — restore
+ *   PATCH /files/{id}/deletion {}              — delete for good
  */
-interface PcFile {
-  id?: string
-  url?: string
-  name?: string
-  filename?: string
-  size?: number
-  byteSize?: number
-  contentType?: string
-  mimeType?: string
-  createdAt?: string
-}
-
-const files = ref<PcFile[]>([])
+const state = ref<FileState>('READY')
+const files = ref<StoredFile[]>([])
+const cursor = ref<string | undefined>()
+const hasMore = ref(false)
 const loading = ref(true)
+const loadingMore = ref(false)
 const error = ref<string | null>(null)
-const quota = ref<{ used: number; limit: number } | null>(null)
 
-/**
- * Files are served from GET /api/v1/files/{id} (verified: 200 + image/webp), and
- * the listing does not necessarily expose a URL or a mime type. So always point
- * <img> at the content endpoint and fall back to a file icon if it fails.
- */
-function fileUrl(file: PcFile): string {
-  const url = file.url ?? file.fileUrl ?? file.contentUrl
-  if (url) return /^https?:/i.test(url) ? url : `https://pickcat.dao3.fun${url.startsWith('/') ? '' : '/'}${url}`
+const storage = ref<FileStorage | null>(null)
+const storageError = ref(false)
+
+const selected = ref<string[]>([])
+
+const uploading = ref(0)
+const busy = ref(false)
+const dragActive = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+const tabs = computed(() => [
+  { key: 'READY', label: '图库' },
+  { key: 'DELETED', label: '回收站' },
+])
+
+const inTrash = computed(() => state.value === 'DELETED')
+const allSelected = computed(() => files.value.length > 0 && selected.value.length === files.value.length)
+
+function fileUrl(file: StoredFile): string {
   return `https://pickcat.dao3.fun/api/v1/files/${file.id}`
 }
 
 const failed = ref<Record<string, boolean>>({})
 
-function onImageError(file: PcFile): void {
-  failed.value[file.id ?? fileUrl(file)] = true
+function label(file: StoredFile): string {
+  return file.name || file.id
 }
-
-const label = (file: PcFile): string =>
-  file.name ?? file.filename ?? file.originalName ?? file.id ?? '未命名文件'
 
 function formatSize(bytes?: number): string {
-  if (!bytes || !Number.isFinite(bytes)) return ''
+  if (!bytes || !Number.isFinite(bytes) || bytes <= 0) return '0 B'
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
-const percent = computed(() => {
-  if (!quota.value || !quota.value.limit) return 0
-  return Math.min(100, Math.round((quota.value.used / quota.value.limit) * 100))
+const usedBytes = computed(() => {
+  const s = storage.value
+  if (!s) return 0
+  if (typeof s.usedBytes === 'number') return s.usedBytes
+  return Math.max(0, (s.limitBytes ?? 0) - (s.remainingBytes ?? 0))
 })
+
+const usedPercent = computed(() => {
+  const limit = storage.value?.limitBytes ?? 0
+  if (!limit) return 0
+  return Math.min(100, Math.round((usedBytes.value / limit) * 100))
+})
+
+const lowSpace = computed(() => usedPercent.value >= 90)
+
+async function loadStorage(): Promise<void> {
+  storageError.value = false
+  try {
+    storage.value = await fetchStorage()
+  } catch {
+    storage.value = null
+    storageError.value = true
+  }
+}
+
+async function load(): Promise<void> {
+  loading.value = true
+  error.value = null
+  selected.value = []
+  cursor.value = undefined
+  try {
+    const page = await listFiles(state.value)
+    files.value = page.items ?? []
+    cursor.value = page.pageInfo?.nextCursor ?? undefined
+    hasMore.value = Boolean(page.pageInfo?.hasNextPage && cursor.value)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '加载失败'
+    files.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadMore(): Promise<void> {
+  if (!hasMore.value || loadingMore.value || !cursor.value) return
+  loadingMore.value = true
+  try {
+    const page = await listFiles(state.value, cursor.value)
+    files.value = [...files.value, ...(page.items ?? [])]
+    cursor.value = page.pageInfo?.nextCursor ?? undefined
+    hasMore.value = Boolean(page.pageInfo?.hasNextPage && cursor.value)
+  } catch (err) {
+    notifyError(err, '加载更多失败')
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+function switchTab(next: string): void {
+  state.value = next as FileState
+  void load()
+}
+
+function toggleSelect(id: string): void {
+  const index = selected.value.indexOf(id)
+  if (index >= 0) selected.value.splice(index, 1)
+  else selected.value.push(id)
+}
+
+function selectAll(): void {
+  selected.value = allSelected.value ? [] : files.value.map((f) => f.id)
+}
+
+function openFile(file: StoredFile): void {
+  window.open(fileUrl(file), '_blank', 'noopener')
+}
+
+async function runBatch(action: 'trash' | 'restore' | 'purge'): Promise<void> {
+  if (busy.value) return
+  const ids = [...selected.value]
+  if (!ids.length) return
+  busy.value = true
+  let ok = 0
+  let failedCount = 0
+  for (const id of ids) {
+    try {
+      if (action === 'trash') await trashFile(id)
+      else if (action === 'restore') await restoreFile(id)
+      else await purgeFile(id)
+      ok += 1
+    } catch (err) {
+      failedCount += 1
+      if (failedCount === 1) notifyError(err, '操作失败')
+    }
+  }
+  busy.value = false
+  selected.value = []
+  await Promise.all([load(), loadStorage()])
+  const verb = action === 'trash' ? '移入回收站' : action === 'restore' ? '恢复' : '彻底删除'
+  if (ok) notify(`已${verb} ${ok} 个文件`, failedCount ? `${failedCount} 个失败` : '', 'Success')
+}
+
+function pickFiles(): void {
+  fileInputRef.value?.click()
+}
+
+async function uploadFiles(list: File[]): Promise<void> {
+  if (!list.length) return
+  uploading.value += list.length
+  let ok = 0
+  for (const file of list) {
+    try {
+      await uploadFile(file)
+      ok += 1
+    } catch (err) {
+      notifyError(err, `上传 ${file.name} 失败`)
+    } finally {
+      uploading.value -= 1
+    }
+  }
+  if (ok) notify(`已上传 ${ok} 张图片`, '已存入个人图盘', 'Success')
+  await Promise.all([load(), loadStorage()])
+}
+
+function onFilesPicked(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const list = Array.from(input.files ?? [])
+  input.value = ''
+  void uploadFiles(list)
+}
+
+function onDrop(event: DragEvent): void {
+  dragActive.value = false
+  const list = Array.from(event.dataTransfer?.files ?? []).filter((f) => f.type.startsWith('image/'))
+  if (!list.length) return
+  event.preventDefault()
+  void uploadFiles(list)
+}
+
+function onDragOver(event: DragEvent): void {
+  if (!isSignedIn.value || inTrash.value) return
+  if (!event.dataTransfer?.types?.includes('Files')) return
+  event.preventDefault()
+  dragActive.value = true
+}
 
 onMounted(async () => {
   if (!isSignedIn.value) {
     loading.value = false
     return
   }
-  try {
-    const page = await api.get<Page<PcFile>>('/files', { limit: 40 })
-    files.value = page.items ?? []
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载失败'
-  } finally {
-    loading.value = false
-  }
-
-  // GET /file-storage-quotas does not exist on this API (404), so there is no
-  // quota to show. Keep the field so the template stays simple.
-  quota.value = null
+  await Promise.all([load(), loadStorage()])
 })
 </script>
 
 <template>
-  <div class="pc-page">
+  <div class="pc-page" @dragover="onDragOver" @dragleave="dragActive = false" @drop="onDrop">
     <div class="pc-page-scroll">
       <header class="pc-page-header">
         <div>
           <h1 class="pc-page-title">个人图盘</h1>
-          <p class="pc-page-subtitle">你在 PickCat 上传过的图片与文件。</p>
+          <p class="pc-page-subtitle">发帖时粘贴的图片会先存在这里。</p>
         </div>
-        <div v-if="quota" class="pc-quota">
-          <span class="pc-muted">{{ formatSize(quota.used) }} / {{ formatSize(quota.limit) }}</span>
-          <span class="pc-quota-bar"><span :style="{ width: `${percent}%` }" /></span>
+
+        <div v-if="isSignedIn" class="pc-storage">
+          <div class="pc-storage-line">
+            <span :class="{ 'pc-storage-low': lowSpace }">
+              {{ formatSize(usedBytes) }} / {{ storage ? formatSize(storage.limitBytes) : '—' }}
+            </span>
+            <span v-if="storageError" class="pc-muted">额度读取失败</span>
+            <span v-else class="pc-muted">{{ usedPercent }}%</span>
+          </div>
+          <span class="pc-quota-bar">
+            <span :class="{ 'pc-quota-bar--low': lowSpace }" :style="{ width: `${usedPercent}%` }" />
+          </span>
         </div>
       </header>
 
       <EmptyState
         v-if="!isSignedIn"
         glyph="&#xE8B7;"
-        title="登录后才能查看个人图盘"
+        title="登录后才能使用个人图盘"
         action-label="去登录"
         @action="navigate('/login')"
       />
 
-      <div v-else-if="loading" class="pc-spin">
-        <ProgressRing IsActive="True" :Width="32" :Height="32" />
-      </div>
+      <template v-else>
+        <div class="pc-media-toolbar">
+          <PcSelector :model-value="state" :tabs="tabs" @update:model-value="switchTab" />
 
-      <EmptyState
-        v-else-if="error"
-        glyph="&#xEA39;"
-        title="加载失败"
-        :description="error"
-      />
+          <span class="pc-grow" />
 
-      <EmptyState
-        v-else-if="!files.length"
-        glyph="&#xE8B7;"
-        title="图盘还是空的"
-        description="上传图片后会自动出现在这里。"
-      />
+          <template v-if="files.length">
+            <button class="pc-link" @click="selectAll">
+              {{ allSelected ? '取消全选' : '全选' }}
+            </button>
+            <span v-if="selected.length" class="pc-muted">{{ selected.length }} 项已选</span>
+          </template>
 
-      <div v-else class="pc-media-grid">
-        <a
-          v-for="file in files"
-          :key="file.id ?? file.url"
-          class="pc-media-item"
-          :href="file.url || '#'"
-          target="_blank"
-          rel="noopener noreferrer"
-          @click="!file.url && $event.preventDefault()"
-        >
-          <img
-            v-if="!failed[file.id ?? fileUrl(file)]"
-            :src="fileUrl(file)"
-            :alt="label(file)"
-            loading="lazy"
-            decoding="async"
-            @error="onImageError(file)"
-          />
-          <span v-else class="pc-media-file-icon">&#xE8A5;</span>
-          <span class="pc-media-meta">
-            <span class="pc-media-name">{{ label(file) }}</span>
-            <span class="pc-muted">
-              {{ formatSize(file.size ?? file.byteSize) }}
-              <template v-if="file.createdAt"> · {{ relativeTime(file.createdAt) }}</template>
+          <Button v-if="!inTrash" Style="AccentButtonStyle" :IsEnabled="!uploading" @Click="pickFiles">
+            <span class="pc-btn-content">
+              <span class="pc-btn-icon">&#xE898;</span>
+              {{ uploading ? `上传中 ${uploading}…` : '上传图片' }}
             </span>
-          </span>
-        </a>
-      </div>
+          </Button>
+        </div>
+
+        <!-- batch actions -->
+        <div v-if="selected.length" class="pc-media-actions">
+          <Button v-if="!inTrash" :IsEnabled="!busy" @Click="runBatch('trash')">
+            <span class="pc-btn-content">移入回收站</span>
+          </Button>
+          <template v-else>
+            <Button :IsEnabled="!busy" @Click="runBatch('restore')">
+              <span class="pc-btn-content">恢复</span>
+            </Button>
+            <Button :IsEnabled="!busy" @Click="runBatch('purge')">
+              <span class="pc-btn-content">彻底删除</span>
+            </Button>
+          </template>
+          <Button :IsEnabled="!busy" @Click="selected = []">
+            <span class="pc-btn-content">取消选择</span>
+          </Button>
+        </div>
+
+        <input ref="fileInputRef" type="file" accept="image/*" multiple hidden @change="onFilesPicked" />
+
+        <div v-if="loading" class="pc-spin">
+          <ProgressRing IsActive="True" :Width="32" :Height="32" />
+        </div>
+
+        <EmptyState v-else-if="error" glyph="&#xEA39;" title="加载失败" :description="error" />
+
+        <EmptyState
+          v-else-if="!files.length"
+          :glyph="inTrash ? '&#xE74D;' : '&#xE8B7;'"
+          :title="inTrash ? '回收站是空的' : '图盘还是空的'"
+          :description="inTrash ? '删除的图片会先放在这里。' : '发帖时粘贴图片，或点右上角上传。'"
+        />
+
+        <div v-else class="pc-media-grid">
+          <div
+            v-for="file in files"
+            :key="file.id"
+            class="pc-media-item"
+            :class="{ 'pc-media-item--on': selected.includes(file.id) }"
+            @click="toggleSelect(file.id)"
+          >
+            <img
+              v-if="!failed[file.id]"
+              :src="fileUrl(file)"
+              :alt="label(file)"
+              loading="lazy"
+              decoding="async"
+              @error="failed[file.id] = true"
+            />
+            <span v-else class="pc-media-file-icon">&#xE8A5;</span>
+
+            <span class="pc-media-check" :class="{ 'pc-media-check--on': selected.includes(file.id) }">
+              <span v-if="selected.includes(file.id)">&#xE73E;</span>
+            </span>
+
+            <span v-if="!inTrash" class="pc-media-open" title="查看原图" @click.stop="openFile(file)">
+              &#xE8A7;
+            </span>
+
+            <span class="pc-media-meta">
+              <span class="pc-media-name">{{ label(file) }}</span>
+              <span class="pc-muted">
+                {{ formatSize(file.size) }}
+                <template v-if="inTrash && file.deletedAt"> · {{ relativeTime(file.deletedAt) }}删除</template>
+                <template v-else-if="file.createdAt"> · {{ relativeTime(file.createdAt) }}</template>
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div v-if="hasMore && !loading" class="pc-media-more">
+          <Button :IsEnabled="!loadingMore" @Click="loadMore">
+            <span class="pc-btn-content">{{ loadingMore ? '加载中…' : '加载更多' }}</span>
+          </Button>
+        </div>
+
+        <div v-if="dragActive" class="pc-media-drop">
+          <span class="pc-editor-drop-glyph">&#xE898;</span>
+          <span>松开即可上传到个人图盘</span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <style>
-.pc-quota {
+.pc-storage {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.pc-storage-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pc-storage-low {
+  color: var(--pc-accent, #ff6b60);
+  font-weight: 600;
 }
 
 .pc-quota-bar {
   display: block;
-  width: 140px;
+  width: 180px;
   height: 6px;
   border-radius: 3px;
   background: color-mix(in srgb, var(--text-primary) 12%, transparent);
@@ -177,6 +402,29 @@ onMounted(async () => {
   transition: width var(--normal-duration, 0.2s) ease;
 }
 
+.pc-quota-bar > .pc-quota-bar--low {
+  background: #ff4d4f;
+}
+
+.pc-media-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pc-media-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pc-accent, #ff6b60) 35%, transparent);
+}
+
 .pc-media-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -184,19 +432,24 @@ onMounted(async () => {
 }
 
 .pc-media-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
   background: var(--card-bg);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color var(--fast-duration, 0.167s) ease, transform var(--faster-duration, 0.083s) ease;
+  cursor: pointer;
+  transition: border-color var(--fast-duration, 0.167s) ease;
 }
 
 .pc-media-item:hover {
-  border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
+  border-color: color-mix(in srgb, var(--text-primary) 24%, transparent);
+}
+
+.pc-media-item--on {
+  border-color: var(--pc-accent, #ff6b60);
+  box-shadow: 0 0 0 1px var(--pc-accent, #ff6b60);
 }
 
 .pc-media-item img {
@@ -217,6 +470,55 @@ onMounted(async () => {
   color: var(--text-tertiary);
 }
 
+.pc-media-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #000000a6;
+  border: 1px solid #ffffff66;
+  color: #fff;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity var(--fast-duration, 0.167s) ease;
+}
+
+.pc-media-item:hover .pc-media-check,
+.pc-media-check--on {
+  opacity: 1;
+}
+
+.pc-media-check--on {
+  background: var(--pc-accent, #ff6b60);
+  border-color: transparent;
+}
+
+.pc-media-open {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #000000a6;
+  color: #fff;
+  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity var(--fast-duration, 0.167s) ease;
+}
+
+.pc-media-item:hover .pc-media-open {
+  opacity: 1;
+}
+
 .pc-media-meta {
   display: flex;
   flex-direction: column;
@@ -231,5 +533,27 @@ onMounted(async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pc-media-more {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 4px;
+}
+
+.pc-media-drop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--app-bg, #202020) 82%, transparent);
+  border: 2px dashed var(--pc-accent, #ff6b60);
+  color: var(--text-primary);
+  font-size: 14px;
+  pointer-events: none;
 }
 </style>

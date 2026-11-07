@@ -1,4 +1,4 @@
-import { PickCatApiError, newIdempotencyKey } from './client'
+import { api, request, PickCatApiError, newIdempotencyKey } from './client'
 
 /**
  * Uploads go to the site's own file storage (`POST /api/v1/files`), which is what the
@@ -95,4 +95,67 @@ export async function uploadFile(file: File, signal?: AbortSignal): Promise<Uplo
 export function fileMarkdown(file: UploadedFile, alt = '图片'): string {
   const src = file.url ?? `/api/v1/files/${file.id}`
   return `![${alt}](${src})`
+}
+
+
+/* ------------------------------------------------------------------ media library
+
+   Contracts taken from the site's own client:
+     GET   /files?scope=OWN&state=READY|DELETED&cursor=…
+     GET   /file-storage                    -> { limitBytes, remainingBytes }
+     PUT   /files/{id}/deletion  {}         -> 201, moves to the recycle bin
+     PATCH /files/{id}/deletion  {state:'RESTORED'}  -> restore
+     PATCH /files/{id}/deletion  {}         -> permanent delete
+   The query schema is strict, so nothing else may be sent. */
+
+export type FileState = 'READY' | 'DELETED'
+
+export interface StoredFile {
+  id: string
+  name?: string
+  size?: number
+  contentType?: string
+  createdAt?: string
+  deletedAt?: string | null
+  canRestore?: boolean
+}
+
+export interface FileStorage {
+  limitBytes: number
+  remainingBytes: number
+  usedBytes?: number
+}
+
+export interface FilePage {
+  items: StoredFile[]
+  pageInfo?: { hasNextPage?: boolean; nextCursor?: string | null }
+}
+
+export async function listFiles(
+  state: FileState,
+  cursor?: string,
+  signal?: AbortSignal,
+): Promise<FilePage> {
+  return request<FilePage>('/files', {
+    query: { scope: 'OWN', state, cursor },
+    signal,
+  })
+}
+
+export async function fetchStorage(signal?: AbortSignal): Promise<FileStorage> {
+  return request<FileStorage>('/file-storage', { signal })
+}
+
+/** Moves a file to the recycle bin. */
+export async function trashFile(id: string): Promise<void> {
+  await request(`/files/${id}/deletion`, { method: 'PUT', body: {} })
+}
+
+export async function restoreFile(id: string): Promise<void> {
+  await request(`/files/${id}/deletion`, { method: 'PATCH', body: { state: 'RESTORED' } })
+}
+
+/** Removes a file from the recycle bin for good. */
+export async function purgeFile(id: string): Promise<void> {
+  await request(`/files/${id}/deletion`, { method: 'PATCH', body: {} })
 }
