@@ -165,17 +165,39 @@ export function goBack(): void {
   window.history.back()
 }
 
+/**
+ * The address must always be `pickcat.dao3.fun/#/route`.
+ *
+ * The site itself may have left a real path in the bar (e.g. /forum/post/<id>)
+ * before we took over, and writing a hash then produced the ugly
+ * "/forum/post/<id>#/personal-library". Everything is normalised back to "/#/…".
+ */
+function cleanLocation(): void {
+  const hash = location.hash || '#/'
+  if (location.pathname === '/' && !location.search) return
+  try {
+    window.history.replaceState(null, '', `/${hash}`)
+  } catch {
+    /* replaceState can be blocked; the hash router still works */
+  }
+}
+
 export function initRouter(): void {
-  // Normalise deep links ("/forum/post/x") into the hash router so the address
-  // bar stays clean and Back behaves the way a desktop app expects.
+  // Deep links ("/forum/post/x") become hash routes, then the path is dropped so
+  // the address bar never mixes a server path with our hash.
   const deep = location.pathname + location.search
   const initial = deep && deep !== '/' ? deep : null
   const hash = location.hash || (initial ? `#${initial}` : '#/')
   try {
-    window.history.replaceState(null, '', hash)
+    window.history.replaceState(null, '', `/${hash}`)
   } catch {
     /* ignore */
   }
   syncRoute()
-  window.addEventListener('hashchange', syncRoute)
+  window.addEventListener('hashchange', () => {
+    cleanLocation()
+    syncRoute()
+  })
+  // The site's own router can still push a path (server redirects, restored tabs).
+  window.addEventListener('popstate', cleanLocation)
 }

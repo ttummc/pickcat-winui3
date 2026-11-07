@@ -1,33 +1,25 @@
-# v1.0.1
+﻿**网址恢复正常**
 
-A round of fixes after living with v1.0.0 for a few days, plus a rebuilt profile page.
+- 地址栏永远是 `pickcat.dao3.fun/#/…`。之前从原站带过来的真实路径（例如
+  `/forum/post/<id>`）会和我们自己的 hash 拼在一起，变成
+  `/forum/post/<id>#/personal-library` 这种四不像；现在进入页面时统一改写为 `/#/…`，
+  并在 hashchange、popstate 时再次校正。
 
-## What's new
+## 安装
 
-- **Profile pages rebuilt**: a sticky identity card on the left (banner, avatar, level, badges,
-  inline stats, follow/edit action) with tabs and sections on the right, matching the original
-  site's information architecture. The contribution heatmap now has month labels and a
-  less/more legend, and the badge wall loads real artwork.
-- **Message toasts rebuilt** on the library `InfoBar`: opaque surface, single-line text, proper
-  rounding, and enter/exit/move transitions.
-- **Floor deep links**: clicking a notification now jumps straight to the reply and highlights it
-  instead of landing at the top of the thread.
+### 浏览器扩展
 
-## Fixes
+1. 下载 `PickCat-WinUI3-extension.zip` 并解压到固定目录
+   （**不要**放在 `C:\Program Files`，会报 `rules.json: Internal error while parsing rules`）
+2. 打开 `chrome://extensions`，开启右上角「开发者模式」
+3. 点「加载已解压的扩展程序」，选择解压出来的文件夹
+4. 打开 <https://pickcat.dao3.fun/>
 
-- Notifications showed "系统" (system) for every row — the API nests actor/topic/post under `details`.
-- Clicking a notification bounced to the forum list before showing the topic (the sidebar reacted
-  to its own selection change).
-- Context menu gained link actions: open link, open in new tab, copy link address, and open or copy
-  a URL contained in the selected text.
-- Removed a global scrollbar style that forced classic scrollbars (with arrows) onto text inputs.
-- Long notification text no longer wraps inside the toast.
+### Windows 桌面版
 
-## Install
+下载 `PickCatWinUI3-Setup-*.msi` 直接安装，不需要管理员权限，开始菜单会有条目，
+可在「设置 → 应用」中卸载。
 
-Unchanged: download the zip, extract it somewhere permanent (never `C:\Program Files`), enable
-Developer mode on `chrome://extensions`, then **Load unpacked** and pick that folder.
+完整历史见 [CHANGELOG.md](https://github.com/ttummc/pickcat-winui3/blob/main/CHANGELOG.md)。
 
-Full guide: <https://ttummc.github.io/pickcat-winui3/>
-
-> Only active on `pickcat.dao3.fun`. Disable the extension and the original site returns.
+> 只在 `pickcat.dao3.fun` 生效。停用扩展后原站界面立刻恢复。

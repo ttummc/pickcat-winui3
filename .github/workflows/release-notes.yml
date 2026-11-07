@@ -1,0 +1,30 @@
+name: release-notes
+
+# Rewrites every GitHub release body from CHANGELOG.md, so the notes on each tag
+# match the changelog instead of drifting. Runs when the changelog changes.
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - CHANGELOG.md
+      - tools/sync-release-notes.mjs
+      - .github/workflows/release-notes.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Push CHANGELOG sections onto the releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/sync-release-notes.mjs

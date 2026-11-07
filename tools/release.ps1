@@ -36,6 +36,10 @@ console.log('  manifest + csproj -> ' + v);
 node $bump
 Remove-Item $bump -Force
 
+Step 'release notes from CHANGELOG.md'
+node tools/release-notes-for.mjs "v$Version" | Out-File -FilePath RELEASE_NOTES.md -Encoding utf8
+Write-Host "  RELEASE_NOTES.md <- CHANGELOG.md v$Version"
+
 Step 'build the extension'
 Push-Location extension
 npx vite build
