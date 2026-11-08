@@ -77,7 +77,15 @@
                   Execute="deferred"
                   Impersonate="yes"
                   Return="ignore" />
+    <!-- A running instance locks the binary and the payload; that makes an
+         interactive double-click install fail with 2318. Close it first. -->
+    <CustomAction Id="CloseRunningApp"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c taskkill /f /im PickCatWinUI3.exe &gt;nul 2&gt;&amp;1"
+                  Execute="immediate"
+                  Return="ignore" />
     <InstallExecuteSequence>
+      <Custom Action="CloseRunningApp" Before="InstallValidate" />
       <Custom Action="PurgeUserData" After="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeInstallFolder" After="PurgeUserData" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeShortcuts" After="PurgeInstallFolder" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
