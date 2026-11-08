@@ -11,6 +11,7 @@ import {
   cancelDshTask,
 } from '@/stores/dsh'
 import EmptyState from '@/components/EmptyState.vue'
+import { renderMarkdown } from '@/lib/markdown'
 
 /**
  * 「DSH 定制」 — a conversation surface over the bundled kernel. Each conversation
@@ -224,14 +225,22 @@ onMounted(async () => {
                     </details>
                   </li>
                 </ul>
-                <pre v-if="message.text">{{ message.text }}</pre>
+                <div
+                  v-if="message.text"
+                  class="pc-dsh-md"
+                  v-html="renderMarkdown(message.text)"
+                />
                 <span v-if="message.usage" class="pc-dsh-usage">{{ message.usage }}</span>
               </div>
             </div>
 
             <div v-if="dshState.running" class="pc-dsh-msg pc-dsh-msg--assistant">
               <div class="pc-dsh-bubble">
-                <pre v-if="dshState.liveText" class="pc-dsh-live">{{ dshState.liveText }}</pre>
+                <div
+                  v-if="dshState.liveText"
+                  class="pc-dsh-md pc-dsh-md--live"
+                  v-html="renderMarkdown(dshState.liveText)"
+                />
                 <p v-else class="pc-dsh-thinking">
                   {{ dshState.thinking || '正在处理…' }}
                 </p>
@@ -269,6 +278,117 @@ onMounted(async () => {
 </template>
 
 <style>
+/* ---------- Markdown 正文 ---------- */
+.pc-dsh-md {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.pc-dsh-md--live::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 13px;
+  margin-left: 2px;
+  vertical-align: -1px;
+  background: currentColor;
+  opacity: 0.5;
+  animation: pc-dsh-caret 1s steps(2, start) infinite;
+}
+
+@keyframes pc-dsh-caret {
+  to { visibility: hidden; }
+}
+
+.pc-dsh-md > :first-child { margin-top: 0; }
+.pc-dsh-md > :last-child { margin-bottom: 0; }
+
+.pc-dsh-md h1, .pc-dsh-md h2, .pc-dsh-md h3,
+.pc-dsh-md h4, .pc-dsh-md h5, .pc-dsh-md h6 {
+  margin: 12px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.pc-dsh-md p {
+  margin: 0 0 8px;
+}
+
+.pc-dsh-md ul, .pc-dsh-md ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.pc-dsh-md li {
+  margin: 2px 0;
+}
+
+.pc-dsh-md code {
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 11.5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+}
+
+.pc-dsh-md pre {
+  margin: 0 0 8px;
+  padding: 9px 11px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  overflow-x: auto;
+}
+
+.pc-dsh-md pre code {
+  padding: 0;
+  background: none;
+  font-size: 11.5px;
+  line-height: 18px;
+  white-space: pre;
+}
+
+.pc-dsh-md blockquote {
+  margin: 0 0 8px;
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid color-mix(in srgb, var(--text-primary) 25%, transparent);
+  color: var(--text-secondary);
+}
+
+.pc-dsh-md table {
+  border-collapse: collapse;
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.pc-dsh-md th, .pc-dsh-md td {
+  border: 1px solid color-mix(in srgb, var(--text-primary) 15%, transparent);
+  padding: 4px 9px;
+  text-align: left;
+}
+
+.pc-dsh-md th {
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  font-weight: 600;
+}
+
+.pc-dsh-md hr {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 15%, transparent);
+  margin: 10px 0;
+}
+
+.pc-dsh-md a {
+  color: var(--pc-accent, #ff6b60);
+}
+
+.pc-dsh-md img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
 .pc-dsh-center {
   padding: 40px 24px;
 }

@@ -83,6 +83,29 @@ export function renderMarkdown(source: string): string {
       continue
     }
 
+    // table: a header row followed by a separator row
+    if (
+      line.includes('|') &&
+      index + 1 < lines.length &&
+      /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(lines[index + 1])
+    ) {
+      const cells = (row: string): string[] =>
+        row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((cell) => cell.trim())
+      const header = cells(line)
+      index += 2
+      const rows: string[][] = []
+      while (index < lines.length && lines[index].includes('|') && lines[index].trim()) {
+        rows.push(cells(lines[index]))
+        index += 1
+      }
+      const head = header.map((cell) => `<th>${inline(cell)}</th>`).join('')
+      const body = rows
+        .map((row) => `<tr>${row.map((cell) => `<td>${inline(cell)}</td>`).join('')}</tr>`)
+        .join('')
+      html.push(`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`)
+      continue
+    }
+
     // blockquote
     if (/^>\s?/.test(line)) {
       const body: string[] = []
