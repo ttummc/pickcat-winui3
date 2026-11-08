@@ -1,11 +1,10 @@
-﻿**新增「DSH 定制」**
+﻿**DSH 内核调用修正**
 
-- 侧栏新增「DSH 定制」，用于描述需求并由 DSH 内核生成功能
-- 桌面宿主内置本机桥接服务，仅监听 127.0.0.1，使用每次启动随机生成的令牌鉴权
-- 通过 `dsh --profile headless --json` 执行任务，逐条解析内核输出的事件流
-- 内核使用独立的 `DSH_HOME`（`%APPDATA%\PickCat\dsh-home`），与用户自己的 DSH 互不影响
-- 模型密钥由用户自行提供，存储在 DSH 的凭据文件中
-- 浏览器扩展模式下该页面提示需要桌面版
+- 内核入口位于 `app.asar` 归档内，只有 Electron 能解析；改为以
+  `ELECTRON_RUN_AS_NODE=1` 直接启动 Electron 可执行文件，不再经由 cmd.exe 包装
+  （经包装后参数丢失，内核不产生任何输出）
+- 移除 headless profile 不接受的 `--permission-mode` 参数
+- 事件流已实测：`session` → `status` → `final`，与 CLI 直接调用一致
 
 ## 安装
 

@@ -13,9 +13,9 @@ namespace PickCat.WinUI3.Dsh;
 /// Runs one `dsh --profile headless --json` task and streams its newline-delimited
 /// events.
 ///
-/// Contract verified against dsh 0.2.1-rc.1: the CLI lives at
-/// resources\runtime\cli\bin\dsh.cmd, honours DSH_HOME, and writes one JSON object
-/// per line to stdout.
+/// Contract verified against dsh 0.2.1-rc.1: the CLI entry sits inside app.asar,
+/// which only Electron can read, so the Electron binary is launched with
+/// ELECTRON_RUN_AS_NODE=1 rather than shelling out to dsh.cmd.
 /// </summary>
 internal sealed class DshTask
 {
@@ -80,6 +80,27 @@ internal static class DshRunner
         return null;
     }
 
+    /// <summary>
+    /// The CLI lives inside app.asar, which only Electron can read, so we launch the
+    /// Electron binary with ELECTRON_RUN_AS_NODE instead of shelling out to dsh.cmd
+    /// (going through cmd.exe lost the argument list).
+    /// </summary>
+    public static (string Exe, string Cli)? ResolveLaunch()
+    {
+        var cmd = ResolveCli();
+        if (cmd is null) return null;
+
+        // <install>\resources\runtime\cli\bin\dsh.cmd -> <install>
+        var bin = Path.GetDirectoryName(cmd)!;
+        var root = Path.GetFullPath(Path.Combine(bin, "..", "..", "..", ".."));
+        var exe = Path.Combine(root, "DeepSeek Harness.exe");
+        var cli = Path.Combine(
+            root, "resources", "app.asar", "dsh", "node_modules",
+            "@deepseek-ai", "dsh-desktop-host", "lib", "cli.js");
+
+        return File.Exists(exe) ? (exe, cli) : null;
+    }
+
     /// <summary>Isolated DSH home so our settings do not leak into the user's own DSH.</summary>
     public static string ResolveHome()
     {
@@ -91,7 +112,7 @@ internal static class DshRunner
     }
 
     public static async Task RunAsync(
-        string cli,
+        (string Exe, string Cli) launch,
         string home,
         DshTask task,
         Action<JsonElement> onEvent,
@@ -99,22 +120,21 @@ internal static class DshRunner
     {
         var start = new ProcessStartInfo
         {
-            FileName = "cmd.exe",
+            FileName = launch.Exe,
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             WorkingDirectory = home,
         };
-        start.ArgumentList.Add("/c");
-        start.ArgumentList.Add(cli);
+        start.ArgumentList.Add("--expose-internals");
+        start.ArgumentList.Add(launch.Cli);
         start.ArgumentList.Add("--profile");
         start.ArgumentList.Add("headless");
         start.ArgumentList.Add("--json");
-        start.ArgumentList.Add("--permission-mode");
-        start.ArgumentList.Add("workspace-write");
         start.ArgumentList.Add(task.Prompt);
         start.Environment["DSH_HOME"] = home;
+        start.Environment["ELECTRON_RUN_AS_NODE"] = "1";
 
         using var process = new Process { StartInfo = start, EnableRaisingEvents = true };
         var stderr = new StringBuilder();
@@ -129,7 +149,7 @@ internal static class DshRunner
         if (!process.Start())
         {
             task.Complete(null, true);
-            onEvent(Error("dsh 进程启动失败"));
+            onEvent(Simple("error", "dsh process failed to start"));
             return;
         }
 
@@ -158,7 +178,7 @@ internal static class DshRunner
             catch
             {
                 // Non-JSON diagnostics are useful too; surface them as a log event.
-                onEvent(Log_entry(line));
+                onEvent(Simple("log", line));
                 continue;
             }
 
@@ -171,6 +191,9 @@ internal static class DshRunner
                 {
                     case "final":
                         if (evt.TryGetProperty("text", out var text)) finalText.Append(text.GetString());
+                        break;
+                    case "error":
+                        failed = true;
                         break;
                     case "status":
                         if (evt.TryGetProperty("reason", out var reason) &&
@@ -195,9 +218,6 @@ internal static class DshRunner
         }
     }
 
-    private static JsonElement Log_entry(string text) =>
-        JsonDocument.Parse(JsonSerializer.Serialize(new { type = "log", text })).RootElement.Clone();
-
-    private static JsonElement Error(string text) =>
-        JsonDocument.Parse(JsonSerializer.Serialize(new { type = "error", text })).RootElement.Clone();
+    private static JsonElement Simple(string type, string text) =>
+        JsonDocument.Parse(JsonSerializer.Serialize(new { type, text })).RootElement.Clone();
 }

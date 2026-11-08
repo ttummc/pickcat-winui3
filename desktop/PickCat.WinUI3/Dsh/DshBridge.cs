@@ -27,6 +27,7 @@ internal sealed class DshBridge : IDisposable
     private readonly string _token = Guid.NewGuid().ToString("n");
     private CancellationTokenSource? _service;
     private string? _cli;
+    private (string Exe, string Cli)? _launch;
     private string _home = "";
 
     public int Port { get; private set; }
@@ -39,6 +40,7 @@ internal sealed class DshBridge : IDisposable
     {
         _home = DshRunner.ResolveHome();
         _cli = DshRunner.ResolveCli();
+        _launch = DshRunner.ResolveLaunch();
         Log.Write($"dsh cli: {_cli ?? "(not found)"}");
         Log.Write($"dsh home: {_home}");
 
@@ -159,7 +161,7 @@ internal sealed class DshBridge : IDisposable
                     _tasks[task.Id] = task;
                     var cts = new CancellationTokenSource();
                     _running[task.Id] = cts;
-                    _ = DshRunner.RunAsync(_cli!, _home, task, _ => { }, cts.Token);
+                    _ = DshRunner.RunAsync(_launch!.Value, _home, task, _ => { }, cts.Token);
 
                     await WriteJson(response, 200, new { taskId = task.Id });
                     return;
