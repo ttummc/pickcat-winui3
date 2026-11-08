@@ -139,6 +139,10 @@ internal static class DshRunner
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // The kernel writes UTF-8. Without this, .NET decodes stdout with the
+            // console code page and every non-ASCII character becomes mojibake.
+            StandardOutputEncoding = new UTF8Encoding(false),
+            StandardErrorEncoding = new UTF8Encoding(false),
             WorkingDirectory = workspace,
         };
         start.ArgumentList.Add("--expose-internals");

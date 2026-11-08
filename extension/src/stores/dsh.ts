@@ -21,9 +21,18 @@ export interface DshChat {
   updatedAt: string
 }
 
+export interface DshStep {
+  kind: 'tool' | 'thinking'
+  tool?: string
+  detail?: string
+  result?: string
+  status?: string
+}
+
 export interface DshMessage {
   role: 'user' | 'assistant'
   text: string
+  steps?: DshStep[]
   failed?: boolean
   usage?: string
 }
@@ -214,6 +223,8 @@ export async function sendPrompt(prompt: string): Promise<void> {
 
     let answer = ''
     let thinking = ''
+    const steps: DshStep[] = []
+    const byCall = new Map<string, DshStep>()
     dshState.thinking = ''
     let since = 0
     for (;;) {
@@ -234,18 +245,46 @@ export async function sendPrompt(prompt: string): Promise<void> {
             answer += event.text
             dshState.liveText = answer
           }
-          if (event.type === 'thinking' && typeof event.text === 'string') {
+          if (event.type === 'thinking' && typeof event.text === 'string' && event.text) {
             thinking = event.text
             dshState.thinking = thinking
+            const last = steps[steps.length - 1]
+            if (last?.kind === 'thinking') last.detail = thinking
+            else steps.push({ kind: 'thinking', detail: thinking })
+          }
+          if (event.type === 'tool_call') {
+            const input = event.input as Record<string, unknown> | undefined
+            const detail =
+              (typeof input?.command === 'string' && input.command) ||
+              (typeof input?.description === 'string' && input.description) ||
+              (typeof input?.path === 'string' && input.path) ||
+              ''
+            const step: DshStep = {
+              kind: 'tool',
+              tool: String(event.tool ?? 'tool'),
+              detail: String(detail).slice(0, 400),
+              status: 'running',
+            }
+            steps.push(step)
+            if (typeof event.callId === 'string') byCall.set(event.callId, step)
+          }
+          if (event.type === 'tool_result') {
+            const step = typeof event.callId === 'string' ? byCall.get(event.callId) : undefined
+            if (step) {
+              step.status = String(event.status ?? 'completed')
+              step.result = String(event.result ?? '').slice(0, 600)
+            }
           }
         }
       }
       since = payload.count ?? since
 
       if (payload.finished) {
+        const body = answer || payload.final || excerpt(dshState.events)
         dshState.messages.push({
           role: 'assistant',
-          text: answer || payload.final || excerpt(dshState.events) || '(无输出)',
+          text: body || (steps.length ? '' : '(无输出)'),
+          steps: steps.length ? steps : undefined,
           failed: payload.failed,
           usage: lastUsage(dshState.events),
         })

@@ -19,6 +19,7 @@ import EmptyState from '@/components/EmptyState.vue'
 const input = ref('')
 const keyInput = ref('')
 const savingKey = ref(false)
+const keyPanelOpen = ref(false)
 const thread = ref<HTMLElement | null>(null)
 
 const canSend = computed(
@@ -28,6 +29,9 @@ const canSend = computed(
 const needsSetup = computed(
   () => dshState.ready && !dshState.hasKey && dshState.chats.length === 0,
 )
+
+/** The key editor is reachable at any time, not only before the first chat. */
+const keyPanelVisible = computed(() => needsSetup.value || keyPanelOpen.value)
 
 const showKeyHint = computed(() => dshState.ready && !dshState.hasKey && dshState.chats.length > 0)
 
@@ -54,6 +58,17 @@ async function submitKey(): Promise<void> {
   savingKey.value = true
   try {
     await saveKey(key)
+    keyInput.value = ''
+    keyPanelOpen.value = false
+  } finally {
+    savingKey.value = false
+  }
+}
+
+async function clearKey(): Promise<void> {
+  savingKey.value = true
+  try {
+    await saveKey('')
     keyInput.value = ''
   } finally {
     savingKey.value = false
@@ -129,14 +144,19 @@ onMounted(async () => {
               {{ activeChat.workspace }}
             </p>
           </div>
-          <span v-if="dshState.running" class="pc-dsh-running">执行中…</span>
+          <div class="pc-dsh-head-actions">
+            <span v-if="dshState.running" class="pc-dsh-running">执行中…</span>
+            <button class="pc-dsh-keybtn" type="button" @click="keyPanelOpen = !keyPanelOpen">
+              {{ dshState.hasKey ? '密钥' : '配置密钥' }}
+            </button>
+          </div>
         </header>
 
         <p v-if="showKeyHint" class="pc-dsh-banner">
           尚未配置模型密钥，发送会失败。请先在上方「配置模型密钥」中保存。
         </p>
 
-        <div v-if="needsSetup" class="pc-dsh-setup">
+        <div v-if="keyPanelVisible" class="pc-dsh-setup">
           <h2>配置模型密钥</h2>
           <p>
             内核需要 DeepSeek API 密钥才能工作。密钥保存在本机
@@ -159,6 +179,12 @@ onMounted(async () => {
             >
               <span class="pc-btn-content">{{ savingKey ? '保存中…' : '保存' }}</span>
             </Button>
+            <Button v-if="dshState.hasKey" @Click="clearKey()">
+              <span class="pc-btn-content">清除</span>
+            </Button>
+            <Button v-if="!needsSetup" @Click="keyPanelOpen = false">
+              <span class="pc-btn-content">关闭</span>
+            </Button>
           </div>
           <p class="pc-dsh-hint">
             获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">
@@ -180,7 +206,25 @@ onMounted(async () => {
               :class="`pc-dsh-msg--${message.role}`"
             >
               <div class="pc-dsh-bubble" :class="{ 'pc-dsh-bubble--failed': message.failed }">
-                <pre>{{ message.text }}</pre>
+                <ul v-if="message.steps?.length" class="pc-dsh-steps">
+                  <li
+                    v-for="(step, stepIndex) in message.steps"
+                    :key="stepIndex"
+                    class="pc-dsh-step"
+                    :class="`pc-dsh-step--${step.kind}`"
+                  >
+                    <span class="pc-dsh-step-tag">
+                      {{ step.kind === 'tool' ? step.tool : '思考' }}
+                    </span>
+                    <span class="pc-dsh-step-detail">{{ step.detail }}</span>
+                    <span v-if="step.status === 'running'" class="pc-dsh-step-state">运行中</span>
+                    <details v-if="step.result" class="pc-dsh-step-out">
+                      <summary>输出</summary>
+                      <pre>{{ step.result }}</pre>
+                    </details>
+                  </li>
+                </ul>
+                <pre v-if="message.text">{{ message.text }}</pre>
                 <span v-if="message.usage" class="pc-dsh-usage">{{ message.usage }}</span>
               </div>
             </div>
@@ -411,6 +455,29 @@ onMounted(async () => {
   font-size: 12px;
 }
 
+.pc-dsh-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.pc-dsh-keybtn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.pc-dsh-keybtn:hover {
+  color: var(--text-primary);
+}
+
 .pc-dsh-running {
   font-size: 12px;
   color: var(--pc-accent, #ff6b60);
@@ -457,6 +524,68 @@ onMounted(async () => {
   font: inherit;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.pc-dsh-steps {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pc-dsh-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.pc-dsh-step-tag {
+  font-family: 'Cascadia Code', Consolas, monospace;
+  color: var(--pc-accent, #ff6b60);
+}
+
+.pc-dsh-step--thinking .pc-dsh-step-tag {
+  color: var(--text-tertiary);
+}
+
+.pc-dsh-step-detail {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Cascadia Code', Consolas, monospace;
+}
+
+.pc-dsh-step-state {
+  color: var(--text-tertiary);
+}
+
+.pc-dsh-step-out {
+  width: 100%;
+  font-size: 11px;
+}
+
+.pc-dsh-step-out summary {
+  cursor: pointer;
+  color: var(--text-tertiary);
+}
+
+.pc-dsh-step-out pre {
+  margin: 4px 0 0;
+  max-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Cascadia Code', Consolas, monospace;
 }
 
 .pc-dsh-usage {
