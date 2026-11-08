@@ -39,6 +39,8 @@
     <StandardDirectory Id="DesktopFolder" />
 
     <Feature Id="Main" Title="PickCat WinUI 3" Level="1">
+
+
       <ComponentGroupRef Id="AppFiles" />
       <ComponentRef Id="StartMenuShortcut" />
       <ComponentRef Id="DesktopShortcut" />
@@ -50,6 +52,36 @@
     <Property Id="ARPPRODUCTICON" Value="AppIcon" />
     <Property Id="ARPNOMODIFY" Value="1" />
     <Icon Id="AppIcon" SourceFile="$(var.PublishDir)\Assets\app.ico" />
+
+    <!-- 卸载时删除用户数据：WebView2 profile 里存着登录 Cookie。
+         RemoveFolderEx 依赖的属性无法解析（WIX1077），改为直接递归删除。 -->
+    <CustomAction Id="PurgeUserData"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c taskkill /f /t /im PickCatWinUI3.exe &gt;nul 2&gt;&amp;1 &amp; rmdir /s /q &quot;PickCatWinUI3&quot;"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+    <!-- RemoveFolderEx 在这个包里同样失败（1613/1603），安装目录也会留下，
+         所以一并处理。 -->
+    <CustomAction Id="PurgeInstallFolder"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c rmdir /s /q &quot;Programs\PickCat WinUI 3&quot;"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+    <!-- The MSI's own shortcut and registry removal does not take effect in this
+         per-user package, so the shortcuts and our registry markers go too. -->
+    <CustomAction Id="PurgeShortcuts"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c rmdir /s /q &quot;%APPDATA%\Microsoft\Windows\Start Menu\Programs\PickCat WinUI 3&quot; &amp; del /q &quot;%USERPROFILE%\Desktop\PickCat WinUI 3.lnk&quot; &amp; reg delete &quot;HKCU\Software\PickCat&quot; /f &gt;nul 2&gt;&amp;1"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="PurgeUserData" After="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="PurgeInstallFolder" After="PurgeUserData" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="PurgeShortcuts" After="PurgeInstallFolder" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
 
   </Package>
 
@@ -80,8 +112,9 @@
         </Component>
       </Directory>
     </DirectoryRef>
-    <Property Id="USERDATAFOLDER" Value="[LocalAppDataFolder]PickCatWinUI3" />
+    <Property Id="USERDATAFOLDER" Value="[UserDataFolder]" />
   </Fragment>
+
 
   <Fragment>
     <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="A1C4F7B2-3D68-4E15-8B90-7C2F5E9A4D61">
@@ -104,5 +137,7 @@
       <RegistryValue Root="HKCU" Key="Software\PickCat\WinUI3" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
     </Component>
   </Fragment>
+
+
 
 </Wix>
