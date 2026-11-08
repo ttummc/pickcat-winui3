@@ -16,6 +16,7 @@ export type RouteName =
   | 'library'
   | 'media'
   | 'login'
+  | 'dsh'
   | 'notFound'
 
 export interface Route {
@@ -45,6 +46,7 @@ const PATTERNS: { name: RouteName; segments: string[] }[] = [
   // The site's /personal-library is the file board, not the works library.
   { name: 'media', segments: ['personal-library'] },
   { name: 'login', segments: ['login'] },
+  { name: 'dsh', segments: ['dsh'] },
 ]
 
 /** Original routes we have not rebuilt yet — surface them instead of silently going home. */
@@ -117,6 +119,7 @@ const DEPTH: Record<RouteName, number> = {
   library: 1,
   media: 1,
   login: 1,
+  dsh: 1,
   notFound: 1,
 }
 

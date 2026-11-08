@@ -185,6 +185,24 @@ public sealed partial class MainWindow : Window
         await core.AddScriptToExecuteOnDocumentCreatedAsync(js);
         Log.Write("content script registered");
         core.WebMessageReceived += OnWebMessage;
+
+        // Local bridge for the "DSH 定制" page. Started once per window.
+        try
+        {
+            _dshBridge = new Dsh.DshBridge();
+            _dshBridge.Start();
+            Log.Write($"dsh bridge ready: port={_dshBridge.Port} token={_dshBridge.Token}");
+
+            // Hand the page its endpoint. Kept out of the bundle: the token changes
+            // every launch and never leaves this machine.
+            var endpoint = JsonSerializer.Serialize(new { port = _dshBridge.Port, token = _dshBridge.Token });
+            await core.AddScriptToExecuteOnDocumentCreatedAsync(
+                $"window.__PICKCAT_DSH__ = {endpoint};");
+        }
+        catch (Exception ex)
+        {
+            Log.Error("dsh bridge", ex);
+        }
         Closed += (_, _) => Log.Write("window closed");
         StartRendererWatchdog(core);
 
@@ -286,6 +304,8 @@ public sealed partial class MainWindow : Window
         timer.Start();
         Log.Write("renderer watchdog started");
     }
+
+    private Dsh.DshBridge? _dshBridge;
 
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _routeTimer;
     private bool _diverting;

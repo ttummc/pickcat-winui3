@@ -42,6 +42,7 @@ const PAGES = {
   settings: SettingsPage,
   library: LibraryPage,
   media: MediaLibraryPage,
+  dsh: DshPage,
   login: LoginPage,
   notFound: NotFoundPage,
 } as const
@@ -70,6 +71,7 @@ const SECTION_FOR_ROUTE: Record<string, string> = {
   settings: 'prefs',
   library: 'library',
   media: 'media',
+  dsh: 'dsh',
   login: 'home',
   notFound: 'home',
 }
@@ -234,6 +236,7 @@ function onNavInvoked(
   } else if (tag === 'library') navigate('/library')
   else if (tag === 'media') navigate('/personal-library')
   else if (tag === 'prefs') navigate('/settings')
+  else if (tag === 'dsh') navigate('/dsh')
 }
 
 function onClose(): void {
@@ -334,6 +337,11 @@ function reopen(): void {
         <NavigationViewItem Content="个人作品库" Tag="library" :IsSelected="activeSection === 'library'">
           <NavigationViewItem.Icon>
             <FontIcon Glyph="&#xE8F1;" />
+          </NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="DSH 定制" Tag="dsh" :IsSelected="activeSection === 'dsh'">
+          <NavigationViewItem.Icon>
+            <FontIcon Glyph="&#xE943;" />
           </NavigationViewItem.Icon>
         </NavigationViewItem>
         <NavigationViewItem Content="设置" Tag="prefs" :IsSelected="activeSection === 'prefs'">
