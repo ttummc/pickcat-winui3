@@ -276,6 +276,7 @@ internal sealed class DshBridge : IDisposable
         {
             try
             {
+                DshContext.Provision(chat.Workspace);
                 await DshRunner.RunAsync(
                     _launch!.Value, _home, chat.Workspace, DshStore.ReadKey(),
                     string.IsNullOrEmpty(chat.KernelSession) ? null : chat.KernelSession,

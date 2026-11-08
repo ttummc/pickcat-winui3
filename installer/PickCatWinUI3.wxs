@@ -77,11 +77,13 @@
                   Execute="deferred"
                   Impersonate="yes"
                   Return="ignore" />
-    <!-- A running instance locks the binary and the payload; that makes an
-         interactive double-click install fail with 2318. Close it first. -->
+    <!-- A running instance locks the binary; the bundled kernel locks the files
+         it runs from (dsh\...). Both must go, or the upgrade fails with 2318
+         "cannot replace <file>". Only the copy inside this install folder is
+         targeted so a separately installed DeepSeek Harness is left alone. -->
     <CustomAction Id="CloseRunningApp"
                   Directory="LocalAppDataFolder"
-                  ExeCommand="cmd.exe /c taskkill /f /im PickCatWinUI3.exe &gt;nul 2&gt;&amp;1"
+                  ExeCommand="cmd.exe /c taskkill /f /im PickCatWinUI3.exe &gt;nul 2&gt;&amp;1 &amp; powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Get-Process -Name &apos;DeepSeek Harness&apos; -ErrorAction SilentlyContinue | Where-Object { $_.Path -like &apos;*PickCat WinUI 3\dsh*&apos; } | Stop-Process -Force -ErrorAction SilentlyContinue&quot;"
                   Execute="immediate"
                   Return="ignore" />
     <InstallExecuteSequence>

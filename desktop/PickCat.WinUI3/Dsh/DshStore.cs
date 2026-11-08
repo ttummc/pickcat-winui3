@@ -112,6 +112,7 @@ internal static class DshStore
             Workspace = Path.Combine(WorkspacesRoot, Guid.NewGuid().ToString("n")[..12]),
         };
         Directory.CreateDirectory(chat.Workspace);
+        DshContext.Provision(chat.Workspace);
 
         var chats = LoadChats();
         chats.Insert(0, chat);
@@ -185,5 +186,34 @@ internal static class DshSettingsStore
             "    provider: " + settings.Provider + "\n" +
             "    model: " + settings.Model + "\n";
         File.WriteAllText(Path.Combine(profile, "cordis.patch.yml"), yaml, new UTF8Encoding(false));
+    }
+}
+
+/// <summary>
+/// Copies the context pack (AGENTS.md, components.json, pages.md) into a workspace.
+/// The kernel reads AGENTS.md from its working directory, so this is what tells it
+/// that the project is PickCat and that the UI must use WinUIonWeb.
+/// </summary>
+internal static class DshContext
+{
+    public static string SourceDir => Path.Combine(AppContext.BaseDirectory, "Assets", "dsh-context");
+
+    public static void Provision(string workspace)
+    {
+        try
+        {
+            if (!Directory.Exists(SourceDir)) return;
+            Directory.CreateDirectory(workspace);
+            foreach (var file in Directory.GetFiles(SourceDir))
+            {
+                var target = Path.Combine(workspace, Path.GetFileName(file));
+                // Do not clobber a file the user (or the kernel) has since edited.
+                if (!File.Exists(target)) File.Copy(file, target);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error("dsh context provision", ex);
+        }
     }
 }
