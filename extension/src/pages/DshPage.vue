@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   checkDsh,
+  loadWebUrl,
   createChat,
   deleteChat,
   dshState,
@@ -21,6 +22,9 @@ const input = ref('')
 const keyInput = ref('')
 const savingKey = ref(false)
 const keyPanelOpen = ref(false)
+/** 'web' shows the kernel's own UI; 'chat' is the built-in conversation view. */
+const view = ref<'web' | 'chat'>('web')
+const frameLoading = ref(true)
 const thread = ref<HTMLElement | null>(null)
 
 const canSend = computed(
@@ -51,6 +55,12 @@ async function submit(): Promise<void> {
 async function scrollToBottom(): Promise<void> {
   await nextTick()
   if (thread.value) thread.value.scrollTop = thread.value.scrollHeight
+}
+
+async function openWebWindow(): Promise<void> {
+  const target = window.__PICKCAT_DSH__
+  if (!target) return
+  await fetch(`http://127.0.0.1:${target.port}/open-web?token=${target.token}`, { method: 'POST' })
 }
 
 async function submitKey(): Promise<void> {
@@ -91,6 +101,12 @@ watch(
 
 onMounted(async () => {
   await checkDsh()
+  if (dshState.ready) {
+    for (let attempt = 0; attempt < 20 && !dshState.webUrl; attempt++) {
+      await loadWebUrl()
+      if (!dshState.webUrl) await new Promise(resolve => setTimeout(resolve, 500))
+    }
+  }
   await scrollToBottom()
 })
 </script>
@@ -146,7 +162,23 @@ onMounted(async () => {
             </p>
           </div>
           <div class="pc-dsh-head-actions">
-            <span v-if="dshState.running" class="pc-dsh-running">执行中…</span>
+            <span v-if="dshState.running && view === 'chat'" class="pc-dsh-running">执行中…</span>
+            <button
+              class="pc-dsh-keybtn"
+              type="button"
+              :class="{ 'pc-dsh-keybtn--on': view === 'web' }"
+              @click="view = 'web'"
+            >
+              DSH 界面
+            </button>
+            <button
+              class="pc-dsh-keybtn"
+              type="button"
+              :class="{ 'pc-dsh-keybtn--on': view === 'chat' }"
+              @click="view = 'chat'"
+            >
+              对话
+            </button>
             <button class="pc-dsh-keybtn" type="button" @click="keyPanelOpen = !keyPanelOpen">
               {{ dshState.hasKey ? '密钥' : '配置密钥' }}
             </button>
@@ -193,6 +225,28 @@ onMounted(async () => {
             </a>
           </p>
         </div>
+
+        <template v-if="view === 'web'">
+          <div class="pc-dsh-webpanel">
+            <p class="pc-dsh-webpanel-title">DeepSeek Harness 官方界面</p>
+            <p class="pc-dsh-webpanel-text">
+              模型选择、权限模式、计划与文件改动、附件、斜杠命令都在官方界面里。
+              它以独立窗口打开：页面本身位于 pickcat.dao3.fun，把本机界面嵌成子框架会
+              落在第三方上下文，浏览器会拦掉它的 Cookie 与登录状态。
+            </p>
+            <div class="pc-row">
+              <Button
+                Style="AccentButtonStyle"
+                :IsEnabled="Boolean(dshState.webUrl)"
+                @Click="openWebWindow()"
+              >
+                <span class="pc-btn-content">
+                  {{ dshState.webUrl ? '打开 DSH 界面' : '正在启动…' }}
+                </span>
+              </Button>
+            </div>
+          </div>
+        </template>
 
         <template v-else>
           <div ref="thread" class="pc-dsh-thread">
@@ -278,6 +332,50 @@ onMounted(async () => {
 </template>
 
 <style>
+/* ---------- 官方界面 ---------- */
+.pc-dsh-frame {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 6px;
+  background: #1b1b1b;
+}
+
+.pc-dsh-webpanel {
+  margin: auto;
+  max-width: 520px;
+  text-align: left;
+}
+
+.pc-dsh-webpanel-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pc-dsh-webpanel-text {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+
+.pc-dsh-framehint {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+}
+
+.pc-dsh-keybtn--on {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 22%, transparent);
+  border-color: transparent;
+}
+
 /* ---------- Markdown 正文 ---------- */
 .pc-dsh-md {
   font-size: 13px;

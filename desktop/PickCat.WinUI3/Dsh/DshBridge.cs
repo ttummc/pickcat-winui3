@@ -28,6 +28,14 @@ internal sealed class DshBridge : IDisposable
     private string? _cli;
     private (string Exe, string Cli)? _launch;
     private string _home = "";
+    private Func<string?>? _webUrl;
+    private Action? _openWeb;
+
+    /// <summary>Opens the kernel's web UI in its own window.</summary>
+    public void BindOpenWeb(Action open) => _openWeb = open;
+
+    /// <summary>Lets the window hand the page the URL of the kernel's own web UI.</summary>
+    public void BindWebUrl(Func<string?> provider) => _webUrl = provider;
 
     public int Port { get; private set; }
 
@@ -134,6 +142,15 @@ internal sealed class DshBridge : IDisposable
             {
                 case "/state":
                     await WriteJson(response, 200, State());
+                    return;
+
+                case "/web":
+                    await WriteJson(response, 200, new { url = _webUrl?.Invoke() });
+                    return;
+
+                case "/open-web":
+                    _openWeb?.Invoke();
+                    await WriteJson(response, 200, new { opened = _openWeb is not null });
                     return;
 
                 case "/config":

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 
 namespace PickCat.WinUI3.Dsh;
@@ -127,5 +128,62 @@ internal static class DshStore
         if (index < 0) return;
         chats[index] = chat;
         SaveChats(chats);
+    }
+}
+
+/// <summary>User-tunable kernel options.</summary>
+internal sealed class DshSettings
+{
+    public string PermissionMode { get; set; } = "workspace-write";
+    public string Model { get; set; } = "deepseek-flash";
+    public string Provider { get; set; } = "deepseek-official";
+}
+
+internal static class DshSettingsStore
+{
+    private static readonly JsonSerializerOptions Json = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+    };
+
+    public static string FilePath => Path.Combine(DshStore.Root, "dsh-settings.json");
+
+    public static DshSettings Load()
+    {
+        try
+        {
+            if (!File.Exists(FilePath)) return new DshSettings();
+            return JsonSerializer.Deserialize<DshSettings>(File.ReadAllText(FilePath), Json)
+                   ?? new DshSettings();
+        }
+        catch
+        {
+            return new DshSettings();
+        }
+    }
+
+    public static void Save(DshSettings settings)
+    {
+        File.WriteAllText(FilePath, JsonSerializer.Serialize(settings, Json));
+        WriteModelPatch(settings);
+    }
+
+    /// <summary>
+    /// The headless profile has no --model flag, so the selection is written into the
+    /// profile patch layer; dsh composes it on the next run.
+    /// </summary>
+    private static void WriteModelPatch(DshSettings settings)
+    {
+        var profile = Path.Combine(DshRunner.ResolveHome(), "profiles", "headless");
+        Directory.CreateDirectory(profile);
+        var yaml =
+            "# Written by PickCat; rewritten whenever the model selection changes.\n" +
+            "- id: agent-default-model\n" +
+            "  config:\n" +
+            "    provider: " + settings.Provider + "\n" +
+            "    model: " + settings.Model + "\n";
+        File.WriteAllText(Path.Combine(profile, "cordis.patch.yml"), yaml, new UTF8Encoding(false));
     }
 }

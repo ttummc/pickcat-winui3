@@ -1,0 +1,11 @@
+﻿const list = await (await fetch('http://127.0.0.1:9444/json/list')).json();
+const page = list.find(x => x.url.includes('pickcat'));
+const ws = new WebSocket(page.webSocketDebuggerUrl);
+let id = 0; const pending = new Map();
+ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); } };
+await new Promise(r => ws.onopen = r);
+const send = (method, params = {}) => new Promise(r => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+await send('Runtime.enable');
+const t = await send('Target.createTarget', { url: 'http://127.0.0.1:49808/?token=hYeezr7bSp1b0MmiZk567FdrYCeylHTUjLQCM8bWYoE' }).catch(e => ({ error: String(e) }));
+console.log('createTarget:', JSON.stringify(t).slice(0, 120));
+ws.close();

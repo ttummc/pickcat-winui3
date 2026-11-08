@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PickCat.WinUI3.Dsh.DshWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="DeepSeek Harness">
+    <Grid x:Name="RootGrid" Background="#1b1b1b">
+        <WebView2 x:Name="Browser" />
+    </Grid>
+</Window>

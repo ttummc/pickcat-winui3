@@ -59,6 +59,7 @@ export const dshState = reactive({
   hasKey: false,
   workspaces: '' as string,
   kernelPath: '' as string,
+  webUrl: '' as string,
   failure: '' as string,
 
   chats: [] as DshChat[],
@@ -199,6 +200,18 @@ export async function saveKey(key: string): Promise<void> {
   const result = await postJson<{ hasKey: boolean }>('/config', { key })
   dshState.hasKey = result.hasKey
   if (result.hasKey) await loadChats()
+}
+
+/** The kernel's own web UI (served on loopback) once it has booted. */
+export async function loadWebUrl(): Promise<string> {
+  if (dshState.webUrl) return dshState.webUrl
+  try {
+    const { url } = await getJson<{ url: string | null }>('/web')
+    if (url) dshState.webUrl = url
+  } catch {
+    /* the host may still be starting it */
+  }
+  return dshState.webUrl
 }
 
 /** Sends a prompt to the active chat and streams the kernel's events. */

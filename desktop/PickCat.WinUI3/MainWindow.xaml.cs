@@ -206,6 +206,26 @@ public sealed partial class MainWindow : Window
                 }
             });
 
+            _dshWeb = new Dsh.DshWeb();
+            _dshWeb.Start();
+            _dshBridge.BindWebUrl(() => _dshWeb?.Url);
+            _dshBridge.BindOpenWeb(() =>
+            {
+                var url = _dshWeb?.Url;
+                if (url is null) return;
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    try
+                    {
+                        new Dsh.DshWindow(url).Activate();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("open dsh window", ex);
+                    }
+                });
+            });
+
             var endpoint = JsonSerializer.Serialize(new { port = _dshBridge.Port, token = _dshBridge.Token });
             await core.AddScriptToExecuteOnDocumentCreatedAsync(
                 $"window.__PICKCAT_DSH__ = {endpoint};");
@@ -214,7 +234,11 @@ public sealed partial class MainWindow : Window
         {
             Log.Error("dsh bridge", ex);
         }
-        Closed += (_, _) => Log.Write("window closed");
+        Closed += (_, _) =>
+        {
+            Log.Write("window closed");
+            _dshWeb?.Dispose();
+        };
         StartRendererWatchdog(core);
 
         // The rewritten UI has a login page, but sign-in is the one flow that should
@@ -317,6 +341,7 @@ public sealed partial class MainWindow : Window
     }
 
     private Dsh.DshBridge? _dshBridge;
+    private Dsh.DshWeb? _dshWeb;
 
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _routeTimer;
     private bool _diverting;
