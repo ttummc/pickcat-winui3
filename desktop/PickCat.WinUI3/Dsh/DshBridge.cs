@@ -356,9 +356,18 @@ internal sealed class DshBridge : IDisposable
         return doc.RootElement.Clone();
     }
 
+    /// <summary>
+    /// camelCase so the page can read `chat.id` / `chat.title` directly; the
+    /// default policy would emit `Id` / `Title` and every lookup would be undefined.
+    /// </summary>
+    private static readonly JsonSerializerOptions Wire = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
     private static async Task WriteJson(HttpListenerResponse response, int status, object payload)
     {
-        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload));
+        var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(payload, Wire));
         response.StatusCode = status;
         response.ContentType = "application/json; charset=utf-8";
         response.ContentLength64 = bytes.Length;

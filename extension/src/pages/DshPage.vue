@@ -25,7 +25,11 @@ const canSend = computed(
   () => dshState.ready && dshState.hasKey && !dshState.running && input.value.trim().length > 0,
 )
 
-const needsSetup = computed(() => dshState.ready && !dshState.hasKey)
+const needsSetup = computed(
+  () => dshState.ready && !dshState.hasKey && dshState.chats.length === 0,
+)
+
+const showKeyHint = computed(() => dshState.ready && !dshState.hasKey && dshState.chats.length > 0)
 
 const activeChat = computed(
   () => dshState.chats.find(c => c.id === dshState.activeId) ?? null,
@@ -128,6 +132,10 @@ onMounted(async () => {
           <span v-if="dshState.running" class="pc-dsh-running">执行中…</span>
         </header>
 
+        <p v-if="showKeyHint" class="pc-dsh-banner">
+          尚未配置模型密钥，发送会失败。请先在上方「配置模型密钥」中保存。
+        </p>
+
         <div v-if="needsSetup" class="pc-dsh-setup">
           <h2>配置模型密钥</h2>
           <p>
@@ -219,9 +227,41 @@ onMounted(async () => {
 
 .pc-dsh {
   display: grid;
-  grid-template-columns: 248px 1fr;
+  grid-template-columns: minmax(0, 248px) minmax(0, 1fr);
   height: 100%;
   min-height: 0;
+  width: 100%;
+}
+
+/* 窄窗口：侧栏收窄，保证对话区可用 */
+@media (max-width: 900px) {
+  .pc-dsh {
+    grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  }
+  .pc-dsh-main {
+    padding: 12px 12px;
+  }
+  .pc-dsh-item {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .pc-dsh {
+    grid-template-columns: minmax(0, 132px) minmax(0, 1fr);
+  }
+  .pc-dsh-new {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+  .pc-dsh-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .pc-dsh-actions .pc-row {
+    justify-content: flex-end;
+  }
 }
 
 /* ---------- 左侧会话列表 ---------- */
@@ -229,6 +269,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
   padding: 12px 10px;
   border-right: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
   min-height: 0;
@@ -257,6 +298,9 @@ onMounted(async () => {
   padding: 0;
   overflow-y: auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .pc-dsh-item {
@@ -264,6 +308,8 @@ onMounted(async () => {
   align-items: center;
   gap: 6px;
   height: 32px;
+  flex: 0 0 auto;
+  overflow: hidden;
   padding: 0 8px;
   border-radius: 6px;
   cursor: pointer;
@@ -296,7 +342,8 @@ onMounted(async () => {
   opacity: 0;
 }
 
-.pc-dsh-item:hover .pc-dsh-del {
+.pc-dsh-item:hover .pc-dsh-del,
+.pc-dsh-item--active .pc-dsh-del {
   opacity: 1;
 }
 
@@ -311,9 +358,11 @@ onMounted(async () => {
 .pc-dsh-main {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 0;
   padding: 14px 18px;
   gap: 10px;
+  overflow: hidden;
 }
 
 .pc-dsh-head {
@@ -321,6 +370,12 @@ onMounted(async () => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
+}
+
+.pc-dsh-head > div {
+  min-width: 0;
+  flex: 1;
 }
 
 .pc-dsh-title {
@@ -328,6 +383,9 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pc-dsh-path {
@@ -338,6 +396,15 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pc-dsh-banner {
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, #d9a441 16%, transparent);
+  color: var(--text-primary);
+  font-size: 12px;
 }
 
 .pc-dsh-running {
