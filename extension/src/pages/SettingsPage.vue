@@ -56,8 +56,8 @@ async function confirmSignOut(): Promise<void> {
   if (result !== 'Primary') return
   signingOut.value = true
   try {
-    await signOut()
-    notify('已退出登录', '', 'Success')
+    const ok = await signOut()
+    notify(ok ? '已退出登录' : '已退出登录（本地）', ok ? '' : '服务器未确认，本地会话已清除', ok ? 'Success' : 'Warning')
     navigate('/')
   } catch (err) {
     notifyError(err, '退出失败')

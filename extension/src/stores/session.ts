@@ -60,12 +60,24 @@ export async function signIn(payload: LoginPayload): Promise<Session> {
   return session
 }
 
-export async function signOut(): Promise<void> {
+/**
+ * Clears the local session first, then tells the server. The UI must never wait on
+ * the network here: a stalled DELETE left the settings page spinning forever.
+ *
+ * Returns false when the server call failed (the local session is still cleared).
+ */
+export async function signOut(): Promise<boolean> {
+  sessionState.session = null
+  sessionState.user = null
+
   try {
-    await api.del('/session')
-  } finally {
-    sessionState.session = null
-    sessionState.user = null
+    await Promise.race([
+      api.del('/session'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8_000)),
+    ])
+    return true
+  } catch {
+    return false
   }
 }
 

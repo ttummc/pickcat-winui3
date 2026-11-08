@@ -29,6 +29,9 @@ export function newIdempotencyKey(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+/** Nothing should hang forever: a stalled request would freeze the caller's state. */
+const DEFAULT_TIMEOUT_MS = 15_000
+
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   query?: Query
@@ -57,10 +60,18 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const { method = 'GET', query, body, headers, signal } = options
   const url = BASE + path + buildQuery(query)
 
+  // Combine the caller's signal with our timeout so either can abort.
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(new DOMException('timeout', 'TimeoutError')), DEFAULT_TIMEOUT_MS)
+  if (signal) {
+    if (signal.aborted) controller.abort(signal.reason)
+    else signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true })
+  }
+
   const init: RequestInit = {
     method,
     credentials: 'include',
-    signal,
+    signal: controller.signal,
     headers: {
       accept: 'application/json',
       ...(body === undefined ? {} : { 'content-type': 'application/json' }),
@@ -71,8 +82,14 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   }
   if (body !== undefined) init.body = JSON.stringify(body)
 
-  const response = await fetch(url, init)
-  const text = await response.text()
+  let response: Response
+  let text: string
+  try {
+    response = await fetch(url, init)
+    text = await response.text()
+  } finally {
+    clearTimeout(timer)
+  }
   let payload: unknown = null
   if (text) {
     try {

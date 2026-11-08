@@ -185,6 +185,8 @@ public sealed partial class MainWindow : Window
         await core.AddScriptToExecuteOnDocumentCreatedAsync(js);
         Log.Write("content script registered");
         core.WebMessageReceived += OnWebMessage;
+        Closed += (_, _) => Log.Write("window closed");
+        StartRendererWatchdog(core);
 
         // The rewritten UI has a login page, but sign-in is the one flow that should
         // look exactly like the official site. Hash-only navigation never raises an
@@ -245,6 +247,46 @@ public sealed partial class MainWindow : Window
             """;
     }
 
+    /// <summary>
+    /// Pings the page every two seconds. If the renderer stops answering, the log
+    /// says so — otherwise a frozen window leaves no evidence at all.
+    /// </summary>
+    private void StartRendererWatchdog(CoreWebView2 core)
+    {
+        var timer = DispatcherQueue.CreateTimer();
+        timer.Interval = TimeSpan.FromSeconds(2);
+        var hung = false;
+
+        timer.Tick += async (_, _) =>
+        {
+            try
+            {
+                var probe = core.ExecuteScriptAsync("1").AsTask();
+                var finished = await Task.WhenAny(probe, Task.Delay(1500));
+                if (finished != probe)
+                {
+                    if (!hung)
+                    {
+                        hung = true;
+                        Log.Write("renderer unresponsive");
+                    }
+                    return;
+                }
+                if (hung)
+                {
+                    hung = false;
+                    Log.Write("renderer responsive again");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("renderer watchdog", ex);
+            }
+        };
+        timer.Start();
+        Log.Write("renderer watchdog started");
+    }
+
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _routeTimer;
     private bool _diverting;
 
@@ -287,6 +329,7 @@ public sealed partial class MainWindow : Window
     private void OnNavigationStarting(CoreWebView2 sender, CoreWebView2NavigationStartingEventArgs args)
     {
         var url = args.Uri ?? string.Empty;
+        Log.Write($"navigation starting: {url}");
         if (!url.Contains("#/login", StringComparison.OrdinalIgnoreCase)) return;
 
         Log.Write($"diverting to stock login: {url}");
