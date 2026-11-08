@@ -197,7 +197,8 @@ export function apply(ctx, config) {
           } catch {
             /* 没有 Agent 上下文时回退到进程目录 */
           }
-          return renderPromptSection(detect(false, cwd))
+          const status = detect(false, cwd)
+          return renderPromptSection(status, { inRepo: repoRootForCwd(cwd) !== null })
         },
       }),
     'pickcat.prompt',
@@ -221,8 +222,9 @@ export function apply(ctx, config) {
           const { status, cwd } = statusForAgent(exec.agent, args?.fresh === true)
           const target = syncTarget(status, cwd)
           const contextFiles = inspectContextFiles(target.target ?? cwd)
-          const summary = renderStatusSummary(target.status, contextFiles)
-          return { summary, status: target.status, cwd, contextFiles }
+          const inRepo = repoRootForCwd(cwd) !== null
+          const summary = renderStatusSummary(target.status, contextFiles, { cwd, inRepo })
+          return { summary, status: target.status, cwd, inRepo, contextFiles }
         },
       }),
     'pickcat.tool.status',

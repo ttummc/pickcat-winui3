@@ -140,6 +140,19 @@ test('只有安装版时系统提示明确说不能改代码', () => {
   assert.match(text, /未找到/)
 })
 
+test('会话不在仓库内时提醒切换工作区', () => {
+  const text = renderPromptSection(
+    {
+      detected: true,
+      installed: { found: true, path: 'C:\\PickCat', version: '1.6.0', hasKernel: false },
+      repo: { found: true, path: 'D:\\src\\PickCat' },
+    },
+    { inRepo: false },
+  )
+  assert.match(text, /当前会话的工作目录不是这个仓库/)
+  assert.match(text, /D:\\src\\PickCat/)
+})
+
 test('只有安装版时 AGENTS.md 使用限制模板且不留占位符', () => {
   const assets = join(import.meta.dirname, '..', 'assets')
   const text = renderAgentsMd(

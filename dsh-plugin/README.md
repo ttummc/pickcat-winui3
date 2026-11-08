@@ -70,6 +70,23 @@ dsh plugin --profile desktop add C:\path\to\dsh-plugin
 
 优先级：**有源码仓库时以仓库为工作目标**；只有安装版时只能解释现有行为，不能改代码。两条路径都会出现在状态里。
 
+### “哪个目录才是 PickCat 仓库工作区？”
+
+就是包含下面结构的目录，不是安装目录：
+
+```text
+<仓库根目录>\
+  extension\src\
+  desktop\PickCat.WinUI3\
+  package.json        # dependencies 里有 winuionweb
+```
+
+在本机可以用 `pickcat_status` 看“源码仓库”那一行；系统提示里也会写出绝对路径。如果当前会话的工作目录不在该仓库内，`pickcat_status` 会明确提示：
+
+> 要直接读写源码，请把 DSH 工作区新建/切换为：`<仓库路径>`
+
+在 DSH 左侧工作区栏新建/添加工作区时选择这个目录即可。插件本身会自动探测常见位置，但**要改源码，会话的工作目录必须是该仓库或其子目录**。
+
 ## 生成的文件
 
 在 PickCat 仓库根目录（或会话所在仓库根目录）写入：

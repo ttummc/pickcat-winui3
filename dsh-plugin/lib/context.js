@@ -238,7 +238,7 @@ export function buildPagesDoc(repoPath) {
  * @param {object} status detectPickCat() 的结果
  * @returns {string}
  */
-export function renderPromptSection(status) {
+export function renderPromptSection(status, options = {}) {
   if (status?.detected !== true) return ''
 
   const lines = ['## PickCat WinUI 3']
@@ -255,6 +255,9 @@ export function renderPromptSection(status) {
     lines.push('- 仓库根目录有插件生成的 `AGENTS.md`、`components.json`、`pages.md`。')
     lines.push('- 改 PickCat 前先读 `AGENTS.md`；写 WinUIonWeb 组件前先查 `components.json` 核对 props 与事件名；新增页面前查 `pages.md`。')
     lines.push('- 前端界面只能使用 `winuionweb`，属性用 XAML 大小写，事件用 PascalCase。')
+    if (options.inRepo === false) {
+      lines.push(`- 注意：当前会话的工作目录不是这个仓库。要让 AI 直接读写源码，请把 DSH 工作区新建/切换为 \`${status.repo.path}\`。`)
+    }
   } else {
     lines.push('- 源码仓库：未找到')
     lines.push('- 只有安装版时无法修改代码。用户要求改 PickCat 功能时，明确说明只能解释现有行为，不要编造文件路径或假装改过代码。')
@@ -384,7 +387,7 @@ export async function ensureWorkspaceFiles(options) {
  * @param {{ name: string, path: string, exists: boolean, bytes: number | null }[]} [contextFiles]
  * @returns {string}
  */
-export function renderStatusSummary(status, contextFiles = []) {
+export function renderStatusSummary(status, contextFiles = [], options = {}) {
   const lines = []
   if (status?.detected !== true) {
     lines.push('未检测到 PickCat WinUI 3（既没有安装版，也没有源码仓库）。')
@@ -402,6 +405,11 @@ export function renderStatusSummary(status, contextFiles = []) {
     lines.push(`扩展版本：${status.repo.extensionVersion ?? '未知'}`)
     lines.push(`winuionweb：${status.repo.winuionweb ?? '未知'}`)
     lines.push(`可修改源码：是`)
+    if (options.inRepo === false) {
+      lines.push('当前会话工作目录不在该仓库内。')
+      if (typeof options.cwd === 'string' && options.cwd.length > 0) lines.push(`当前工作目录：${options.cwd}`)
+      lines.push(`要直接读写源码，请把 DSH 工作区新建/切换为：${status.repo.path}`)
+    }
   } else {
     lines.push('可修改源码：否（只有安装版，只能解释现有行为）')
   }

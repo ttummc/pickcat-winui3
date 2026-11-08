@@ -40,3 +40,6 @@ research/.tmp-endpoints.txt
 
 .chrome-orig*/
 .chrome-*/
+
+# DSH 插件的分发归档
+/releases/dsh-plugin/
