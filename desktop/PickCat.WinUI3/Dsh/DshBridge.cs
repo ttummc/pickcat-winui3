@@ -36,6 +36,14 @@ internal sealed class DshBridge : IDisposable
 
     public static TaskCompletionSource<DshBridge> Started { get; } = new();
 
+    /// <summary>Re-runs kernel discovery; call after the payload has been unpacked.</summary>
+    public void Refresh()
+    {
+        _cli = DshRunner.ResolveCli();
+        _launch = DshRunner.ResolveLaunch();
+        Log.Write($"dsh kernel refresh: {_cli ?? "(still missing)"}");
+    }
+
     public void Start()
     {
         _home = DshRunner.ResolveHome();

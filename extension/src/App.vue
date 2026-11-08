@@ -22,6 +22,7 @@ import SearchPage from './pages/SearchPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import LibraryPage from './pages/LibraryPage.vue'
 import MediaLibraryPage from './pages/MediaLibraryPage.vue'
+import DshPage from './pages/DshPage.vue'
 import LoginPage from './pages/LoginPage.vue'
 import NotFoundPage from './pages/NotFoundPage.vue'
 import CardContextMenu from './components/CardContextMenu.vue'
@@ -358,11 +359,6 @@ function reopen(): void {
       </div>
     </NavigationView>
 
-    <div v-else class="pc-content">
-      <Transition :name="transitionName" mode="out-in">
-        <component :is="pageComponent" :key="pageKey" />
-      </Transition>
-    </div>
 
     <ToastHost />
 

@@ -195,6 +195,17 @@ public sealed partial class MainWindow : Window
 
             // Hand the page its endpoint. Kept out of the bundle: the token changes
             // every launch and never leaves this machine.
+            // First run copies the bundled kernel out of its payload; the page shows
+            // "preparing" until the bridge reports it.
+            var bridge = _dshBridge;
+            _ = Task.Run(async () =>
+            {
+                if (await Dsh.DshProvisioner.EnsureAsync())
+                {
+                    bridge.Refresh();
+                }
+            });
+
             var endpoint = JsonSerializer.Serialize(new { port = _dshBridge.Port, token = _dshBridge.Token });
             await core.AddScriptToExecuteOnDocumentCreatedAsync(
                 $"window.__PICKCAT_DSH__ = {endpoint};");

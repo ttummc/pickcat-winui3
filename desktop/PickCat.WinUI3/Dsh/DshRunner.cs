@@ -66,7 +66,7 @@ internal static class DshRunner
         var candidates = new List<string>();
 
         // 1. bundled beside our executable: <app>\dsh\runtime\cli\bin\dsh.cmd
-        var bundled = Path.Combine(AppContext.BaseDirectory, "dsh", "runtime", "cli", "bin", "dsh.cmd");
+        var bundled = Path.Combine(AppContext.BaseDirectory, "dsh", "resources", "runtime", "cli", "bin", "dsh.cmd");
         candidates.Add(bundled);
 
         // 2. an existing DeepSeek Harness install (%LOCALAPPDATA%\Programs\DeepSeek Harness)
