@@ -12,12 +12,11 @@ using System.Threading.Tasks;
 namespace PickCat.WinUI3.Dsh;
 
 /// <summary>
-/// Local HTTP bridge between the page ("DSH 定制") and the DSH kernel.
+/// Local HTTP bridge between the «DSH 定制» page and the kernel.
 ///
 /// Plain HTTP + long-poll rather than WebSocket: the renderer is a web page, so a
 /// WebSocket would need a hand-rolled server, while fetch() works as-is. The token
-/// travels in the query string and bodies are text/plain so the browser never sends
-/// a CORS preflight.
+/// travels in the query string and bodies are text/plain so no CORS preflight fires.
 /// </summary>
 internal sealed class DshBridge : IDisposable
 {
@@ -32,9 +31,9 @@ internal sealed class DshBridge : IDisposable
 
     public int Port { get; private set; }
 
-    public bool KernelFound => _cli is not null;
+    public bool KernelFound => _launch is not null;
 
-    public static TaskCompletionSource<DshBridge> Started { get; } = new();
+    public string Token => _token;
 
     /// <summary>Re-runs kernel discovery; call after the payload has been unpacked.</summary>
     public void Refresh()
@@ -47,32 +46,22 @@ internal sealed class DshBridge : IDisposable
     public void Start()
     {
         _home = DshRunner.ResolveHome();
-        _cli = DshRunner.ResolveCli();
-        _launch = DshRunner.ResolveLaunch();
-        Log.Write($"dsh cli: {_cli ?? "(not found)"}");
-        Log.Write($"dsh home: {_home}");
+        Refresh();
 
-        // Port 0 asks the OS for a free port; loop the bind a few times in case of a race.
         for (var attempt = 0; attempt < 5; attempt++)
         {
             var port = FreePort();
-            var prefix = $"http://127.0.0.1:{port}/";
             try
             {
                 _listener.Prefixes.Clear();
-                _listener.Prefixes.Add(prefix);
+                _listener.Prefixes.Add($"http://127.0.0.1:{port}/");
                 _listener.Start();
                 Port = port;
                 break;
             }
-            catch (HttpListenerException ex)
-            {
-                Log.Write($"dsh bridge bind {port} failed: {ex.Message}");
-            }
             catch (Exception ex)
             {
-                Log.Error("dsh bridge bind", ex);
-                break;
+                Log.Write($"dsh bridge bind {port} failed: {ex.Message}");
             }
         }
 
@@ -85,7 +74,6 @@ internal sealed class DshBridge : IDisposable
         _service = new CancellationTokenSource();
         Log.Write($"dsh bridge listening on 127.0.0.1:{Port}");
         _ = Task.Run(() => LoopAsync(_service.Token));
-        Started.TrySetResult(this);
     }
 
     private static int FreePort()
@@ -126,7 +114,6 @@ internal sealed class DshBridge : IDisposable
         var response = context.Response;
         try
         {
-            // Only the extension may talk to us; the token is the real gate.
             AddCors(response, request);
 
             if (request.HttpMethod == "OPTIONS")
@@ -143,81 +130,30 @@ internal sealed class DshBridge : IDisposable
                 return;
             }
 
-            var path = (request.Url?.AbsolutePath ?? "/").TrimEnd('/');
-            switch (path)
+            switch ((request.Url?.AbsolutePath ?? "/").TrimEnd('/'))
             {
                 case "/state":
                     await WriteJson(response, 200, State());
                     return;
 
-                case "/task":
-                {
-                    var body = await ReadBody(request);
-                    var prompt = body.TryGetProperty("prompt", out var p) ? p.GetString() ?? "" : "";
-                    if (string.IsNullOrWhiteSpace(prompt))
-                    {
-                        await WriteJson(response, 400, new { error = "empty prompt" });
-                        return;
-                    }
-                    if (!KernelFound)
-                    {
-                        await WriteJson(response, 503, new { error = "DSH 内核未找到" });
-                        return;
-                    }
-
-                    var task = new DshTask(prompt);
-                    _tasks[task.Id] = task;
-                    var cts = new CancellationTokenSource();
-                    _running[task.Id] = cts;
-                    _ = DshRunner.RunAsync(_launch!.Value, _home, task, _ => { }, cts.Token);
-
-                    await WriteJson(response, 200, new { taskId = task.Id });
+                case "/config":
+                    await HandleConfig(request, response);
                     return;
-                }
+
+                case "/chats":
+                    await HandleChats(request, response, query);
+                    return;
+
+                case "/task":
+                    await HandleTask(request, response, token);
+                    return;
 
                 case "/events":
-                {
-                    var id = Extract(query, "task");
-                    var since = int.TryParse(Extract(query, "since"), out var s) ? s : 0;
-                    if (!_tasks.TryGetValue(id, out var task))
-                    {
-                        await WriteJson(response, 404, new { error = "unknown task" });
-                        return;
-                    }
-
-                    // Long-poll: wait until there is something new or the task ends.
-                    var deadline = DateTime.UtcNow.AddSeconds(25);
-                    while (task.EventCount <= since && !task.Finished && DateTime.UtcNow < deadline)
-                    {
-                        await Task.Delay(120, token);
-                    }
-
-                    await WriteJson(response, 200, new
-                    {
-                        events = task.Snapshot(since),
-                        finished = task.Finished,
-                        failed = task.Failed,
-                        final = task.FinalText,
-                        count = task.EventCount,
-                    });
+                    await HandleEvents(response, query, token);
                     return;
-                }
 
                 case "/cancel":
-                {
-                    var id = Extract(query, "task");
-                    if (_running.TryRemove(id, out var cts))
-                    {
-                        cts.Cancel();
-                        await WriteJson(response, 200, new { cancelled = true });
-                        return;
-                    }
-                    await WriteJson(response, 404, new { error = "unknown task" });
-                    return;
-                }
-
-                case "/tasks":
-                    await WriteJson(response, 200, new { tasks = new List<object>() });
+                    await HandleCancel(response, query);
                     return;
 
                 default:
@@ -234,24 +170,169 @@ internal sealed class DshBridge : IDisposable
 
     private object State() => new
     {
-        ready = KernelFound && Port != 0,
-        version = "1.2.3",
-        kernel = new
-        {
-            found = KernelFound,
-            path = _cli,
-            home = _home,
-        },
-        protocol = 1,
+        ready = KernelFound,
+        hasKey = DshStore.HasKey(),
+        workspaces = DshStore.WorkspacesRoot,
+        kernel = new { found = KernelFound, path = _cli, home = _home },
+        protocol = 2,
     };
+
+    private async Task HandleConfig(HttpListenerRequest request, HttpListenerResponse response)
+    {
+        if (request.HttpMethod == "POST")
+        {
+            var body = await ReadBody(request);
+            var key = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("key", out var k)
+                ? k.GetString() ?? ""
+                : "";
+            DshStore.WriteKey(key);
+            Log.Write(key.Length == 0 ? "dsh key cleared" : "dsh key stored");
+        }
+
+        await WriteJson(response, 200, new { hasKey = DshStore.HasKey() });
+    }
+
+    private async Task HandleChats(HttpListenerRequest request, HttpListenerResponse response, string query)
+    {
+        switch (request.HttpMethod)
+        {
+            case "POST":
+            {
+                var body = await ReadBody(request);
+                var title = body.ValueKind == JsonValueKind.Object && body.TryGetProperty("title", out var t)
+                    ? t.GetString()
+                    : null;
+                var chat = DshStore.CreateChat(title);
+                await WriteJson(response, 200, chat);
+                return;
+            }
+            case "DELETE":
+            {
+                var id = Extract(query, "id");
+                var chats = DshStore.LoadChats();
+                chats.RemoveAll(c => c.Id == id);
+                DshStore.SaveChats(chats);
+                await WriteJson(response, 200, new { deleted = true });
+                return;
+            }
+            default:
+            {
+                var chats = DshStore.LoadChats();
+                await WriteJson(response, 200, new { chats });
+                return;
+            }
+        }
+    }
+
+    private async Task HandleTask(HttpListenerRequest request, HttpListenerResponse response, CancellationToken token)
+    {
+        var body = await ReadBody(request);
+        var prompt = body.TryGetProperty("prompt", out var p) ? p.GetString() ?? "" : "";
+        var chatId = body.TryGetProperty("chatId", out var c) ? c.GetString() ?? "" : "";
+
+        if (string.IsNullOrWhiteSpace(prompt))
+        {
+            await WriteJson(response, 400, new { error = "empty prompt" });
+            return;
+        }
+        if (!KernelFound)
+        {
+            await WriteJson(response, 503, new { error = "DSH kernel not found" });
+            return;
+        }
+
+        var chat = DshStore.Find(chatId) ?? DshStore.CreateChat();
+        var task = new DshTask(prompt, chat.Id);
+        _tasks[task.Id] = task;
+
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        _running[task.Id] = cts;
+
+        if (chat.Title == "新对话")
+        {
+            chat.Title = prompt.Length > 24 ? prompt[..24] : prompt;
+            chat.UpdatedAt = DateTime.Now;
+            DshStore.Update(chat);
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await DshRunner.RunAsync(
+                    _launch!.Value, _home, chat.Workspace, DshStore.ReadKey(),
+                    string.IsNullOrEmpty(chat.KernelSession) ? null : chat.KernelSession,
+                    task, _ => { }, cts.Token);
+
+                if (task.KernelSession.Length > 0)
+                {
+                    var stored = DshStore.Find(chat.Id);
+                    if (stored is not null)
+                    {
+                        stored.KernelSession = task.KernelSession;
+                        stored.UpdatedAt = DateTime.Now;
+                        DshStore.Update(stored);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("dsh task", ex);
+            }
+            finally
+            {
+                _running.TryRemove(task.Id, out _);
+            }
+        }, token);
+
+        await WriteJson(response, 200, new { taskId = task.Id, chatId = chat.Id });
+    }
+
+    private async Task HandleEvents(HttpListenerResponse response, string query, CancellationToken token)
+    {
+        var id = Extract(query, "task");
+        var since = int.TryParse(Extract(query, "since"), out var s) ? s : 0;
+        if (!_tasks.TryGetValue(id, out var task))
+        {
+            await WriteJson(response, 404, new { error = "unknown task" });
+            return;
+        }
+
+        var deadline = DateTime.UtcNow.AddSeconds(25);
+        while (task.EventCount <= since && !task.Finished && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(120, token);
+        }
+
+        await WriteJson(response, 200, new
+        {
+            events = task.Snapshot(since),
+            finished = task.Finished,
+            failed = task.Failed,
+            final = task.FinalText,
+            session = task.KernelSession,
+            count = task.EventCount,
+        });
+    }
+
+    private async Task HandleCancel(HttpListenerResponse response, string query)
+    {
+        var id = Extract(query, "task");
+        if (_running.TryRemove(id, out var cts))
+        {
+            cts.Cancel();
+            await WriteJson(response, 200, new { cancelled = true });
+            return;
+        }
+        await WriteJson(response, 404, new { error = "unknown task" });
+    }
 
     private void AddCors(HttpListenerResponse response, HttpListenerRequest request)
     {
         var origin = request.Headers["Origin"];
-        // The page runs inside the extension or the desktop webview.
         response.Headers["Access-Control-Allow-Origin"] = string.IsNullOrEmpty(origin) ? "*" : origin;
         response.Headers["Access-Control-Allow-Headers"] = "content-type";
-        response.Headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+        response.Headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS";
         response.Headers["Access-Control-Max-Age"] = "600";
     }
 
@@ -284,9 +365,6 @@ internal sealed class DshBridge : IDisposable
         await response.OutputStream.WriteAsync(bytes);
         response.Close();
     }
-
-    /// <summary>Token the page must append to every request.</summary>
-    public string Token => _token;
 
     public void Dispose()
     {

@@ -1,223 +1,496 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { checkDsh, runDshTask, cancelDshTask, dshState } from '@/stores/dsh'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import {
+  checkDsh,
+  createChat,
+  deleteChat,
+  dshState,
+  saveKey,
+  selectChat,
+  sendPrompt,
+  cancelDshTask,
+} from '@/stores/dsh'
 import EmptyState from '@/components/EmptyState.vue'
 
 /**
- * 「DSH 定制」 — describe a feature in Chinese, the desktop host runs the DSH
- * kernel and streams its events back.
+ * 「DSH 定制」 — a conversation surface over the bundled kernel. Each conversation
+ * owns a workspace folder the kernel runs inside, mirroring the DSH app itself.
  */
-const prompt = ref('')
+const input = ref('')
+const keyInput = ref('')
+const savingKey = ref(false)
+const thread = ref<HTMLElement | null>(null)
 
-const examples = [
-  '给帖子详情页加一个“收藏到我的合集”按钮',
-  '在设置页增加一个“图片代理”开关，默认关闭',
-  '给作品详情页加一行显示作品来源 ID',
-]
-
-const canSubmit = computed(
-  () => dshState.ready && !dshState.running && prompt.value.trim().length > 0,
+const canSend = computed(
+  () => dshState.ready && dshState.hasKey && !dshState.running && input.value.trim().length > 0,
 )
 
-/** Human-readable one-line summary of a kernel event. */
-function describe(event: Record<string, unknown>): string {
-  const type = String(event.type ?? '')
-  if (type === 'session') return `会话 ${String(event.sessionId ?? '')}`
-  if (type === 'status') {
-    const phase = String(event.phase ?? '')
-    const turn = event.turn ?? ''
-    const step = event.step ?? ''
-    if (phase === 'turn_start') return `第 ${turn} 轮开始`
-    if (phase === 'step_start') return `第 ${turn} 轮 第 ${step} 步开始`
-    if (phase === 'step_end') return `第 ${turn} 轮 第 ${step} 步结束`
-    if (phase === 'turn_end') {
-      const reason = event.reason as { kind?: string; error?: { message?: string } } | undefined
-      if (reason?.kind === 'error') return `第 ${turn} 轮失败：${reason.error?.message ?? ''}`
-      return `第 ${turn} 轮结束`
-    }
-    return phase
-  }
-  if (type === 'final') return `最终输出 ${String(event.text ?? '').slice(0, 80)}`
-  if (type === 'log') return String(event.text ?? '')
-  if (type === 'error') return String(event.text ?? '')
-  return type
-}
+const needsSetup = computed(() => dshState.ready && !dshState.hasKey)
+
+const activeChat = computed(
+  () => dshState.chats.find(c => c.id === dshState.activeId) ?? null,
+)
 
 async function submit(): Promise<void> {
-  if (!canSubmit.value) return
-  await runDshTask(prompt.value.trim())
+  if (!canSend.value) return
+  const text = input.value.trim()
+  input.value = ''
+  await sendPrompt(text)
+  await scrollToBottom()
 }
 
-onMounted(() => {
-  void checkDsh()
+async function scrollToBottom(): Promise<void> {
+  await nextTick()
+  if (thread.value) thread.value.scrollTop = thread.value.scrollHeight
+}
+
+async function submitKey(): Promise<void> {
+  const key = keyInput.value.trim()
+  if (!key) return
+  savingKey.value = true
+  try {
+    await saveKey(key)
+    keyInput.value = ''
+  } finally {
+    savingKey.value = false
+  }
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  // Enter sends, Shift+Enter breaks the line — the same as the DSH app.
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    event.preventDefault()
+    void submit()
+  }
+}
+
+watch(
+  () => dshState.messages.length,
+  () => void scrollToBottom(),
+)
+
+onMounted(async () => {
+  await checkDsh()
+  await scrollToBottom()
 })
 </script>
 
 <template>
   <div class="pc-page">
-    <div class="pc-page-scroll">
-      <header class="pc-page-header">
-        <div>
-          <h1 class="pc-page-title">DSH 定制</h1>
-          <p class="pc-page-subtitle">描述你想要的功能，由内置的 DSH 内核生成并应用。</p>
-        </div>
-      </header>
+    <div v-if="dshState.checking" class="pc-dsh-center">
+      <EmptyState glyph="&#xE895;" title="正在检测内核" description="正在连接桌面宿主。" />
+    </div>
 
+    <div v-else-if="!dshState.available" class="pc-dsh-center">
       <EmptyState
-        v-if="dshState.checking"
-        glyph="&#xE895;"
-        title="正在检测内核"
-        description="正在连接桌面宿主。"
-      />
-
-      <EmptyState
-        v-else-if="!dshState.available"
         glyph="&#xE7BA;"
         title="未检测到桌面版"
         description="DSH 定制需要桌面版提供的内核与本机桥接；浏览器扩展模式不支持。"
       />
+    </div>
 
+    <div v-else-if="!dshState.ready" class="pc-dsh-center">
       <EmptyState
-        v-else-if="!dshState.ready"
         glyph="&#xEA39;"
         title="内核不可用"
         :description="dshState.failure || '未找到 DSH 内核，请重新安装桌面版。'"
       />
+    </div>
 
-      <template v-else>
-        <section class="pc-dsh-status">
-          <span class="pc-dsh-dot" />
-          <span>内核就绪</span>
-          <span v-if="dshState.kernel" class="pc-muted">
-            {{ dshState.kernel.path }}
-          </span>
-        </section>
-
-        <section class="pc-card pc-dsh-form">
-          <label class="pc-field-label">需求描述</label>
-          <textarea
-            v-model="prompt"
-            class="pc-dsh-input"
-            rows="4"
-            placeholder="例如：在帖子详情页加一个按钮，把当前帖子加入我的合集"
-            :disabled="dshState.running"
-          />
-
-          <div class="pc-dsh-examples">
-            <button
-              v-for="example in examples"
-              :key="example"
-              class="pc-tag"
-              type="button"
-              :disabled="dshState.running"
-              @click="prompt = example"
-            >
-              {{ example }}
+    <div v-else class="pc-dsh">
+      <aside class="pc-dsh-rail">
+        <button class="pc-dsh-new" type="button" @click="createChat()">＋ 新对话</button>
+        <ul class="pc-dsh-list">
+          <li
+            v-for="chat in dshState.chats"
+            :key="chat.id"
+            class="pc-dsh-item"
+            :class="{ 'pc-dsh-item--active': chat.id === dshState.activeId }"
+            @click="selectChat(chat.id)"
+          >
+            <span class="pc-dsh-item-title">{{ chat.title }}</span>
+            <button class="pc-dsh-del" type="button" title="删除对话" @click.stop="deleteChat(chat.id)">
+              ✕
             </button>
+          </li>
+        </ul>
+        <p v-if="!dshState.chats.length" class="pc-dsh-empty">还没有对话</p>
+      </aside>
+
+      <section class="pc-dsh-main">
+        <header class="pc-dsh-head">
+          <div>
+            <h1 class="pc-dsh-title">{{ activeChat?.title ?? '新对话' }}</h1>
+            <p v-if="activeChat" class="pc-dsh-path" :title="activeChat.workspace">
+              {{ activeChat.workspace }}
+            </p>
+          </div>
+          <span v-if="dshState.running" class="pc-dsh-running">执行中…</span>
+        </header>
+
+        <div v-if="needsSetup" class="pc-dsh-setup">
+          <h2>配置模型密钥</h2>
+          <p>
+            内核需要 DeepSeek API 密钥才能工作。密钥保存在本机
+            <code>%APPDATA%\PickCat\api-key.txt</code>，仅用于内核进程的环境变量，
+            不会写入日志或上传。
+          </p>
+          <div class="pc-dsh-keyrow">
+            <input
+              v-model="keyInput"
+              class="pc-dsh-input"
+              type="password"
+              placeholder="sk-…"
+              autocomplete="off"
+              @keydown.enter="submitKey()"
+            />
+            <Button
+              Style="AccentButtonStyle"
+              :IsEnabled="!savingKey && keyInput.trim().length > 0"
+              @Click="submitKey()"
+            >
+              <span class="pc-btn-content">{{ savingKey ? '保存中…' : '保存' }}</span>
+            </Button>
+          </div>
+          <p class="pc-dsh-hint">
+            获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">
+              platform.deepseek.com/api_keys
+            </a>
+          </p>
+        </div>
+
+        <template v-else>
+          <div ref="thread" class="pc-dsh-thread">
+            <p v-if="!dshState.messages.length" class="pc-dsh-hint pc-dsh-hint--center">
+              描述你想要的功能，例如「在帖子页加一个收藏按钮」。
+            </p>
+
+            <div
+              v-for="(message, index) in dshState.messages"
+              :key="index"
+              class="pc-dsh-msg"
+              :class="`pc-dsh-msg--${message.role}`"
+            >
+              <div class="pc-dsh-bubble" :class="{ 'pc-dsh-bubble--failed': message.failed }">
+                <pre>{{ message.text }}</pre>
+              </div>
+            </div>
+
+            <div v-if="dshState.running" class="pc-dsh-msg pc-dsh-msg--assistant">
+              <div class="pc-dsh-bubble">
+                <p class="pc-dsh-thinking">{{ dshState.liveText || '思考中…' }}</p>
+              </div>
+            </div>
           </div>
 
-          <div class="pc-row" style="margin-top: 12px">
-            <Button Style="AccentButtonStyle" :IsEnabled="canSubmit" @Click="submit">
-              <span class="pc-btn-content">{{ dshState.running ? '执行中…' : '开始生成' }}</span>
-            </Button>
-            <Button v-if="dshState.running" @Click="cancelDshTask">
-              <span class="pc-btn-content">取消</span>
-            </Button>
+          <div class="pc-dsh-composer">
+            <textarea
+              v-model="input"
+              class="pc-dsh-textarea"
+              rows="2"
+              placeholder="描述你想要的功能…（Enter 发送，Shift+Enter 换行）"
+              :disabled="dshState.running"
+              @keydown="onKeydown"
+            />
+            <div class="pc-dsh-actions">
+              <span class="pc-dsh-hint">
+                {{ dshState.chats.length ? '每个对话独立工作区' : '' }}
+              </span>
+              <div class="pc-row">
+                <Button v-if="dshState.running" @Click="cancelDshTask()">
+                  <span class="pc-btn-content">停止</span>
+                </Button>
+                <Button Style="AccentButtonStyle" :IsEnabled="canSend" @Click="submit()">
+                  <span class="pc-btn-content">发送</span>
+                </Button>
+              </div>
+            </div>
           </div>
-        </section>
-
-        <section v-if="dshState.events.length || dshState.running" class="pc-card pc-dsh-log">
-          <h3 class="pc-rail-title">执行日志</h3>
-          <ol class="pc-dsh-events">
-            <li v-for="(event, index) in dshState.events" :key="index" class="pc-dsh-event">
-              {{ describe(event) }}
-            </li>
-          </ol>
-        </section>
-
-        <section v-if="dshState.finalText || dshState.failed" class="pc-card pc-dsh-result">
-          <h3 class="pc-rail-title">{{ dshState.failed ? '执行失败' : '生成结果' }}</h3>
-          <pre class="pc-dsh-output">{{ dshState.finalText || dshState.failure }}</pre>
-        </section>
-      </template>
+        </template>
+      </section>
     </div>
   </div>
 </template>
 
 <style>
-.pc-dsh-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12.5px;
-  margin-bottom: 14px;
-  color: var(--text-secondary);
+.pc-dsh-center {
+  padding: 40px 24px;
 }
 
-.pc-dsh-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #4bd07a;
+.pc-dsh {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  height: 100%;
+  min-height: 0;
 }
 
-.pc-dsh-form {
+/* ---------- 左侧会话列表 ---------- */
+.pc-dsh-rail {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 14px;
+  padding: 12px 10px;
+  border-right: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  min-height: 0;
 }
 
-.pc-dsh-input {
+.pc-dsh-new {
   width: 100%;
-  resize: vertical;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.pc-dsh-new:hover {
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.pc-dsh-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.pc-dsh-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+
+.pc-dsh-item:hover {
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.pc-dsh-item--active {
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 14%, transparent);
+  color: var(--text-primary);
+}
+
+.pc-dsh-item-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pc-dsh-del {
+  border: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 11px;
+  opacity: 0;
+}
+
+.pc-dsh-item:hover .pc-dsh-del {
+  opacity: 1;
+}
+
+.pc-dsh-empty {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  text-align: center;
+  margin: 12px 0;
+}
+
+/* ---------- 右侧对话 ---------- */
+.pc-dsh-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 14px 18px;
+  gap: 10px;
+}
+
+.pc-dsh-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pc-dsh-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pc-dsh-path {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: 'Cascadia Code', Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pc-dsh-running {
+  font-size: 12px;
+  color: var(--pc-accent, #ff6b60);
+}
+
+.pc-dsh-thread {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+  min-height: 0;
+}
+
+.pc-dsh-msg {
+  display: flex;
+}
+
+.pc-dsh-msg--user {
+  justify-content: flex-end;
+}
+
+.pc-dsh-bubble {
+  max-width: 82%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.pc-dsh-msg--user .pc-dsh-bubble {
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 20%, transparent);
+}
+
+.pc-dsh-bubble--failed {
+  background: color-mix(in srgb, #d9534f 18%, transparent);
+}
+
+.pc-dsh-bubble pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pc-dsh-thinking {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  white-space: pre-wrap;
+}
+
+/* ---------- 输入区 ---------- */
+.pc-dsh-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  padding-top: 10px;
+}
+
+.pc-dsh-textarea {
+  width: 100%;
+  resize: none;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
   background: color-mix(in srgb, var(--text-primary) 4%, transparent);
   color: var(--text-primary);
   font: inherit;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 20px;
-  padding: 10px 12px;
+  padding: 9px 11px;
 }
 
-.pc-dsh-input:focus {
+.pc-dsh-textarea:focus {
   outline: none;
   border-color: var(--pc-accent, #ff6b60);
 }
 
-.pc-dsh-examples {
+.pc-dsh-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.pc-dsh-log,
-.pc-dsh-result {
-  margin-bottom: 14px;
-}
-
-.pc-dsh-events {
+.pc-dsh-hint {
   margin: 0;
-  padding-left: 18px;
-  max-height: 320px;
-  overflow-y: auto;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.pc-dsh-hint--center {
+  text-align: center;
+  margin: auto;
+}
+
+.pc-dsh-hint a {
+  color: var(--pc-accent, #ff6b60);
+}
+
+/* ---------- 首次配置 ---------- */
+.pc-dsh-setup {
+  margin: auto;
+  max-width: 520px;
+  text-align: left;
+}
+
+.pc-dsh-setup h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.pc-dsh-setup p {
+  margin: 0 0 12px;
   font-size: 12.5px;
   line-height: 20px;
   color: var(--text-secondary);
 }
 
-.pc-dsh-output {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+.pc-dsh-setup code {
   font-family: 'Cascadia Code', Consolas, monospace;
-  font-size: 12.5px;
-  line-height: 19px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 360px;
-  overflow: auto;
+  font-size: 11.5px;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.pc-dsh-keyrow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pc-dsh-input {
+  flex: 1;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  padding: 0 10px;
+}
+
+.pc-dsh-input:focus {
+  outline: none;
+  border-color: var(--pc-accent, #ff6b60);
 }
 </style>

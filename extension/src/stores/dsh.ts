@@ -12,16 +12,27 @@ export interface DshEndpoint {
   token: string
 }
 
-interface DshKernelState {
-  found: boolean
-  path: string | null
-  home: string
+export interface DshChat {
+  id: string
+  title: string
+  kernelSession: string
+  workspace: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DshMessage {
+  role: 'user' | 'assistant'
+  text: string
+  failed?: boolean
 }
 
 interface DshEvent {
   type?: string
   [key: string]: unknown
 }
+
+const MESSAGES_PREFIX = 'pickcat-dsh-messages-'
 
 function endpoint(): DshEndpoint | null {
   const host = (window as unknown as Record<string, unknown>).__PICKCAT_DSH__ as
@@ -35,13 +46,19 @@ export const dshState = reactive({
   available: false,
   ready: false,
   checking: true,
+  hasKey: false,
+  workspaces: '' as string,
+  kernelPath: '' as string,
   failure: '' as string,
-  kernel: null as DshKernelState | null,
-  taskId: '' as string,
+
+  chats: [] as DshChat[],
+  activeId: '' as string,
+  messages: [] as DshMessage[],
+
   running: false,
   events: [] as DshEvent[],
-  finalText: '' as string,
-  failed: false,
+  taskId: '' as string,
+  liveText: '' as string,
 })
 
 function url(path: string, params: Record<string, string | number> = {}): string | null {
@@ -52,11 +69,54 @@ function url(path: string, params: Record<string, string | number> = {}): string
   return `http://127.0.0.1:${host.port}${path}?${query.toString()}`
 }
 
-/** Reads the bridge state; safe to call when the desktop host is absent. */
+async function getJson<T>(path: string, params?: Record<string, string | number>): Promise<T> {
+  const target = url(path, params)
+  if (!target) throw new Error('no host')
+  const response = await fetch(target)
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return (await response.json()) as T
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const target = url(path)
+  if (!target) throw new Error('no host')
+  // text/plain keeps this a "simple" request, so no CORS preflight is needed.
+  const response = await fetch(target, {
+    method: 'POST',
+    headers: { 'content-type': 'text/plain;charset=UTF-8' },
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return (await response.json()) as T
+}
+
+function loadMessages(chatId: string): DshMessage[] {
+  try {
+    const raw = localStorage.getItem(MESSAGES_PREFIX + chatId)
+    return raw ? (JSON.parse(raw) as DshMessage[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveMessages(chatId: string, messages: DshMessage[]): void {
+  try {
+    localStorage.setItem(MESSAGES_PREFIX + chatId, JSON.stringify(messages.slice(-100)))
+  } catch {
+    /* storage is best effort */
+  }
+}
+
+export function selectChat(chatId: string): void {
+  dshState.activeId = chatId
+  dshState.messages = loadMessages(chatId)
+  dshState.events = []
+  dshState.liveText = ''
+}
+
 export async function checkDsh(): Promise<void> {
   dshState.checking = true
-  const target = url('/state')
-  if (!target) {
+  if (!endpoint()) {
     dshState.available = false
     dshState.ready = false
     dshState.checking = false
@@ -64,13 +124,21 @@ export async function checkDsh(): Promise<void> {
   }
 
   try {
-    const response = await fetch(target)
-    if (!response.ok) throw new Error(`状态 ${response.status}`)
-    const data = (await response.json()) as { ready: boolean; kernel: DshKernelState }
+    const state = await getJson<{
+      ready: boolean
+      hasKey: boolean
+      workspaces: string
+      kernel: { found: boolean; path: string | null }
+    }>('/state')
+
     dshState.available = true
-    dshState.ready = Boolean(data.ready)
-    dshState.kernel = data.kernel ?? null
-    dshState.failure = data.kernel?.found ? '' : '未找到 DSH 内核'
+    dshState.ready = state.ready
+    dshState.hasKey = state.hasKey
+    dshState.workspaces = state.workspaces ?? ''
+    dshState.kernelPath = state.kernel?.path ?? ''
+    dshState.failure = state.ready ? '' : '未找到 DSH 内核'
+
+    if (state.ready) await loadChats()
   } catch (err) {
     dshState.available = false
     dshState.ready = false
@@ -80,56 +148,108 @@ export async function checkDsh(): Promise<void> {
   }
 }
 
-/** Submits a task and streams its events until the kernel finishes. */
-export async function runDshTask(prompt: string): Promise<void> {
-  const submit = url('/task')
-  if (!submit) return
+export async function loadChats(): Promise<void> {
+  const { chats } = await getJson<{ chats: DshChat[] }>('/chats')
+  dshState.chats = chats ?? []
+  if (!dshState.activeId && dshState.chats.length) selectChat(dshState.chats[0].id)
+}
+
+export async function createChat(): Promise<void> {
+  const chat = await postJson<DshChat>('/chats', { title: '新对话' })
+  dshState.chats = [chat, ...dshState.chats]
+  selectChat(chat.id)
+}
+
+export async function deleteChat(chatId: string): Promise<void> {
+  const target = url('/chats', { id: chatId })
+  if (!target) return
+  await fetch(target, { method: 'DELETE' })
+  dshState.chats = dshState.chats.filter(c => c.id !== chatId)
+  localStorage.removeItem(MESSAGES_PREFIX + chatId)
+  if (dshState.activeId === chatId) {
+    dshState.activeId = ''
+    dshState.messages = []
+    if (dshState.chats.length) selectChat(dshState.chats[0].id)
+  }
+}
+
+export async function saveKey(key: string): Promise<void> {
+  const result = await postJson<{ hasKey: boolean }>('/config', { key })
+  dshState.hasKey = result.hasKey
+  if (result.hasKey) await loadChats()
+}
+
+/** Sends a prompt to the active chat and streams the kernel's events. */
+export async function sendPrompt(prompt: string): Promise<void> {
+  if (!dshState.activeId) await createChat()
+  const chatId = dshState.activeId
+  if (!chatId) return
+
+  const text = prompt.trim()
+  if (!text) return
+
+  dshState.messages.push({ role: 'user', text })
+  saveMessages(chatId, dshState.messages)
 
   dshState.events = []
-  dshState.finalText = ''
-  dshState.failed = false
+  dshState.liveText = ''
   dshState.running = true
 
   try {
-    // text/plain keeps this a "simple" request, so no CORS preflight is needed.
-    const response = await fetch(submit, {
-      method: 'POST',
-      headers: { 'content-type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ prompt }),
-    })
-    if (!response.ok) throw new Error(`提交失败 ${response.status}`)
-    const { taskId } = (await response.json()) as { taskId: string }
+    const { taskId } = await postJson<{ taskId: string }>('/task', { prompt: text, chatId })
     dshState.taskId = taskId
 
     let since = 0
     for (;;) {
-      const poll = url('/events', { task: taskId, since })
-      if (!poll) break
-      const eventsResponse = await fetch(poll)
-      if (!eventsResponse.ok) throw new Error(`读取事件失败 ${eventsResponse.status}`)
-      const payload = (await eventsResponse.json()) as {
+      const payload = await getJson<{
         events: DshEvent[]
         finished: boolean
         failed: boolean
         final: string | null
         count: number
-      }
+      }>('/events', { task: taskId, since })
 
-      if (payload.events?.length) dshState.events.push(...payload.events)
-      since = payload.count ?? since + (payload.events?.length ?? 0)
+      if (payload.events?.length) {
+        dshState.events.push(...payload.events)
+        for (const event of payload.events) {
+          if (event.type === 'final' && typeof event.text === 'string') dshState.liveText = event.text
+        }
+      }
+      since = payload.count ?? since
 
       if (payload.finished) {
-        dshState.finalText = payload.final ?? ''
-        dshState.failed = Boolean(payload.failed)
+        dshState.messages.push({
+          role: 'assistant',
+          text: payload.final || excerpt(dshState.events) || '(无输出)',
+          failed: payload.failed,
+        })
+        saveMessages(chatId, dshState.messages)
+        await loadChats()
         break
       }
     }
   } catch (err) {
-    dshState.failed = true
-    dshState.failure = err instanceof Error ? err.message : '执行失败'
+    dshState.messages.push({
+      role: 'assistant',
+      text: err instanceof Error ? err.message : '执行失败',
+      failed: true,
+    })
+    saveMessages(chatId, dshState.messages)
   } finally {
     dshState.running = false
   }
+}
+
+/** Last meaningful line from the event stream, used when the kernel gives no text. */
+function excerpt(events: DshEvent[]): string {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const event = events[i]
+    if (event.type === 'error') return String(event.text ?? event.message ?? '')
+    if (event.type === 'log') return String(event.text ?? '')
+    const reason = event.reason as { kind?: string; error?: { message?: string } } | undefined
+    if (reason?.kind === 'error' && reason.error?.message) return reason.error.message
+  }
+  return ''
 }
 
 export async function cancelDshTask(): Promise<void> {

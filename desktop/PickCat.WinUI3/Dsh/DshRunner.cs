@@ -9,28 +9,42 @@ using System.Threading.Tasks;
 
 namespace PickCat.WinUI3.Dsh;
 
-/// <summary>
-/// Runs one `dsh --profile headless --json` task and streams its newline-delimited
-/// events.
-///
-/// Contract verified against dsh 0.2.1-rc.1: the CLI entry sits inside app.asar,
-/// which only Electron can read, so the Electron binary is launched with
-/// ELECTRON_RUN_AS_NODE=1 rather than shelling out to dsh.cmd.
-/// </summary>
+/// <summary>One kernel run: a single turn of a conversation.</summary>
 internal sealed class DshTask
 {
     public string Id { get; } = Guid.NewGuid().ToString("n")[..12];
+    public string ChatId { get; }
     public string Prompt { get; }
     public List<JsonElement> Events { get; } = new();
     public bool Finished { get; private set; }
     public bool Failed { get; private set; }
     public string? FinalText { get; private set; }
 
+    /// <summary>Session id the kernel reported, used to continue the conversation.</summary>
+    public string KernelSession { get; private set; } = "";
+
     private readonly object _gate = new();
 
-    public DshTask(string prompt) => Prompt = prompt;
+    public DshTask(string prompt, string chatId)
+    {
+        Prompt = prompt;
+        ChatId = chatId;
+    }
 
-    public void Add(JsonElement evt) { lock (_gate) Events.Add(evt); }
+    public void Add(JsonElement evt)
+    {
+        lock (_gate)
+        {
+            Events.Add(evt);
+            if (KernelSession.Length == 0 &&
+                evt.TryGetProperty("type", out var type) &&
+                type.GetString() == "session" &&
+                evt.TryGetProperty("sessionId", out var session))
+            {
+                KernelSession = session.GetString() ?? "";
+            }
+        }
+    }
 
     public void Complete(string? text, bool failed)
     {
@@ -44,7 +58,6 @@ internal sealed class DshTask
 
     public int EventCount { get { lock (_gate) return Events.Count; } }
 
-    /// <summary>Events from <paramref name="since"/> onwards, copied for serialisation.</summary>
     public List<JsonElement> Snapshot(int since)
     {
         lock (_gate)
@@ -60,16 +73,14 @@ internal static class DshRunner
 {
     private static readonly JsonDocumentOptions Json = new() { AllowTrailingCommas = true };
 
-    /// <summary>Path to dsh.cmd inside the DSH installation shipped next to the app.</summary>
+    /// <summary>Path to dsh.cmd inside the bundled kernel, or an existing DSH install.</summary>
     public static string? ResolveCli()
     {
-        var candidates = new List<string>();
+        var candidates = new List<string>
+        {
+            Path.Combine(AppContext.BaseDirectory, "dsh", "resources", "runtime", "cli", "bin", "dsh.cmd"),
+        };
 
-        // 1. bundled beside our executable: <app>\dsh\runtime\cli\bin\dsh.cmd
-        var bundled = Path.Combine(AppContext.BaseDirectory, "dsh", "resources", "runtime", "cli", "bin", "dsh.cmd");
-        candidates.Add(bundled);
-
-        // 2. an existing DeepSeek Harness install (%LOCALAPPDATA%\Programs\DeepSeek Harness)
         var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         candidates.Add(Path.Combine(local, "Programs", "DeepSeek Harness", "resources", "runtime", "cli", "bin", "dsh.cmd"));
 
@@ -81,16 +92,15 @@ internal static class DshRunner
     }
 
     /// <summary>
-    /// The CLI lives inside app.asar, which only Electron can read, so we launch the
-    /// Electron binary with ELECTRON_RUN_AS_NODE instead of shelling out to dsh.cmd
-    /// (going through cmd.exe lost the argument list).
+    /// The CLI lives inside app.asar, which only Electron can read, so the Electron
+    /// binary is launched with ELECTRON_RUN_AS_NODE instead of shelling out to dsh.cmd.
     /// </summary>
     public static (string Exe, string Cli)? ResolveLaunch()
     {
         var cmd = ResolveCli();
         if (cmd is null) return null;
 
-        // <install>\resources\runtime\cli\bin\dsh.cmd -> <install>
+        // <root>\resources\runtime\cli\bin\dsh.cmd -> <root>
         var bin = Path.GetDirectoryName(cmd)!;
         var root = Path.GetFullPath(Path.Combine(bin, "..", "..", "..", ".."));
         var exe = Path.Combine(root, "DeepSeek Harness.exe");
@@ -114,10 +124,14 @@ internal static class DshRunner
     public static async Task RunAsync(
         (string Exe, string Cli) launch,
         string home,
+        string workspace,
+        string? apiKey,
+        string? kernelSession,
         DshTask task,
         Action<JsonElement> onEvent,
         CancellationToken cancellation)
     {
+        Directory.CreateDirectory(workspace);
         var start = new ProcessStartInfo
         {
             FileName = launch.Exe,
@@ -125,16 +139,24 @@ internal static class DshRunner
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            WorkingDirectory = home,
+            WorkingDirectory = workspace,
         };
         start.ArgumentList.Add("--expose-internals");
         start.ArgumentList.Add(launch.Cli);
         start.ArgumentList.Add("--profile");
         start.ArgumentList.Add("headless");
         start.ArgumentList.Add("--json");
+        if (!string.IsNullOrEmpty(kernelSession))
+        {
+            start.ArgumentList.Add("--session-id");
+            start.ArgumentList.Add(kernelSession);
+        }
         start.ArgumentList.Add(task.Prompt);
+
         start.Environment["DSH_HOME"] = home;
         start.Environment["ELECTRON_RUN_AS_NODE"] = "1";
+        // The kernel reads the key from the environment when no credential file exists.
+        if (!string.IsNullOrEmpty(apiKey)) start.Environment["DEEPSEEK_API_KEY"] = apiKey;
 
         using var process = new Process { StartInfo = start, EnableRaisingEvents = true };
         var stderr = new StringBuilder();
@@ -177,7 +199,6 @@ internal static class DshRunner
             }
             catch
             {
-                // Non-JSON diagnostics are useful too; surface them as a log event.
                 onEvent(Simple("log", line));
                 continue;
             }
