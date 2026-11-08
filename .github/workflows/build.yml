@@ -148,7 +148,12 @@ jobs:
           Pop-Location
 
           $lines = @()
-          foreach ($file in @("PickCat-WinUI3-extension.zip") + (Get-ChildItem desktop\dist\*.msi | ForEach-Object { $_.FullName })) {
+          # desktop\dist may not exist when the installer was skipped above.
+          $msi = @()
+          if (Test-Path desktop\dist) {
+            $msi = @(Get-ChildItem desktop\dist\*.msi -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+          }
+          foreach ($file in @("PickCat-WinUI3-extension.zip") + $msi) {
             $item = Get-Item $file
             $hash = (Get-FileHash $item.FullName -Algorithm SHA256).Hash.ToLower()
             $lines += "$hash  $($item.Name)"
