@@ -181,12 +181,16 @@ onMounted(async () => {
             >
               <div class="pc-dsh-bubble" :class="{ 'pc-dsh-bubble--failed': message.failed }">
                 <pre>{{ message.text }}</pre>
+                <span v-if="message.usage" class="pc-dsh-usage">{{ message.usage }}</span>
               </div>
             </div>
 
             <div v-if="dshState.running" class="pc-dsh-msg pc-dsh-msg--assistant">
               <div class="pc-dsh-bubble">
-                <p class="pc-dsh-thinking">{{ dshState.liveText || '思考中…' }}</p>
+                <pre v-if="dshState.liveText" class="pc-dsh-live">{{ dshState.liveText }}</pre>
+                <p v-else class="pc-dsh-thinking">
+                  {{ dshState.thinking || '正在处理…' }}
+                </p>
               </div>
             </div>
           </div>
@@ -449,6 +453,20 @@ onMounted(async () => {
 }
 
 .pc-dsh-bubble pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pc-dsh-usage {
+  display: block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+
+.pc-dsh-live {
   margin: 0;
   font: inherit;
   white-space: pre-wrap;

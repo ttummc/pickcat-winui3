@@ -25,6 +25,7 @@ export interface DshMessage {
   role: 'user' | 'assistant'
   text: string
   failed?: boolean
+  usage?: string
 }
 
 interface DshEvent {
@@ -59,7 +60,19 @@ export const dshState = reactive({
   events: [] as DshEvent[],
   taskId: '' as string,
   liveText: '' as string,
+  thinking: '' as string,
 })
+
+/** Token usage reported on the final step of a turn. */
+function lastUsage(events: DshEvent[]): string {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const usage = events[i].usage as { inputTokens?: number; outputTokens?: number } | undefined
+    if (usage && typeof usage.inputTokens === 'number') {
+      return `${usage.inputTokens} in / ${usage.outputTokens ?? 0} out`
+    }
+  }
+  return ''
+}
 
 function url(path: string, params: Record<string, string | number> = {}): string | null {
   const host = endpoint()
@@ -199,6 +212,9 @@ export async function sendPrompt(prompt: string): Promise<void> {
     const { taskId } = await postJson<{ taskId: string }>('/task', { prompt: text, chatId })
     dshState.taskId = taskId
 
+    let answer = ''
+    let thinking = ''
+    dshState.thinking = ''
     let since = 0
     for (;;) {
       const payload = await getJson<{
@@ -212,7 +228,16 @@ export async function sendPrompt(prompt: string): Promise<void> {
       if (payload.events?.length) {
         dshState.events.push(...payload.events)
         for (const event of payload.events) {
-          if (event.type === 'final' && typeof event.text === 'string') dshState.liveText = event.text
+          // The kernel streams the answer as "text" events; "final" only repeats the
+          // tail, and older turns may not carry one at all.
+          if (event.type === 'text' && typeof event.text === 'string') {
+            answer += event.text
+            dshState.liveText = answer
+          }
+          if (event.type === 'thinking' && typeof event.text === 'string') {
+            thinking = event.text
+            dshState.thinking = thinking
+          }
         }
       }
       since = payload.count ?? since
@@ -220,8 +245,9 @@ export async function sendPrompt(prompt: string): Promise<void> {
       if (payload.finished) {
         dshState.messages.push({
           role: 'assistant',
-          text: payload.final || excerpt(dshState.events) || '(无输出)',
+          text: answer || payload.final || excerpt(dshState.events) || '(无输出)',
           failed: payload.failed,
+          usage: lastUsage(dshState.events),
         })
         saveMessages(chatId, dshState.messages)
         await loadChats()
