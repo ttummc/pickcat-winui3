@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="PickCat WinUI 3 plugin">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0067C0"/>
+      <stop offset="1" stop-color="#2B88D8"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#bg)"/>
+  <path d="M15 22 L13 11 L25 17 C28 15.6 31.6 15 35 15 C38.4 15 41.6 15.6 44.4 17 L56 11 L54 23 C56.4 26.4 57.6 30.4 57.6 34.4 C57.6 45.4 47.8 53.4 35.2 53.4 C22.6 53.4 12.4 45.4 12.4 34.4 C12.4 30.2 13.4 26 15 22 Z" fill="#FFFFFF" opacity="0.95"/>
+  <ellipse cx="26" cy="33" rx="3.3" ry="4.1" fill="#0067C0"/>
+  <ellipse cx="44" cy="33" rx="3.3" ry="4.1" fill="#0067C0"/>
+  <path d="M33.2 38.5 L35.2 41.2 L37.2 38.5" fill="none" stroke="#0067C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 43.4 C26 46.8 29.6 47.6 35.2 47.6" fill="none" stroke="#0067C0" stroke-width="1.6" stroke-linecap="round" opacity="0.45"/>
+  <path d="M20 25.4 L25 27.6 M50 25.4 L45 27.6" stroke="#0067C0" stroke-width="2.2" stroke-linecap="round"/>
+  <g transform="translate(41 43)">
+    <rect x="0" y="0" width="16" height="12" rx="3" fill="#003A6B" opacity="0.85"/>
+    <path d="M3.4 3.6 L6.2 6 L3.4 8.4" fill="none" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M8.2 9 L12.6 9" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -22,7 +22,6 @@ import SearchPage from './pages/SearchPage.vue'
 import SettingsPage from './pages/SettingsPage.vue'
 import LibraryPage from './pages/LibraryPage.vue'
 import MediaLibraryPage from './pages/MediaLibraryPage.vue'
-import DshPage from './pages/DshPage.vue'
 import LoginPage from './pages/LoginPage.vue'
 import NotFoundPage from './pages/NotFoundPage.vue'
 import CardContextMenu from './components/CardContextMenu.vue'
@@ -43,7 +42,6 @@ const PAGES = {
   settings: SettingsPage,
   library: LibraryPage,
   media: MediaLibraryPage,
-  dsh: DshPage,
   login: LoginPage,
   notFound: NotFoundPage,
 } as const
@@ -72,7 +70,6 @@ const SECTION_FOR_ROUTE: Record<string, string> = {
   settings: 'prefs',
   library: 'library',
   media: 'media',
-  dsh: 'dsh',
   login: 'home',
   notFound: 'home',
 }
@@ -237,7 +234,6 @@ function onNavInvoked(
   } else if (tag === 'library') navigate('/library')
   else if (tag === 'media') navigate('/personal-library')
   else if (tag === 'prefs') navigate('/settings')
-  else if (tag === 'dsh') navigate('/dsh')
 }
 
 function onClose(): void {
@@ -338,11 +334,6 @@ function reopen(): void {
         <NavigationViewItem Content="个人作品库" Tag="library" :IsSelected="activeSection === 'library'">
           <NavigationViewItem.Icon>
             <FontIcon Glyph="&#xE8F1;" />
-          </NavigationViewItem.Icon>
-        </NavigationViewItem>
-        <NavigationViewItem Content="DSH 定制" Tag="dsh" :IsSelected="activeSection === 'dsh'">
-          <NavigationViewItem.Icon>
-            <FontIcon Glyph="&#xE943;" />
           </NavigationViewItem.Icon>
         </NavigationViewItem>
         <NavigationViewItem Content="设置" Tag="prefs" :IsSelected="activeSection === 'prefs'">

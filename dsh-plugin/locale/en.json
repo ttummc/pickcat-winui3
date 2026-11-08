@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "PickCat WinUI 3",
+    "description": "Detects the local PickCat desktop app and source repository, then fills AGENTS.md, components.json, and pages.md into the workspace."
+  }
+}

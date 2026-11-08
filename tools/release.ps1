@@ -77,10 +77,6 @@ if (Test-Path desktop\publish) { Remove-Item desktop\publish -Recurse -Force }
 & 'C:\Program Files\dotnet\dotnet.exe' publish desktop\PickCat.WinUI3\PickCat.WinUI3.csproj -c Release -r win-x64 --self-contained -o desktop\publish | Out-Null
 if (-not (Test-Path desktop\publish\PickCatWinUI3.pri)) { throw 'publish is missing PickCatWinUI3.pri (the app would crash silently)' }
 
-Step 'bundle the DSH kernel'
-& powershell -NoProfile -ExecutionPolicy Bypass -File tools\bundle-dsh.ps1
-if ($LASTEXITCODE -ne 0) { throw 'bundle-dsh failed' }
-
 Step 'build the MSI'
 $wix = Join-Path $env:USERPROFILE '.dotnet\tools\wix.exe'
 $pub = (Resolve-Path desktop\publish).Path

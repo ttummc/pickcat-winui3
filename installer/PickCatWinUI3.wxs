@@ -77,17 +77,26 @@
                   Execute="deferred"
                   Impersonate="yes"
                   Return="ignore" />
-    <!-- A running instance locks the binary; the bundled kernel locks the files
-         it runs from (dsh\...). Both must go, or the upgrade fails with 2318
-         "cannot replace <file>". Only the copy inside this install folder is
-         targeted so a separately installed DeepSeek Harness is left alone. -->
+    <!-- A running instance locks the binary; a pre-2.0 install also ran a bundled
+         kernel from dsh\ that locks its own files. Both must go, or the upgrade
+         fails with 2318 "cannot replace <file>". Only copies under this install
+         folder are targeted, so a separately installed DeepSeek Harness is left
+         alone. -->
     <CustomAction Id="CloseRunningApp"
                   Directory="LocalAppDataFolder"
                   ExeCommand="cmd.exe /c taskkill /f /im PickCatWinUI3.exe &gt;nul 2&gt;&amp;1 &amp; powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Get-Process -Name &apos;DeepSeek Harness&apos; -ErrorAction SilentlyContinue | Where-Object { $_.Path -like &apos;*PickCat WinUI 3\dsh*&apos; } | Stop-Process -Force -ErrorAction SilentlyContinue&quot;"
                   Execute="immediate"
                   Return="ignore" />
+    <!-- 2.0 removed the bundled kernel. Upgrading would otherwise leave its ~1.4 GB
+         behind, because Windows Installer only removes files it wrote itself. -->
+    <CustomAction Id="PurgeLegacyKernel"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c if exist &quot;Programs\PickCat WinUI 3\dsh&quot; rmdir /s /q &quot;Programs\PickCat WinUI 3\dsh&quot;"
+                  Execute="immediate"
+                  Return="ignore" />
     <InstallExecuteSequence>
       <Custom Action="CloseRunningApp" Before="InstallValidate" />
+      <Custom Action="PurgeLegacyKernel" After="CloseRunningApp" Condition="NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeUserData" After="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeInstallFolder" After="PurgeUserData" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeShortcuts" After="PurgeInstallFolder" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />

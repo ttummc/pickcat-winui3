@@ -38,5 +38,6 @@
 | v1.4.4 | 1.58 MB | `fc7f3fb4bf7b2446c15e9de037c327ce6a459cf8f993f1f522564a8db2102d3d` |
 | v1.5.0 | 1.58 MB | `a1b97e34e27cbb96b71248f052509b0047c8d23397ea3ea980549bfaf41b432a` |
 | v1.5.1 | 1.58 MB | `5f864bc1b18b54bfac8985707cf2d0ac16a8cded60e0e904edf641bf4a7835ec` |
+| v1.6.0 | 1.58 MB | `a63b1ef6068af77e1ebfa5177deba1dd227c0a569b392e59f27a06288dc3054c` |
 
 下载地址规律：`https://github.com/ttummc/pickcat-winui3/releases/download/<版本>/PickCat-WinUI3-extension.zip`

@@ -111,23 +111,7 @@ jobs:
             throw "publish is missing PickCatWinUI3.pri - the app will crash at startup"
           }
 
-      # The installer carries the DSH kernel (~415 MB payload). A CI runner has no
-      # DeepSeek Harness installed, so it can only produce a kernel-less package;
-      # skip it rather than publishing an installer that cannot work on a fresh
-      # machine. Build it locally with tools\release.ps1 instead.
-      - name: Check for the kernel payload
-        id: kernel
-        shell: pwsh
-        run: |
-          if (Test-Path "desktop\publish\dsh\payload.zip") {
-            "present=true" >> $env:GITHUB_OUTPUT
-          } else {
-            "present=false" >> $env:GITHUB_OUTPUT
-            Write-Host "::notice::No kernel payload; skipping the installer build."
-          }
-
       - name: Build the installer
-        if: steps.kernel.outputs.present == 'true'
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''

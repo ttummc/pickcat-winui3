@@ -186,59 +186,7 @@ public sealed partial class MainWindow : Window
         Log.Write("content script registered");
         core.WebMessageReceived += OnWebMessage;
 
-        // Local bridge for the "DSH 定制" page. Started once per window.
-        try
-        {
-            _dshBridge = new Dsh.DshBridge();
-            _dshBridge.Start();
-            Log.Write($"dsh bridge ready: port={_dshBridge.Port} token={_dshBridge.Token}");
-
-            // Hand the page its endpoint. Kept out of the bundle: the token changes
-            // every launch and never leaves this machine.
-            // First run copies the bundled kernel out of its payload; the page shows
-            // "preparing" until the bridge reports it.
-            var bridge = _dshBridge;
-            _ = Task.Run(async () =>
-            {
-                if (await Dsh.DshProvisioner.EnsureAsync())
-                {
-                    bridge.Refresh();
-                }
-            });
-
-            _dshWeb = new Dsh.DshWeb();
-            _dshWeb.Start();
-            _dshBridge.BindWebUrl(() => _dshWeb?.Url);
-            _dshBridge.BindOpenWeb(() =>
-            {
-                var url = _dshWeb?.Url;
-                if (url is null) return;
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    try
-                    {
-                        new Dsh.DshWindow(url).Activate();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("open dsh window", ex);
-                    }
-                });
-            });
-
-            var endpoint = JsonSerializer.Serialize(new { port = _dshBridge.Port, token = _dshBridge.Token });
-            await core.AddScriptToExecuteOnDocumentCreatedAsync(
-                $"window.__PICKCAT_DSH__ = {endpoint};");
-        }
-        catch (Exception ex)
-        {
-            Log.Error("dsh bridge", ex);
-        }
-        Closed += (_, _) =>
-        {
-            Log.Write("window closed");
-            _dshWeb?.Dispose();
-        };
+        Closed += (_, _) => Log.Write("window closed");
         StartRendererWatchdog(core);
 
         // The rewritten UI has a login page, but sign-in is the one flow that should
@@ -339,9 +287,6 @@ public sealed partial class MainWindow : Window
         timer.Start();
         Log.Write("renderer watchdog started");
     }
-
-    private Dsh.DshBridge? _dshBridge;
-    private Dsh.DshWeb? _dshWeb;
 
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _routeTimer;
     private bool _diverting;

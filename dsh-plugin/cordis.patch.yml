@@ -1,0 +1,9 @@
+# @pickcat/dsh-plugin 的 Loader 条目。
+# 插件只做检测与上下文铺设，不注册任何自定义界面。
+- insert:
+    - id: pickcat
+      name: '@pickcat/dsh-plugin'
+      config:
+        installPath: ''
+        repoPath: ''
+        autoWrite: true

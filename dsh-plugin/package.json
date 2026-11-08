@@ -1,0 +1,39 @@
+{
+  "name": "@pickcat/dsh-plugin",
+  "version": "0.1.0",
+  "description": "为 DeepSeek Harness 提供 PickCat WinUI 3 的项目检测、开发规范与组件上下文。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "lib/**/*.js",
+    "assets/**",
+    "scripts/**",
+    "test/**/*.mjs",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md"
+  ],
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.5"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node test/detect.test.mjs",
+    "context": "node scripts/build-context.mjs .."
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "GPL-3.0-only"
+}
