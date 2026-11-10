@@ -24,7 +24,7 @@
     <Product>PickCat WinUI 3</Product>
     <AssemblyTitle>PickCat WinUI 3</AssemblyTitle>
     <Company>PickCat WinUI 3 contributors</Company>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <FileVersion>$(Version).0</FileVersion>
   </PropertyGroup>
 

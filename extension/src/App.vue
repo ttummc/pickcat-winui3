@@ -26,6 +26,8 @@ import LoginPage from './pages/LoginPage.vue'
 import NotFoundPage from './pages/NotFoundPage.vue'
 import CardContextMenu from './components/CardContextMenu.vue'
 import ToastHost from './components/ToastHost.vue'
+import FollowGate from './components/FollowGate.vue'
+import { checkFollowGate, followGateBlocking } from './stores/followGate'
 
 const PAGES = {
   home: HomePage,
@@ -150,6 +152,7 @@ onMounted(() => {
   window.addEventListener('pointerdown', markInteraction, true)
   window.addEventListener('keydown', markInteraction, true)
   void refreshNotifications()
+  void checkFollowGate()
 
   // New notifications arrive without any navigation, so the badge would otherwise
   // keep showing a stale number until the next route change.
@@ -158,14 +161,22 @@ onMounted(() => {
   }, 60_000)
   window.addEventListener('focus', () => void refreshNotifications())
   window.addEventListener('visibilitychange', () => {
-    if (!document.hidden) void refreshNotifications()
+    if (!document.hidden) {
+      void refreshNotifications()
+      // 用户可能刚在别的标签页关注了目标账号，回到窗口时重新校验。
+      if (followGateBlocking.value) void checkFollowGate()
+    }
   })
   onBeforeUnmount(() => window.clearInterval(poll))
 })
 
 watch(
   () => sessionState.user?.id,
-  () => void refreshNotifications(),
+  () => {
+    void refreshNotifications()
+    // 登录账号变化时重新校验关注状态；登出后由 store 自行复位。
+    void checkFollowGate()
+  },
 )
 
 watch(
@@ -355,6 +366,9 @@ function reopen(): void {
 
     <CardContextMenu />
     <ToolTipService />
+
+    <!-- 登录后未关注指定账号时整站拦截；仅前端校验。 -->
+    <FollowGate v-if="followGateBlocking" />
   </div>
 
   <div v-else class="pc-closed">
