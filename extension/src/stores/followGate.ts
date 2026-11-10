@@ -1,5 +1,6 @@
 import { computed, reactive } from 'vue'
 import { api } from '@/api/client'
+import { avatarUrl, initials } from '@/lib/format'
 import { isSignedIn } from '@/stores/session'
 import type { UserProfile } from '@/api/types'
 
@@ -8,9 +9,10 @@ import type { UserProfile } from '@/api/types'
  *
  * 登录后检查当前账号是否关注了指定账号；未关注则整站拦一层提示，提供一键关注。
  * 仅前端拦截，不涉及任何服务端限制。
+ *
+ * 目标账号的名称与头像每次都从接口现取，不写死，账号改名或换头像后提示会跟着变。
  */
 export const REQUIRED_PROFILE_ID = '01a0faca-3c45-7654-bea1-4147d7af5165'
-export const REQUIRED_PROFILE_NAME = 'PickCat'
 export const REQUIRED_PROFILE_URL = `https://pickcat.dao3.fun/profile/${REQUIRED_PROFILE_ID}`
 
 export const followGateState = reactive({
@@ -19,6 +21,14 @@ export const followGateState = reactive({
   following: false,
   busy: false,
   error: '',
+  /** 目标账号的最新信息，来自每次校验的接口响应。 */
+  target: {
+    id: REQUIRED_PROFILE_ID,
+    username: '',
+    avatar: '',
+    initials: '?',
+    loaded: false,
+  },
 })
 
 /** 已登录且确认未关注时才拦截。检测失败按放行处理，避免把用户锁在门外。 */
@@ -27,6 +37,16 @@ export const followGateBlocking = computed(
 )
 
 let inFlight: Promise<void> | null = null
+
+function applyProfile(profile: UserProfile): void {
+  followGateState.target = {
+    id: profile.id || REQUIRED_PROFILE_ID,
+    username: profile.username || '',
+    avatar: avatarUrl(profile),
+    initials: initials(profile.username),
+    loaded: true,
+  }
+}
 
 export async function checkFollowGate(): Promise<void> {
   if (!isSignedIn.value) {
@@ -41,7 +61,9 @@ export async function checkFollowGate(): Promise<void> {
   followGateState.checking = true
   inFlight = (async () => {
     try {
+      // 每次校验都重新拉取，保证名称与头像是最新的。
       const profile = await api.get<UserProfile>(`/users/${REQUIRED_PROFILE_ID}`)
+      applyProfile(profile)
       followGateState.following = Boolean(profile.viewerState?.following)
       followGateState.error = ''
       followGateState.checked = true
@@ -77,7 +99,7 @@ export async function followRequiredProfile(): Promise<boolean> {
   }
 }
 
-/** 关注后手动重新校验。 */
+/** 关注后手动重新校验；同时刷新账号名称与头像。 */
 export async function recheckFollowGate(): Promise<void> {
   followGateState.checked = false
   await checkFollowGate()

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { PersonPicture } from 'winuionweb'
 import {
-  REQUIRED_PROFILE_NAME,
   REQUIRED_PROFILE_URL,
   followGateState,
   followRequiredProfile,
@@ -12,8 +12,12 @@ import {
  * 关注校验拦截层。
  *
  * 登录后若未关注指定账号，用一层全屏遮罩挡住界面，提供一键关注与重新检测。
- * 只做前端拦截。
+ * 账号名称与头像取自接口的最新响应，不写死。只做前端拦截。
  */
+const target = computed(() => followGateState.target)
+const displayName = computed(
+  () => target.value.username || '该账号',
+)
 const busy = computed(() => followGateState.busy)
 
 async function follow(): Promise<void> {
@@ -24,29 +28,32 @@ async function follow(): Promise<void> {
 <template>
   <div class="pc-gate">
     <div class="pc-gate-card">
-      <div class="pc-gate-icon">
-        <FontIcon Glyph="&#xE77B;" />
+      <div class="pc-gate-avatar">
+        <PersonPicture
+          :ProfilePicture="target.avatar || undefined"
+          :Initials="target.initials"
+          :DisplayName="displayName"
+          Width="64"
+          Height="64"
+        />
       </div>
 
-      <h1 class="pc-gate-title">需要先关注 {{ REQUIRED_PROFILE_NAME }}</h1>
+      <h1 class="pc-gate-title">需要先关注 {{ displayName }}</h1>
       <p class="pc-gate-text">
         使用本客户端前，请先关注
         <HyperlinkButton
-          :Content="REQUIRED_PROFILE_NAME"
+          :Content="displayName"
           :NavigateUri="REQUIRED_PROFILE_URL"
           class="pc-gate-link"
         />
         。关注后即可正常浏览与发帖。
       </p>
+      <p class="pc-gate-url">{{ REQUIRED_PROFILE_URL }}</p>
 
       <p v-if="followGateState.error" class="pc-gate-error">{{ followGateState.error }}</p>
 
       <div class="pc-gate-actions">
-        <Button
-          Style="AccentButtonStyle"
-          :IsEnabled="!busy"
-          @Click="follow()"
-        >
+        <Button Style="AccentButtonStyle" :IsEnabled="!busy" @Click="follow()">
           <span class="pc-btn-content">{{ busy ? '正在关注…' : '一键关注' }}</span>
         </Button>
         <Button :IsEnabled="!busy" @Click="recheckFollowGate()">
@@ -72,8 +79,8 @@ async function follow(): Promise<void> {
 }
 
 .pc-gate-card {
-  width: min(460px, 100%);
-  padding: 28px 28px 22px;
+  width: min(470px, 100%);
+  padding: 26px 28px 20px;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
   background: #2b2b2b;
@@ -81,17 +88,10 @@ async function follow(): Promise<void> {
   text-align: center;
 }
 
-.pc-gate-icon {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 14px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 18%, transparent);
-  color: var(--pc-accent, #ff6b60);
-  font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets';
-  font-size: 24px;
+.pc-gate-avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
 }
 
 .pc-gate-title {
@@ -102,10 +102,19 @@ async function follow(): Promise<void> {
 }
 
 .pc-gate-text {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   font-size: 13px;
   line-height: 21px;
   color: var(--text-secondary);
+}
+
+.pc-gate-url {
+  margin: 0 0 4px;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 11px;
+  line-height: 17px;
+  color: var(--text-tertiary);
+  word-break: break-all;
 }
 
 .pc-gate-link {
@@ -127,7 +136,7 @@ async function follow(): Promise<void> {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin: 20px 0 12px;
+  margin: 18px 0 12px;
   flex-wrap: wrap;
 }
 
