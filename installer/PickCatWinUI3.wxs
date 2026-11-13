@@ -94,8 +94,16 @@
                   ExeCommand="cmd.exe /c if exist &quot;Programs\PickCat WinUI 3\dsh&quot; rmdir /s /q &quot;Programs\PickCat WinUI 3\dsh&quot;"
                   Execute="immediate"
                   Return="ignore" />
+    <!-- content.js / content.css 没有版本资源，Windows Installer 会按“同版本”处理并
+         跳过覆盖，导致界面更新在升级后仍然显示旧版。先删掉再写入。 -->
+    <CustomAction Id="PurgeWebAssets"
+                  Directory="LocalAppDataFolder"
+                  ExeCommand="cmd.exe /c del /q &quot;Programs\PickCat WinUI 3\Assets\content.js&quot; &quot;Programs\PickCat WinUI 3\Assets\content.css&quot; &gt;nul 2&gt;&amp;1"
+                  Execute="immediate"
+                  Return="ignore" />
     <InstallExecuteSequence>
       <Custom Action="CloseRunningApp" Before="InstallValidate" />
+      <Custom Action="PurgeWebAssets" Before="InstallFiles" />
       <Custom Action="PurgeLegacyKernel" After="CloseRunningApp" Condition="NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeUserData" After="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
       <Custom Action="PurgeInstallFolder" After="PurgeUserData" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
