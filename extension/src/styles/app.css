@@ -1401,3 +1401,59 @@ html.pc-editor-full body {
 .pc-editor:fullscreen::backdrop {
   background: var(--app-bg, #202020);
 }
+
+/* ---------- 评论区层级 ---------- */
+.pc-thread-item {
+  margin-bottom: 8px;
+}
+
+.pc-thread-more {
+  display: block;
+  margin: 4px 0 8px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pc-thread-more:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.pc-thread-quote {
+  margin: 6px 0;
+  padding: 6px 10px;
+  border-left: 2px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+  font-size: 11.5px;
+  line-height: 17px;
+}
+
+.pc-thread-quote-text {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pc-thread-op {
+  margin-left: 6px;
+  padding: 0 6px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--pc-accent, #ff6b60) 20%, transparent);
+  color: var(--pc-accent, #ff6b60);
+  font-size: 11px;
+}

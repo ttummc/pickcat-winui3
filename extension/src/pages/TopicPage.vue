@@ -15,6 +15,7 @@ import {
 import AuthorChip from '@/components/AuthorChip.vue'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { buildThread, flattenThread } from '@/lib/thread'
 
 const topicId = computed(() => route.params.id ?? '')
 const topic = ref<TopicDetail | null>(null)
@@ -24,6 +25,38 @@ const error = ref<string | null>(null)
 const replyText = ref('')
 const replying = ref(false)
 const replyTo = ref<Post | null>(null)
+
+/** 帖子楼层同样是扁平返回，靠 replyToPostNumber 拼成树。 */
+const expandedPosts = ref<Set<string>>(new Set())
+/** 首楼单独渲染，但必须进树，否则「回复楼主」的楼层会变成孤立根节点。 */
+const threadPosts = computed(() => {
+  const first = topic.value?.firstPost
+  return first ? [first, ...posts.value] : posts.value
+})
+const postThread = computed(() =>
+  buildThread(
+    threadPosts.value,
+    p => String(p.postNumber),
+    p => (p.replyToPostNumber == null ? null : String(p.replyToPostNumber)),
+    3,
+  ),
+)
+const postRows = computed(() =>
+  flattenThread(postThread.value, p => String(p.postNumber), expandedPosts.value, 3, 2).filter(
+    // 首楼由页面顶部单独渲染，这里只渲染它的子回复（depth ≥ 1）
+    row => !(row.kind === 'item' && row.item.postNumber === 1),
+  ),
+)
+
+function quotedPost(post: Post): Post | null {
+  const target = post.replyToPostNumber
+  if (target == null) return null
+  return posts.value.find(item => item.postNumber === target) ?? null
+}
+
+function expandPost(key: string): void {
+  expandedPosts.value = new Set([...expandedPosts.value, key])
+}
 const likedPosts = ref<Record<string, boolean>>({})
 const likeCounts = ref<Record<string, number>>({})
 
@@ -327,36 +360,66 @@ async function submitReport(reasonCode: string): Promise<void> {
         />
 
         <div v-else class="pc-replies">
-          <article
-            v-for="post in posts"
-            :id="`pc-post-${post.postNumber}`"
-            :key="post.id"
-            class="pc-card pc-post"
-            :class="{ 'pc-post--flash': highlighted === post.postNumber }"
+          <template
+            v-for="row in postRows"
+            :key="row.kind === 'item' ? `p${row.item.postNumber}` : `m${row.key}`"
           >
-            <div class="pc-post-head">
-              <AuthorChip :user="post.author" :size="32" />
-              <span class="pc-grow" />
-              <span class="pc-muted">#{{ post.postNumber }} · {{ relativeTime(post.createdAt) }}</span>
-            </div>
-            <RichHtml :html="post.cookedHtml" />
-            <div class="pc-post-actions">
-              <button
-                class="pc-action"
-                :class="{ 'pc-action--on': likedPosts[post.id] }"
-                @click="toggleLike(post)"
-              >
-                <span class="pc-meta-glyph">&#xEB51;</span>
-                {{ compactNumber(likeCounts[post.id]) }}
-              </button>
-              <button class="pc-action" @click="startReply(post)">
-                <span class="pc-meta-glyph">&#xE97A;</span> 回复
-              </button>
-              <button class="pc-action" @click="openReport(post)">
-                <span class="pc-meta-glyph">&#xE7BA;</span> 举报
-              </button>
-            </div>
-          </article>
+            <button
+              v-if="row.kind === 'more'"
+              class="pc-thread-more"
+              :style="{ marginLeft: `${row.depth * 16}px` }"
+              @click="expandPost(row.key)"
+            >
+              展开 {{ row.count }} 条回复
+            </button>
+
+            <article
+              v-else
+              :id="`pc-post-${row.item.postNumber}`"
+              class="pc-card pc-post pc-thread-item"
+              :class="{ 'pc-post--flash': highlighted === row.item.postNumber }"
+              :style="{ marginLeft: `${row.depth * 16}px` }"
+            >
+              <div class="pc-post-head">
+                <AuthorChip :user="row.item.author" :size="row.depth > 0 ? 26 : 32" />
+                <span v-if="row.item.postNumber === 1" class="pc-thread-op">楼主</span>
+                <span class="pc-grow" />
+                <span class="pc-muted">
+                  #{{ row.item.postNumber }} · {{ relativeTime(row.item.createdAt) }}
+                </span>
+              </div>
+
+              <div v-if="quotedPost(row.item)" class="pc-thread-quote">
+                <span class="pc-muted">
+                  回复 #{{ row.item.replyToPostNumber }} @{{ quotedPost(row.item)?.author?.username }}
+                </span>
+                <span class="pc-thread-quote-text">{{
+                  htmlToText(quotedPost(row.item)?.cookedHtml ?? '').slice(0, 120)
+                }}</span>
+              </div>
+              <div v-else-if="row.item.replyToPostNumber" class="pc-muted pc-comment-replyto">
+                回复 #{{ row.item.replyToPostNumber }}（该楼层不可见）
+              </div>
+
+              <RichHtml :html="row.item.cookedHtml" />
+              <div class="pc-post-actions">
+                <button
+                  class="pc-action"
+                  :class="{ 'pc-action--on': likedPosts[row.item.id] }"
+                  @click="toggleLike(row.item)"
+                >
+                  <span class="pc-meta-glyph">&#xEB51;</span>
+                  {{ compactNumber(likeCounts[row.item.id]) }}
+                </button>
+                <button class="pc-action" @click="startReply(row.item)">
+                  <span class="pc-meta-glyph">&#xE97A;</span> 回复
+                </button>
+                <button class="pc-action" @click="openReport(row.item)">
+                  <span class="pc-meta-glyph">&#xE7BA;</span> 举报
+                </button>
+              </div>
+            </article>
+          </template>
         </div>
 
         <section class="pc-reply-box pc-card">

@@ -16,6 +16,8 @@ import {
 import AuthorChip from '@/components/AuthorChip.vue'
 import RichHtml from '@/components/RichHtml.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { buildThread, flattenThread } from '@/lib/thread'
+import { htmlToText } from '@/lib/html'
 
 const workId = computed(() => route.params.id ?? '')
 const work = ref<Work | null>(null)
@@ -120,6 +122,35 @@ const likeCount = ref(0)
 const commentLikes = ref<Record<number, boolean>>({})
 const commentLikeCounts = ref<Record<string, number>>({})
 const replyToComment = ref<WorkComment | null>(null)
+
+/** 评论区层级：接口返回扁平列表，靠 replyToCommentNumber 拼树。 */
+const expandedComments = ref<Set<string>>(new Set())
+const commentThread = computed(() =>
+  buildThread(
+    comments.value,
+    c => String(c.commentNumber),
+    c => (c.replyToCommentNumber == null ? null : String(c.replyToCommentNumber)),
+    3,
+  ),
+)
+const commentRows = computed(() =>
+  flattenThread(commentThread.value, c => String(c.commentNumber), expandedComments.value, 3, 2),
+)
+
+/** 被回复内容的摘要，用于引用行。 */
+function quotedComment(comment: WorkComment): WorkComment | null {
+  const target = comment.replyToCommentNumber
+  if (target == null) return null
+  return comments.value.find(item => item.commentNumber === target) ?? null
+}
+
+function stripToText(html: string): string {
+  return htmlToText(html).replace(/\\s+/g, ' ').trim().slice(0, 120)
+}
+
+function expandComment(key: string): void {
+  expandedComments.value = new Set([...expandedComments.value, key])
+}
 const deletingComment = ref<number | null>(null)
 
 function seedComment(comment: WorkComment): void {
@@ -307,40 +338,61 @@ async function toggleWorkFavorite(): Promise<void> {
             <EmptyState v-if="!comments.length" glyph="&#xE90A;" title="还没有评论" description="来说点什么吧。" />
 
             <div v-else class="pc-replies">
-              <article v-for="comment in comments" :key="comment.commentNumber" class="pc-card pc-post">
-                <div class="pc-post-head">
-                  <AuthorChip :user="comment.author" :size="28" />
-                  <span class="pc-grow" />
-                  <span class="pc-muted">
-                    #{{ comment.commentNumber }} · {{ relativeTime(comment.createdAt) }}
-                  </span>
-                </div>
-                <div v-if="comment.replyToCommentNumber" class="pc-muted pc-comment-replyto">
-                  回复 #{{ comment.replyToCommentNumber }}
-                </div>
-                <RichHtml :html="commentHtml(comment)" />
-                <div class="pc-post-actions pc-comment-actions">
-                  <button
-                    class="pc-action"
-                    :class="{ 'pc-action--on': commentLikes[comment.commentNumber] }"
-                    @click="toggleCommentLike(comment)"
-                  >
-                    <span class="pc-meta-glyph">&#xEB51;</span>
-                    {{ compactNumber(commentLikeCounts[comment.commentNumber] ?? 0) }}
-                  </button>
-                  <button class="pc-action" @click="startCommentReply(comment)">
-                    <span class="pc-meta-glyph">&#xE97A;</span> 回复
-                  </button>
-                  <button
-                    v-if="canDelete(comment)"
-                    class="pc-action"
-                    :disabled="deletingComment === comment.commentNumber"
-                    @click="removeComment(comment)"
-                  >
-                    <span class="pc-meta-glyph">&#xE74D;</span> 删除
-                  </button>
-                </div>
-              </article>
+              <template v-for="row in commentRows" :key="row.kind === 'item' ? `c${row.item.commentNumber}` : `m${row.key}`">
+                <button
+                  v-if="row.kind === 'more'"
+                  class="pc-thread-more"
+                  :style="{ marginLeft: `${row.depth * 16}px` }"
+                  @click="expandComment(row.key)"
+                >
+                  展开 {{ row.count }} 条回复
+                </button>
+
+                <article
+                  v-else
+                  class="pc-card pc-post pc-thread-item"
+                  :style="{ marginLeft: `${row.depth * 16}px` }"
+                >
+                  <div class="pc-post-head">
+                    <AuthorChip :user="row.item.author" :size="28" />
+                    <span class="pc-grow" />
+                    <span class="pc-muted">
+                      #{{ row.item.commentNumber }} · {{ relativeTime(row.item.createdAt) }}
+                    </span>
+                  </div>
+
+                  <div v-if="quotedComment(row.item)" class="pc-thread-quote">
+                    <span class="pc-muted">回复 #{{ row.item.replyToCommentNumber }} @{{ quotedComment(row.item)?.author?.username }}</span>
+                    <span class="pc-thread-quote-text">{{ stripToText(commentHtml(quotedComment(row.item)!)) }}</span>
+                  </div>
+                  <div v-else-if="row.item.replyToCommentNumber" class="pc-muted pc-comment-replyto">
+                    回复 #{{ row.item.replyToCommentNumber }}（该评论不可见）
+                  </div>
+
+                  <RichHtml :html="commentHtml(row.item)" />
+                  <div class="pc-post-actions pc-comment-actions">
+                    <button
+                      class="pc-action"
+                      :class="{ 'pc-action--on': commentLikes[row.item.commentNumber] }"
+                      @click="toggleCommentLike(row.item)"
+                    >
+                      <span class="pc-meta-glyph">&#xEB51;</span>
+                      {{ compactNumber(commentLikeCounts[row.item.commentNumber] ?? 0) }}
+                    </button>
+                    <button class="pc-action" @click="startCommentReply(row.item)">
+                      <span class="pc-meta-glyph">&#xE97A;</span> 回复
+                    </button>
+                    <button
+                      v-if="canDelete(row.item)"
+                      class="pc-action"
+                      :disabled="deletingComment === row.item.commentNumber"
+                      @click="removeComment(row.item)"
+                    >
+                      <span class="pc-meta-glyph">&#xE74D;</span> 删除
+                    </button>
+                  </div>
+                </article>
+              </template>
             </div>
 
             <section class="pc-reply-box pc-card">
@@ -393,6 +445,7 @@ async function toggleWorkFavorite(): Promise<void> {
 </template>
 
 <style>
+
 .pc-work-detail {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
